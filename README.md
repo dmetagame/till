@@ -37,6 +37,8 @@ Use Node 22.18+ and npm. No additional payment SDK or application dependency is 
 
    Open **http://localhost:8080**. Use one stable app origin throughout checkout. Never commit credentials or share the business app secret with the buyer. Grok's optional `XAI_API_KEY` is not needed for the cafe sample. The sandbox personal buyer login is separate from these app credentials.
 
+If PayPal reports **Funds not available**, configure a funded test buyer in **Testing Tools → Sandbox Accounts → Create account → Create Custom Account**. Choose **Personal**, **United States**, and a **USD 1,000 test balance**. Log out of the previous buyer on PayPal sandbox, then retry from Till using this buyer. Keep the merchant app credentials unchanged. If an existing account's balance cannot be edited, **Duplicate Account** supports editing the cloned balance. See [PayPal's sandbox account guide](https://developer.paypal.com/sandbox-testing/accounts). No real deposit is needed.
+
 ## Run the sandbox purchase
 
 1. Click **Cafe restock**. Its unchanged sample cart has beans ($72), oat milk ($24), and cups ($64): **$160**, below its **$220** cap. Its two fictional catalog vendors do not create two PayPal payees.

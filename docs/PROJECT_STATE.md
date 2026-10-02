@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: `2026-10-02T19:54:46Z`
+Last updated: `2026-10-02T19:58:00Z`
 Status: `IMPLEMENTED — REAL SANDBOX VERIFICATION PENDING`
 Active objective: Replace Till's simulated checkout with one controlled-merchant PayPal sandbox create/approve/recheck/capture flow. Preserve design, mandate UI, and Grok planning.
 
@@ -16,6 +16,7 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - Latest resumed HEAD: `5a9ac5c0c251be76b238bd893b7e187e971b8538`, clean `main` tracking `origin/main`; repository, remote and GitHub authentication verified before this test.
 - Sandbox API verification checkpoint: `bf68feff20a11ae1161c6da00259a3ab0d2dbb52`, pushed and independently matched against remote main after the real order/refusal tests.
 - Browser cancellation evidence checkpoint: `7efb2d630806b9e326c46679c272f7e3a7ed3489`, pushed; HEAD, tracking main and remote main matched at 19:54 UTC with a clean tree. `.env` remains ignored. Documentation-only handoff commits may follow; latest app code remains `62721da`.
+- Funding-help session starts on clean `main` at `b862a8105c7905d73d3bbba71fe9cea038db903c`; repository, remote and GitHub authentication verified before documentation edits.
 - No existing project state or frozen release was present. Platform shell, catalog and planning are preserved.
 - GitHub authentication passes. Branch-protection inspection returned HTTP 403 (private-repository feature unavailable); no protection override will be attempted.
 
@@ -76,11 +77,12 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 ## Risks And Blockers
 
 - Sandbox authentication and order creation are verified. Real personal-buyer approval, capture/receipt ID comparison and receipt-refresh acceptance remain pending the user's own browser action. Do not call the end-to-end acceptance criteria complete yet. Earlier invalid_client errors were resolved by the corrected credential pair.
+- User reports “Funds not available” during the buyer test. Likely a buyer funding issue; exact screen/location and order ID are not yet supplied. Asked whether it appeared on PayPal approval or Till after return. Current official sandbox account documentation supports custom buyer test values and editing balance during account duplication; README now includes funded-buyer setup. No payment success is inferred from this report.
 - The existing broad test command stops at the pre-existing template failures; use the independent focused checks above to assess this slice.
 
 ## Next Actions
 
-1. User opens http://localhost:8080, starts Cafe restock, acknowledges checkout and approves in their own browser with a personal sandbox buyer. An asynchronous request is pending for receipt order/capture IDs after refresh; no buyer credentials are requested.
+1. User configures a funded personal sandbox buyer using the README's custom-account instructions, then retries Cafe restock at http://localhost:8080. Clarify the funds error's location; if Till returned it, obtain the order ID and inspect PayPal GET before advising a retry. Do not ask for buyer login or card details, alter the cart price/cap, or change working merchant credentials.
 2. Independently GET that approved order to compare IDs, amount, status and capture count. Cancellation and refusal paths already have genuine sandbox evidence above. Record approval/capture evidence separately from unit fixtures; do not infer success from localStorage or an unapproved order.
 3. Commit and push the real verification record when that test completes. Preserve current design and planning; do not expand into replanning or another payment product.
 
@@ -97,3 +99,4 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - 2026-10-02T19:49:50Z: Corrected credentials authenticate (sandbox OAuth 200). Real app-created order `7MM810398K324114K` verified by PayPal GET for one $160 purchase unit and exact catalog items. Edited and cancelled checkout capture requests both refused; independent GET shows CREATED and zero captures. User's personal-buyer approval/receipt evidence requested; browser cancel test underway. No secrets or token values printed.
 - 2026-10-02T19:52:56Z: Browser checkout created `5R4237005G696803X`, reached genuine PayPal sandbox, and used PayPal's cancel link. Till cancellation and reload verified; independent GET confirms CREATED/$160/zero captures. Still awaiting the user's personal-buyer-approved receipt IDs for capture and refresh acceptance. No app code changes in this test session; local dev remains running.
 - 2026-10-02T19:54:46Z: Real sandbox verification record pushed in `7efb2d6` and remote main verified; clean tree and ignored root credential file confirmed. All independent checks in this session are complete. Awaiting the user's approval and receipt IDs; dev server remains available at http://localhost:8080.
+- 2026-10-02T19:58:00Z: Buyer reports funds unavailable; exact location/order remains unknown. Verified current official PayPal sandbox account instructions and added funded personal-buyer setup to README. No app/payment behavior changed; approval/capture acceptance remains pending.
