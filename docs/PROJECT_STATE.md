@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: `2026-10-02T19:49:50Z`
+Last updated: `2026-10-02T19:52:56Z`
 Status: `IMPLEMENTED — REAL SANDBOX VERIFICATION PENDING`
 Active objective: Replace Till's simulated checkout with one controlled-merchant PayPal sandbox create/approve/recheck/capture flow. Preserve design, mandate UI, and Grok planning.
 
@@ -14,6 +14,7 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - Session resumed on `main` at `b25bc3cd0509b2372200e7e14292418d4a25a6af` (documentation handoff), clean and tracking `origin/main`; GitHub authentication verified again.
 - Latest implementation checkpoint: `62721da71ef5bd9dfe579029a46f8b84504a12ac` (mobile error visibility and real OAuth test record). Push succeeded; HEAD, `origin/main` and remote main matched at 19:19 UTC with a clean tree. This handoff record may be followed by a documentation-only commit.
 - Latest resumed HEAD: `5a9ac5c0c251be76b238bd893b7e187e971b8538`, clean `main` tracking `origin/main`; repository, remote and GitHub authentication verified before this test.
+- Sandbox API verification checkpoint: `bf68feff20a11ae1161c6da00259a3ab0d2dbb52`, pushed and independently matched against remote main after the real order/refusal tests.
 - No existing project state or frozen release was present. Platform shell, catalog and planning are preserved.
 - GitHub authentication passes. Branch-protection inspection returned HTTP 403 (private-repository feature unavailable); no protection override will be attempted.
 
@@ -68,6 +69,7 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - At 19:47 UTC the user reported the corrected pair ready. Root-file-loaded sandbox OAuth now returns HTTP 200 with a token received (boolean output only); local dev restarted with the corrected environment.
 - Real sandbox order created through the running app route: `7MM810398K324114K`, USD $160.00, intent CAPTURE, one purchase unit; PayPal GET confirms beans 1×$72, cups 1×$64, oat milk 1×$24, and a sandbox buyer-approval URL. Order stayed `CREATED`; capture count zero.
 - On that real, unapproved order, an edited-cart capture request was refused with HTTP 409 before capture. Server cancel action succeeded; a subsequent unchanged-cart capture request was refused with HTTP 409. Independent sandbox GET confirms zero captures afterward. This is genuine API refusal evidence, not buyer approval or a browser PayPal-cancel test.
+- Separate real browser cafe checkout created order `5R4237005G696803X` and redirected to `www.sandbox.paypal.com`. Clicked PayPal's actual “Cancel and return to Test Store” link without logging in or approving. PayPal returned to Till's cancel URL; cancellation alert visible, no receipt IDs and local ledger count zero. Independent PayPal GET: CREATED, USD $160.00, zero captures. Reloading the actual cancel URL retains cancellation/no receipt. Screenshot `screenshots/sandbox-cancel.png` retained locally and visually inspected.
 - Disposable baseline checkout and temporary portable smoke-script copy removed. Test logs and ignored browser screenshots retained as evidence. Production preview stopped; local dev remains running for the user's test.
 
 ## Risks And Blockers
@@ -78,7 +80,7 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 ## Next Actions
 
 1. User opens http://localhost:8080, starts Cafe restock, acknowledges checkout and approves in their own browser with a personal sandbox buyer. An asynchronous request is pending for receipt order/capture IDs after refresh; no buyer credentials are requested.
-2. Independently GET that order to compare IDs, amount, status and capture count. Finish a separate browser PayPal-cancel test and confirm zero captures. Record actual evidence separately from fixture tests and the already verified server cancel action.
+2. Independently GET that approved order to compare IDs, amount, status and capture count. Cancellation and refusal paths already have genuine sandbox evidence above. Record approval/capture evidence separately from unit fixtures; do not infer success from localStorage or an unapproved order.
 3. Commit and push the real verification record when that test completes. Preserve current design and planning; do not expand into replanning or another payment product.
 
 ## Change Log
@@ -92,3 +94,4 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - 2026-10-02T19:18:29Z: Error alert focus/scroll fix verified in mobile browser; genuine auth rejection visible, zero ledger entries and no receipt. Typecheck, scoped lint and build pass with `.env` configured; actual credential values absent from browser assets. Awaiting corrected sandbox app credentials; no order or capture has occurred.
 - 2026-10-02T19:19:42Z: Checkpoint `62721da` pushed and remote main independently verified; `.env` still ignored. Local dev remains running at localhost:8080. External blocker remains PayPal's HTTP 401 `invalid_client`; awaiting the corrected credential pair and user's ready reply, then personal-buyer approval.
 - 2026-10-02T19:49:50Z: Corrected credentials authenticate (sandbox OAuth 200). Real app-created order `7MM810398K324114K` verified by PayPal GET for one $160 purchase unit and exact catalog items. Edited and cancelled checkout capture requests both refused; independent GET shows CREATED and zero captures. User's personal-buyer approval/receipt evidence requested; browser cancel test underway. No secrets or token values printed.
+- 2026-10-02T19:52:56Z: Browser checkout created `5R4237005G696803X`, reached genuine PayPal sandbox, and used PayPal's cancel link. Till cancellation and reload verified; independent GET confirms CREATED/$160/zero captures. Still awaiting the user's personal-buyer-approved receipt IDs for capture and refresh acceptance. No app code changes in this test session; local dev remains running.
