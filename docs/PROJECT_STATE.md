@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: `2026-10-02T19:18:29Z`
+Last updated: `2026-10-02T19:19:42Z`
 Status: `IMPLEMENTED — REAL SANDBOX VERIFICATION PENDING`
 Active objective: Replace Till's simulated checkout with one controlled-merchant PayPal sandbox create/approve/recheck/capture flow. Preserve design, mandate UI, and Grok planning.
 
@@ -12,6 +12,7 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - Initial commit: `d6755c29403fe1ec535a2cf05f7301713d172b50`; clean clone
 - Implementation checkpoint: `cacc85fb15acd3547d18f53743ad6374cb71f408`, pushed to `origin/main`. Local HEAD, tracking ref and `git ls-remote origin refs/heads/main` matched at 14:10 UTC; working tree clean. A documentation-only handoff commit may follow this recorded implementation commit.
 - Session resumed on `main` at `b25bc3cd0509b2372200e7e14292418d4a25a6af` (documentation handoff), clean and tracking `origin/main`; GitHub authentication verified again.
+- Latest implementation checkpoint: `62721da71ef5bd9dfe579029a46f8b84504a12ac` (mobile error visibility and real OAuth test record). Push succeeded; HEAD, `origin/main` and remote main matched at 19:19 UTC with a clean tree. This handoff record may be followed by a documentation-only commit.
 - No existing project state or frozen release was present. Platform shell, catalog and planning are preserved.
 - GitHub authentication passes. Branch-protection inspection returned HTTP 403 (private-repository feature unavailable); no protection override will be attempted.
 
@@ -85,3 +86,4 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - 2026-10-02T14:10:14Z: Feature checkpoint `cacc85f` pushed and independently verified on GitHub; dev server restarted and HTTP 200 verified. Presence-only check still finds no PayPal credentials. Disposed of our temporary baseline/smoke-script copy, retaining verification evidence. Ready for the user's sandbox credentials and personal-buyer approval.
 - 2026-10-02T19:15:41Z: User saved root `.env`; loader verified and dev restarted. Real sandbox OAuth returned HTTP 401 `invalid_client` (no order/capture). Browser shows the genuine rejection; running-server budget refusal passes. Corrected credential pair requested. Mobile error visibility fix is underway.
 - 2026-10-02T19:18:29Z: Error alert focus/scroll fix verified in mobile browser; genuine auth rejection visible, zero ledger entries and no receipt. Typecheck, scoped lint and build pass with `.env` configured; actual credential values absent from browser assets. Awaiting corrected sandbox app credentials; no order or capture has occurred.
+- 2026-10-02T19:19:42Z: Checkpoint `62721da` pushed and remote main independently verified; `.env` still ignored. Local dev remains running at localhost:8080. External blocker remains PayPal's HTTP 401 `invalid_client`; awaiting the corrected credential pair and user's ready reply, then personal-buyer approval.
