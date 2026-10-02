@@ -24,6 +24,7 @@ import { readFileSync, realpathSync } from "node:fs";
 import { constants as osConstants } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseEnv } from "node:util";
 
 export const APP_ENV_REL_PATH = ".grok/app-env.json";
 
@@ -58,6 +59,24 @@ export function readAppEnv(root) {
   } catch {
     return {};
   }
+}
+
+/** Load only the two server PayPal variables from the optional, gitignored root file. */
+export function readPayPalEnv(root) {
+  let text;
+  try {
+    text = readFileSync(join(root, ".env"), "utf8");
+  } catch (error) {
+    if (error?.code === "ENOENT") return {};
+    // Never include file contents or credential-bearing errors in output.
+    throw new Error("Could not read the root .env file.");
+  }
+  const parsed = parseEnv(text);
+  const env = {};
+  for (const key of ["PAYPAL_CLIENT_ID", "PAYPAL_CLIENT_SECRET"]) {
+    if (typeof parsed[key] === "string") env[key] = parsed[key];
+  }
+  return env;
 }
 
 /** File values under the process environment: an explicit override wins. */
@@ -110,7 +129,8 @@ function main(argv) {
     console.error("usage: node scripts/with-app-env.mjs <command> [args…]");
     process.exit(2);
   }
-  const env = mergeAppEnv(readAppEnv(projectRoot()), process.env);
+  const root = projectRoot();
+  const env = mergeAppEnv({ ...readAppEnv(root), ...readPayPalEnv(root) }, process.env);
   const child = spawn(command, args, { stdio: "inherit", env });
   // The dev server is long-running and is stopped by signalling this wrapper.
   for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"]) {

@@ -10,33 +10,43 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPaypalCheckoutRouteImport } from './routes/api/paypal/checkout'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPaypalCheckoutRoute = ApiPaypalCheckoutRouteImport.update({
+  id: '/api/paypal/checkout',
+  path: '/api/paypal/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/paypal/checkout': typeof ApiPaypalCheckoutRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/paypal/checkout': typeof ApiPaypalCheckoutRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/paypal/checkout': typeof ApiPaypalCheckoutRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/api/paypal/checkout'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/api/paypal/checkout'
+  id: '__root__' | '/' | '/api/paypal/checkout'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiPaypalCheckoutRoute: typeof ApiPaypalCheckoutRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +58,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/paypal/checkout': {
+      id: '/api/paypal/checkout'
+      path: '/api/paypal/checkout'
+      fullPath: '/api/paypal/checkout'
+      preLoaderRoute: typeof ApiPaypalCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiPaypalCheckoutRoute: ApiPaypalCheckoutRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

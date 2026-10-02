@@ -13,14 +13,67 @@ import {
 } from "@/lib/till/catalog";
 import { planMandate } from "@/lib/till/plan.functions";
 import { loadReceipts, saveReceipts, type Receipt } from "@/lib/till/ledger";
+import type { CheckoutCart, PayPalReceipt } from "@/lib/till/checkout";
 
-type Phase = "brief" | "planning" | "review" | "pay" | "done" | "ledger";
+const PENDING_CHECKOUT = "till.paypal.pending.v1";
+type PendingCheckout = { cart: CheckoutCart; notes: Receipt };
+
+async function paypalRequest(
+  body?: object,
+  orderId?: string,
+): Promise<{
+  receipt?: PayPalReceipt;
+  approvalUrl?: string;
+  orderId?: string;
+  cartVersion?: string;
+}> {
+  const url = orderId
+    ? `/api/paypal/checkout?orderId=${encodeURIComponent(orderId)}`
+    : "/api/paypal/checkout";
+  const response = await fetch(
+    url,
+    body
+      ? {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }
+      : { cache: "no-store" },
+  );
+  const result = await response.json();
+  if (!response.ok || !result.ok)
+    throw new Error(result.error ?? "PayPal checkout could not be verified.");
+  return result;
+}
+
+function receiptNotes(payment: PayPalReceipt, notes?: Receipt): Receipt {
+  return {
+    id: payment.orderId,
+    at: notes?.at ?? Date.now(),
+    title: payment.title,
+    brief: payment.brief,
+    summary: notes?.summary ?? "Your cart at Till’s controlled PayPal sandbox merchant.",
+    rules: notes?.rules ?? [`Spend at most ${money(payment.budgetCents)}`],
+    lines: payment.lines.map((line) => ({
+      ...line,
+      merchant: getProduct(line.productId)?.merchant ?? "Demo catalog",
+      why: "",
+    })),
+    rejected: notes?.rejected ?? [],
+    total: payment.totalCents,
+    budgetCents: payment.budgetCents,
+    address: notes?.address ?? "Delivery not arranged in this sandbox",
+    source: notes?.source ?? "preset",
+  };
+}
+
+type Phase = "brief" | "planning" | "review" | "pay" | "payment" | "done" | "ledger";
 
 const STEPS = [
   "Reading the brief",
   "Scoring the catalog",
   "Dropping anything outside the mandate",
-  "Drafting a one-time PayPal authorization",
+  "Preparing a one-time cart for your approval",
 ];
 
 const SOURCE_LABEL: Record<PlanSource, string> = {
@@ -41,16 +94,133 @@ export function TillApp() {
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [active, setActive] = useState<Receipt | null>(null);
   const [fromLedger, setFromLedger] = useState(false);
+  const [payment, setPayment] = useState<PayPalReceipt | null>(null);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [paymentBusy, setPaymentBusy] = useState(false);
+  const checkoutKey = useRef("");
+  const checkoutBusy = useRef(false);
   const token = useRef(0);
   const timers = useRef<number[]>([]);
 
   useEffect(() => {
     setReceipts(loadReceipts());
+    const query = new URLSearchParams(window.location.search);
+    const outcome = query.get("paypal");
+    if (outcome) {
+      setPhase("payment");
+      setPaymentBusy(true);
+      void (async () => {
+        try {
+          let pending: PendingCheckout | undefined;
+          try {
+            const raw = window.sessionStorage.getItem(PENDING_CHECKOUT);
+            pending = raw ? (JSON.parse(raw) as PendingCheckout) : undefined;
+          } catch {
+            // Local notes are optional for a GET-only receipt. Missing cart data cannot authorize capture.
+          }
+          if (outcome === "cancel") {
+            await paypalRequest({ action: "cancel", cartVersion: query.get("cartVersion") });
+            if (pending) restoreCart(pending);
+            throw new Error("PayPal checkout was cancelled. Till did not request a capture.");
+          }
+          const orderId = query.get("token");
+          if (!orderId)
+            throw new Error("PayPal did not return an order ID. No capture was attempted.");
+          let result;
+          if (outcome === "return") {
+            if (!pending)
+              throw new Error(
+                "The checkout cart is missing from this tab. No capture was attempted.",
+              );
+            result = await paypalRequest({
+              action: "capture",
+              orderId,
+              cartVersion: query.get("cartVersion"),
+              cart: pending.cart,
+            });
+          } else if (outcome === "receipt") {
+            result = await paypalRequest(undefined, orderId);
+          } else {
+            throw new Error("Unknown PayPal return. No capture was attempted.");
+          }
+          if (!result.receipt) throw new Error("PayPal did not return a verified receipt.");
+          showReceipt(result.receipt, pending?.notes);
+        } catch (error) {
+          setPaymentError(
+            error instanceof Error ? error.message : "PayPal checkout could not be verified.",
+          );
+        } finally {
+          setPaymentBusy(false);
+        }
+      })();
+    }
     return () => {
       token.current += 1;
       timers.current.forEach((id) => window.clearTimeout(id));
     };
   }, []);
+
+  function restoreCart(pending: PendingCheckout) {
+    checkoutKey.current = pending.cart.checkoutKey;
+    setPlan({
+      title: pending.notes.title,
+      brief: pending.cart.brief,
+      summary: pending.notes.summary,
+      rules: pending.notes.rules,
+      lines: pending.notes.lines.map((line) => ({
+        productId: line.productId,
+        qty: line.qty,
+        why: line.why,
+      })),
+      rejected: [],
+      budgetCents: pending.cart.budgetCents,
+      source: pending.notes.source,
+    });
+    setBrief(pending.cart.brief);
+    setRemoved([]);
+    setAgreed(false);
+    setPhase("review");
+  }
+
+  function showReceipt(verified: PayPalReceipt, notes?: Receipt) {
+    const receipt = receiptNotes(verified, notes);
+    setPayment(verified);
+    setActive(receipt);
+    setPaymentError(null);
+    setFromLedger(false);
+    setPhase("done");
+    window.history.replaceState(
+      null,
+      "",
+      `/?paypal=receipt&token=${encodeURIComponent(verified.orderId)}`,
+    );
+    // The local ledger is only a convenience index; never use its contents as payment evidence.
+    const next = [receipt, ...loadReceipts().filter((item) => item.id !== receipt.id)].slice(0, 12);
+    setReceipts(next);
+    try {
+      saveReceipts(next);
+    } catch {
+      /* PayPal evidence remains available if local storage is full. */
+    }
+  }
+
+  async function beforeEdit(edit: () => void) {
+    if (checkoutBusy.current) return;
+    try {
+      // Invalidate the browser's frozen checkout even if this tab lost its local draft.
+      await paypalRequest({ action: "cancel" });
+      window.sessionStorage.removeItem(PENDING_CHECKOUT);
+      checkoutKey.current = crypto.randomUUID();
+      setPayment(null);
+      setPaymentError(null);
+      window.history.replaceState(null, "", "/");
+      edit();
+    } catch (error) {
+      setPaymentError(
+        error instanceof Error ? error.message : "Could not invalidate the frozen checkout.",
+      );
+    }
+  }
 
   const budgetPreview = parseBudget(brief);
 
@@ -64,6 +234,9 @@ export function TillApp() {
     if (clean.length < 8) return;
     const run = ++token.current;
     clearTimers();
+    checkoutKey.current = crypto.randomUUID();
+    setPayment(null);
+    setPaymentError(null);
     setBrief(clean);
     setStep(0);
     setAgreed(false);
@@ -96,15 +269,20 @@ export function TillApp() {
 
   function visibleLines() {
     if (!plan) return [];
-    return plan.lines.filter((line) => !removed.includes(line.productId) && getProduct(line.productId));
+    return plan.lines.filter(
+      (line) => !removed.includes(line.productId) && getProduct(line.productId),
+    );
   }
 
   function totalOf(lines: ReturnType<typeof visibleLines>) {
-    return lines.reduce((sum, line) => sum + (getProduct(line.productId)?.price ?? 0) * line.qty, 0);
+    return lines.reduce(
+      (sum, line) => sum + (getProduct(line.productId)?.price ?? 0) * line.qty,
+      0,
+    );
   }
 
-  function authorize() {
-    if (!plan || !agreed) return;
+  async function checkout() {
+    if (!plan || !agreed || checkoutBusy.current) return;
     const lines = visibleLines().flatMap((line) => {
       const product = getProduct(line.productId);
       if (!product) return [];
@@ -121,7 +299,7 @@ export function TillApp() {
     });
     if (lines.length === 0) return;
     const receipt: Receipt = {
-      id: `TILL-${Date.now().toString(36).toUpperCase().slice(-6)}`,
+      id: "Pending checkout",
       at: Date.now(),
       title: plan.title,
       brief: plan.brief,
@@ -137,12 +315,57 @@ export function TillApp() {
       address: address.trim() || "No address given",
       source: plan.source,
     };
-    const next = [receipt, ...receipts].slice(0, 12);
-    setReceipts(next);
-    saveReceipts(next);
+    checkoutBusy.current = true;
+    setPaymentBusy(true);
+    setPaymentError(null);
+    try {
+      const cart: CheckoutCart = {
+        checkoutKey: checkoutKey.current || (checkoutKey.current = crypto.randomUUID()),
+        title: plan.title,
+        brief: plan.brief,
+        budgetCents: plan.budgetCents,
+        lines: lines.map((line) => ({ productId: line.productId, qty: line.qty })),
+      };
+      window.sessionStorage.setItem(PENDING_CHECKOUT, JSON.stringify({ cart, notes: receipt }));
+      const result = await paypalRequest({ action: "create", cart });
+      if (result.receipt) {
+        showReceipt(result.receipt, receipt);
+      } else if (result.approvalUrl) {
+        window.location.assign(result.approvalUrl);
+      } else {
+        throw new Error("PayPal did not return a buyer approval link.");
+      }
+    } catch (error) {
+      setPaymentError(
+        error instanceof Error ? error.message : "PayPal checkout could not be started.",
+      );
+    } finally {
+      checkoutBusy.current = false;
+      setPaymentBusy(false);
+    }
+  }
+
+  async function openLocalReceipt(receipt: Receipt) {
     setActive(receipt);
-    setFromLedger(false);
+    setPayment(null);
+    setPaymentError(null);
+    setFromLedger(true);
     setPhase("done");
+    setPaymentBusy(true);
+    try {
+      const result = await paypalRequest(undefined, receipt.id);
+      if (!result.receipt) throw new Error("PayPal did not return a verified receipt.");
+      setPayment(result.receipt);
+      setActive(receiptNotes(result.receipt, receipt));
+    } catch (error) {
+      setPaymentError(
+        error instanceof Error
+          ? error.message
+          : "This local reference could not be checked against PayPal.",
+      );
+    } finally {
+      setPaymentBusy(false);
+    }
   }
 
   return (
@@ -159,6 +382,7 @@ export function TillApp() {
         </div>
         <button
           type="button"
+          disabled={paymentBusy}
           onClick={() => setPhase("ledger")}
           className="inline-flex min-h-11 items-center gap-2 rounded-full border border-ink/15 bg-card px-4 text-sm font-medium transition-transform duration-150 ease-out active:scale-95"
         >
@@ -168,13 +392,51 @@ export function TillApp() {
         </button>
       </header>
 
+      {paymentError ? (
+        <p role="alert" className="mt-6 rounded-2xl border border-ink/15 bg-card px-4 py-4 text-sm">
+          {paymentError}
+        </p>
+      ) : null}
+
+      {phase === "payment" ? (
+        <div className="rise mt-10" aria-live="polite">
+          <p className="text-sm font-medium text-teal">PayPal sandbox · no real money</p>
+          <h1 className="font-display mt-2 text-4xl font-semibold tracking-tight">
+            {paymentBusy ? "Checking PayPal" : "Checkout not confirmed"}
+          </h1>
+          <p className="mt-3 text-muted">
+            {paymentBusy
+              ? "The server is checking your frozen cart and PayPal’s order status."
+              : "No successful payment is being reported. Retry checks the existing PayPal order."}
+          </p>
+          {!paymentBusy ? (
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="min-h-11 rounded-full bg-teal px-5 font-medium text-paper"
+              >
+                Retry check
+              </button>
+              <button
+                type="button"
+                onClick={() => void beforeEdit(() => setPhase("brief"))}
+                className="min-h-11 rounded-full border border-ink/15 bg-card px-5 font-medium"
+              >
+                New mandate
+              </button>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
       {phase === "brief" ? (
         <Brief
           brief={brief}
           budget={budgetPreview}
           onChange={setBrief}
-          onStart={() => void begin(brief, null)}
-          onPreset={(id, text) => void begin(text, id)}
+          onStart={() => void beforeEdit(() => void begin(brief, null))}
+          onPreset={(id, text) => void beforeEdit(() => void begin(text, id))}
         />
       ) : null}
 
@@ -185,12 +447,12 @@ export function TillApp() {
           plan={plan}
           lines={visibleLines()}
           total={totalOf(visibleLines())}
-          onRemove={(id) => setRemoved((current) => [...current, id])}
+          onRemove={(id) => void beforeEdit(() => setRemoved((current) => [...current, id]))}
           onPay={() => {
             setAgreed(false);
             setPhase("pay");
           }}
-          onBack={() => setPhase("brief")}
+          onBack={() => void beforeEdit(() => setPhase("brief"))}
         />
       ) : null}
 
@@ -203,8 +465,9 @@ export function TillApp() {
           agreed={agreed}
           onAddress={setAddress}
           onAgreed={setAgreed}
-          onBack={() => setPhase("review")}
-          onAuthorize={authorize}
+          busy={paymentBusy}
+          onBack={() => void beforeEdit(() => setPhase("review"))}
+          onCheckout={() => void checkout()}
         />
       ) : null}
 
@@ -212,11 +475,15 @@ export function TillApp() {
         <Done
           receipt={active}
           fromLedger={fromLedger}
-          onNew={() => {
-            setBrief("");
-            setPlan(null);
-            setPhase("brief");
-          }}
+          payment={payment}
+          checking={paymentBusy}
+          onNew={() =>
+            void beforeEdit(() => {
+              setBrief("");
+              setPlan(null);
+              setPhase("brief");
+            })
+          }
           onLedger={() => setPhase("ledger")}
         />
       ) : null}
@@ -224,11 +491,7 @@ export function TillApp() {
       {phase === "ledger" ? (
         <Ledger
           receipts={receipts}
-          onOpen={(receipt) => {
-            setActive(receipt);
-            setFromLedger(true);
-            setPhase("done");
-          }}
+          onOpen={(receipt) => void openLocalReceipt(receipt)}
           onBack={() => setPhase(active ? "done" : "brief")}
         />
       ) : null}
@@ -256,8 +519,8 @@ function Brief({
         Spend only what you wrote down.
       </h1>
       <p className="mt-4 max-w-xl text-lg text-muted">
-        Till shops a catalog inside a mandate you write, then asks for a one-time PayPal authorization.
-        When that charge settles, the agent’s access ends.
+        Till shops a catalog inside a mandate you write. You approve one checkout on PayPal; the
+        server checks the frozen cart before capturing. The agent cannot approve or capture.
       </p>
 
       <ol className="mt-8 grid gap-3 sm:grid-cols-3">
@@ -295,7 +558,9 @@ function Brief({
         />
         <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted tabular-nums">
-            {budget ? `Cap detected · ${money(budget)}` : "Name a dollar cap so the agent can stop itself."}
+            {budget
+              ? `Cap detected · ${money(budget)}`
+              : "Name a dollar cap so the agent can stop itself."}
           </p>
           <button
             type="submit"
@@ -326,7 +591,8 @@ function Brief({
         </ul>
       </div>
       <p className="mt-8 text-sm text-muted">
-        Checkout is a sandbox simulation for the PayPal AI Hackathon. No live charge is made.
+        PayPal sandbox · no real money. Catalog vendors are fictional; checkout pays one controlled
+        sandbox merchant.
       </p>
     </div>
   );
@@ -373,7 +639,8 @@ function Review({
   onPay: () => void;
   onBack: () => void;
 }) {
-  const ratio = plan.budgetCents > 0 ? Math.min(100, Math.round((total / plan.budgetCents) * 100)) : 0;
+  const ratio =
+    plan.budgetCents > 0 ? Math.min(100, Math.round((total / plan.budgetCents) * 100)) : 0;
   const left = plan.budgetCents - total;
   return (
     <div className="rise mt-10">
@@ -404,8 +671,8 @@ function Review({
 
       {lines.length === 0 ? (
         <p className="mt-6 rounded-2xl border border-ink/10 bg-card px-4 py-6 text-muted">
-          The cart is empty, so nothing will be charged. You can only remove items — adding one would rewrite
-          the mandate.
+          The cart is empty, so nothing will be charged. You can only remove items — adding one
+          would rewrite the mandate.
         </p>
       ) : (
         <ul className="mt-4 divide-y divide-ink/10 rounded-2xl border border-ink/10 bg-card">
@@ -457,17 +724,19 @@ function Review({
         </div>
       ) : null}
 
-      <p className="mt-4 text-sm text-muted">You can take items off. You cannot add — that would rewrite the mandate.</p>
+      <p className="mt-4 text-sm text-muted">
+        You can take items off. You cannot add — that would rewrite the mandate.
+      </p>
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         <button
           type="button"
-          disabled={lines.length === 0}
+          disabled={lines.length === 0 || total > plan.budgetCents}
           onClick={onPay}
           className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full bg-teal px-5 font-medium text-paper transition-transform duration-150 ease-out active:scale-95 disabled:opacity-40"
         >
           <LockKeyhole className="size-4" aria-hidden="true" />
-          Authorize with PayPal
+          Review PayPal checkout
         </button>
         <button
           type="button"
@@ -490,7 +759,8 @@ function Pay({
   onAddress,
   onAgreed,
   onBack,
-  onAuthorize,
+  onCheckout,
+  busy,
 }: {
   plan: Plan;
   lines: Plan["lines"];
@@ -500,21 +770,16 @@ function Pay({
   onAddress: (value: string) => void;
   onAgreed: (value: boolean) => void;
   onBack: () => void;
-  onAuthorize: () => void;
+  onCheckout: () => void;
+  busy: boolean;
 }) {
-  const merchants = [
-    ...new Set(lines.flatMap((line) => {
-      const product = getProduct(line.productId);
-      return product ? [product.merchant] : [];
-    })),
-  ];
   return (
     <div className="rise mt-10">
-      <p className="text-sm font-medium text-teal">Sandbox · no live charge</p>
-      <h1 className="font-display mt-2 text-4xl font-semibold tracking-tight">One-time authorization</h1>
+      <p className="text-sm font-medium text-teal">PayPal sandbox · no real money</p>
+      <h1 className="font-display mt-2 text-4xl font-semibold tracking-tight">One-time checkout</h1>
       <p className="mt-3 text-muted">
-        PayPal is asked to capture this cart and nothing else. The agent never sees a card, and the
-        authorization dies with this charge.
+        You’ll approve this exact cart on PayPal sandbox. When you return, the server checks the
+        frozen cart before capturing. The agent cannot approve, change the payee, or capture.
       </p>
 
       <div className="mt-6 overflow-hidden rounded-2xl border border-ink/10 bg-card">
@@ -529,32 +794,36 @@ function Pay({
           </div>
           <div>
             <dt className="text-sm text-muted">Agent</dt>
-            <dd className="font-medium">Till, this cart only</dd>
+            <dd className="font-medium">Till, proposal only</dd>
           </div>
           <div>
-            <dt className="text-sm text-muted">Payees</dt>
-            <dd className="font-medium">{merchants.join(", ") || "—"}</dd>
+            <dt className="text-sm text-muted">Payee</dt>
+            <dd className="font-medium">Till’s controlled sandbox merchant</dd>
           </div>
           <div>
-            <dt className="text-sm text-muted">Buyer protection</dt>
+            <dt className="text-sm text-muted">Payment environment</dt>
             <dd className="inline-flex items-center gap-1 font-medium">
               <ShieldCheck className="size-4 text-teal" aria-hidden="true" />
-              On for these goods
+              Sandbox test funds
             </dd>
           </div>
         </dl>
       </div>
 
       <label className="mt-4 block text-sm font-medium" htmlFor="address">
-        Ship to
+        Delivery note · demo only
       </label>
       <input
         id="address"
         value={address}
+        disabled={busy}
         onChange={(event) => onAddress(event.target.value)}
         className="mt-2 min-h-11 w-full rounded-xl border border-ink/15 bg-card px-3 text-base outline-none focus:border-teal"
       />
 
+      <p className="mt-2 text-sm text-muted">
+        No delivery is arranged. Fictional catalog vendors are not PayPal payees.
+      </p>
       <ul className="mt-4 space-y-1 text-sm text-muted">
         {plan.rules.map((rule) => (
           <li key={rule}>{rule}</li>
@@ -565,24 +834,28 @@ function Pay({
         <input
           type="checkbox"
           checked={agreed}
+          disabled={busy}
           onChange={(event) => onAgreed(event.target.checked)}
           className="mt-1 size-4 accent-teal"
         />
-        <span>This charge matches the mandate I wrote. Till may not spend again without a new one.</span>
+        <span>
+          I reviewed this cart. I’ll approve payment on PayPal; a new purchase needs a new mandate.
+        </span>
       </label>
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         <button
           type="button"
-          disabled={!agreed || lines.length === 0 || total <= 0}
-          onClick={onAuthorize}
+          disabled={busy || !agreed || lines.length === 0 || total <= 0 || total > plan.budgetCents}
+          onClick={onCheckout}
           className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-teal px-5 font-medium text-paper tabular-nums transition-transform duration-150 ease-out active:scale-95 disabled:opacity-40"
         >
-          Authorize {money(total)}
+          {busy ? "Opening PayPal…" : `Continue to PayPal · ${money(total)}`}
         </button>
         <button
           type="button"
           onClick={onBack}
+          disabled={busy}
           className="inline-flex min-h-11 items-center justify-center rounded-full border border-ink/15 bg-card px-5 font-medium transition-transform duration-150 ease-out active:scale-95"
         >
           Send back
@@ -595,11 +868,15 @@ function Pay({
 function Done({
   receipt,
   fromLedger,
+  payment,
+  checking,
   onNew,
   onLedger,
 }: {
   receipt: Receipt;
   fromLedger: boolean;
+  payment: PayPalReceipt | null;
+  checking: boolean;
   onNew: () => void;
   onLedger: () => void;
 }) {
@@ -611,11 +888,39 @@ function Done({
   });
   return (
     <div className="rise mt-10">
-      <p className="text-sm font-medium text-teal">{fromLedger ? "From your ledger" : "Paid · sandbox"}</p>
+      <p className="text-sm font-medium text-teal">PayPal sandbox · no real money</p>
       <h1 className="font-display mt-2 text-4xl font-semibold tracking-tight">{receipt.title}</h1>
       <p className="mt-2 text-sm text-muted tabular-nums">
-        {receipt.id} · {when}
+        {when} ·{" "}
+        {checking
+          ? "Checking PayPal…"
+          : payment
+            ? "Checked against PayPal"
+            : "Local mandate · payment not verified"}
+        {fromLedger ? " · From your local ledger" : ""}
       </p>
+      {payment ? (
+        <dl className="mt-5 space-y-3 rounded-2xl border border-ink/10 bg-card px-4 py-4 text-sm">
+          <div>
+            <dt className="text-muted">PayPal order ID</dt>
+            <dd className="break-all font-medium">{payment.orderId}</dd>
+          </div>
+          <div>
+            <dt className="text-muted">PayPal order status</dt>
+            <dd className="font-medium">{payment.orderStatus}</dd>
+          </div>
+          <div>
+            <dt className="text-muted">PayPal capture ID</dt>
+            <dd className="break-all font-medium">
+              {payment.captureId ?? "None — no capture returned by PayPal"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted">PayPal capture status</dt>
+            <dd className="font-medium">{payment.captureStatus ?? "Not captured"}</dd>
+          </div>
+        </dl>
+      ) : null}
       <p className="font-display mt-4 text-4xl tabular-nums">{money(receipt.total)}</p>
       <p className="mt-2 text-muted">{receipt.summary}</p>
 
@@ -627,7 +932,7 @@ function Done({
                 {line.name}
                 {line.qty > 1 ? ` × ${line.qty}` : ""}
               </p>
-              <p className="text-sm text-muted">{line.merchant}</p>
+              <p className="text-sm text-muted">{line.merchant} · fictional catalog label</p>
             </div>
             <p className="tabular-nums">{money(line.price * line.qty)}</p>
           </li>
@@ -637,12 +942,12 @@ function Done({
       <div className="mt-6 rounded-2xl border border-ink/10 bg-card px-4 py-4">
         <p className="text-sm font-medium">What the agent was allowed to do</p>
         <ol className="mt-3 space-y-2 text-sm text-muted">
-          <li>Read the brief and locked the cart to it.</li>
-          <li>Refused anything that broke a rule, instead of asking for more money.</li>
-          <li>Requested one PayPal authorization for {money(receipt.total)}.</li>
-          <li>Access ended when you approved. A new purchase needs a new mandate.</li>
+          <li>Propose catalog items inside your mandate.</li>
+          <li>Never approve payment, change the payee, raise the budget, or capture.</li>
+          <li>You approve on PayPal. The server rechecks the frozen cart before capture.</li>
+          <li>Only the PayPal IDs and statuses above are payment evidence.</li>
         </ol>
-        <p className="mt-3 text-sm">Ships to {receipt.address}</p>
+        <p className="mt-3 text-sm">Delivery note (demo only): {receipt.address}</p>
       </div>
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
@@ -677,10 +982,13 @@ function Ledger({
   return (
     <div className="rise mt-10">
       <h1 className="font-display text-4xl font-semibold tracking-tight">Ledger</h1>
-      <p className="mt-3 text-muted">Authorizations stay on this device. Nothing here is a live PayPal charge.</p>
+      <p className="mt-3 text-muted">
+        Local mandate notes and order references, not payment records. Open a reference to check the
+        current checkout against PayPal.
+      </p>
       {receipts.length === 0 ? (
         <p className="mt-6 rounded-2xl border border-ink/10 bg-card px-4 py-6 text-muted">
-          No mandates settled yet.
+          No local mandate references yet.
         </p>
       ) : (
         <ul className="mt-6 divide-y divide-ink/10 rounded-2xl border border-ink/10 bg-card">
