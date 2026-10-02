@@ -39,6 +39,8 @@ Use Node 22.18+ and npm. No additional payment SDK or application dependency is 
 
 If PayPal reports **Funds not available**, configure a funded test buyer in **Testing Tools → Sandbox Accounts → Create account → Create Custom Account**. Choose **Personal**, **United States**, and a **USD 1,000 test balance**. Log out of the previous buyer on PayPal sandbox, then retry from Till using this buyer. Keep the merchant app credentials unchanged. If an existing account's balance cannot be edited, **Duplicate Account** supports editing the cloned balance. See [PayPal's sandbox account guide](https://developer.paypal.com/sandbox-testing/accounts). No real deposit is needed.
 
+If PayPal shows a credit/debit-card form, select **Log In** and use the **personal sandbox buyer**, rather than guest card checkout. If that buyer asks for a funding card after sign-in, use [PayPal's sandbox test-card generator](https://developer.paypal.com/sandbox-testing/card-testing) and add the generated test card to the buyer **only on www.sandbox.paypal.com**. Keep all card details within PayPal; Till and its agent never receive them. Then approve the order and return to Till.
+
 ## Run the sandbox purchase
 
 1. Click **Cafe restock**. Its unchanged sample cart has beans ($72), oat milk ($24), and cups ($64): **$160**, below its **$220** cap. Its two fictional catalog vendors do not create two PayPal payees.
