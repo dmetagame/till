@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: `2026-10-02T19:19:42Z`
+Last updated: `2026-10-02T19:49:50Z`
 Status: `IMPLEMENTED — REAL SANDBOX VERIFICATION PENDING`
 Active objective: Replace Till's simulated checkout with one controlled-merchant PayPal sandbox create/approve/recheck/capture flow. Preserve design, mandate UI, and Grok planning.
 
@@ -13,6 +13,7 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - Implementation checkpoint: `cacc85fb15acd3547d18f53743ad6374cb71f408`, pushed to `origin/main`. Local HEAD, tracking ref and `git ls-remote origin refs/heads/main` matched at 14:10 UTC; working tree clean. A documentation-only handoff commit may follow this recorded implementation commit.
 - Session resumed on `main` at `b25bc3cd0509b2372200e7e14292418d4a25a6af` (documentation handoff), clean and tracking `origin/main`; GitHub authentication verified again.
 - Latest implementation checkpoint: `62721da71ef5bd9dfe579029a46f8b84504a12ac` (mobile error visibility and real OAuth test record). Push succeeded; HEAD, `origin/main` and remote main matched at 19:19 UTC with a clean tree. This handoff record may be followed by a documentation-only commit.
+- Latest resumed HEAD: `5a9ac5c0c251be76b238bd893b7e187e971b8538`, clean `main` tracking `origin/main`; repository, remote and GitHub authentication verified before this test.
 - No existing project state or frozen release was present. Platform shell, catalog and planning are preserved.
 - GitHub authentication passes. Branch-protection inspection returned HTTP 403 (private-repository feature unavailable); no protection override will be attempted.
 
@@ -64,17 +65,20 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - Browser cafe checkout displays PayPal `invalid_client`, remains on checkout and retains Ledger 0; no receipt or local Paid stamp. Mobile regression check after the alert fix: auth error visible, alert fully in viewport, alert focused, local ledger count zero, no receipt IDs. Screenshot: ignored `screenshots/sandbox-oauth-rejected.png`, visually inspected.
 - Running-server over-budget check: $160 cafe cart with a $100 cap returns HTTP 400, `ok:false`, no order ID or receipt. Actual credential strings are absent from the existing browser JS assets (boolean checks only).
 - With the root `.env` loaded, `npm run typecheck`, scoped ESLint and `npm run build` pass after the error fix. A fresh browser-asset scan confirms neither actual credential value nor server OAuth/client/signing markers appear in the built browser JavaScript. No credentials or access token were printed or committed.
+- At 19:47 UTC the user reported the corrected pair ready. Root-file-loaded sandbox OAuth now returns HTTP 200 with a token received (boolean output only); local dev restarted with the corrected environment.
+- Real sandbox order created through the running app route: `7MM810398K324114K`, USD $160.00, intent CAPTURE, one purchase unit; PayPal GET confirms beans 1×$72, cups 1×$64, oat milk 1×$24, and a sandbox buyer-approval URL. Order stayed `CREATED`; capture count zero.
+- On that real, unapproved order, an edited-cart capture request was refused with HTTP 409 before capture. Server cancel action succeeded; a subsequent unchanged-cart capture request was refused with HTTP 409. Independent sandbox GET confirms zero captures afterward. This is genuine API refusal evidence, not buyer approval or a browser PayPal-cancel test.
 - Disposable baseline checkout and temporary portable smoke-script copy removed. Test logs and ignored browser screenshots retained as evidence. Production preview stopped; local dev remains running for the user's test.
 
 ## Risks And Blockers
 
-- Real sandbox OAuth rejects the supplied app credential pair with HTTP 401 `invalid_client`. The root file loads correctly and the server is running, but the user must correct the matching Sandbox REST-app Client ID/Secret before order creation and personal-buyer approval can proceed. No real sandbox order or capture has been verified yet; do not call the end-to-end acceptance criteria complete.
+- Sandbox authentication and order creation are verified. Real personal-buyer approval, capture/receipt ID comparison and receipt-refresh acceptance remain pending the user's own browser action. Do not call the end-to-end acceptance criteria complete yet. Earlier invalid_client errors were resolved by the corrected credential pair.
 - The existing broad test command stops at the pre-existing template failures; use the independent focused checks above to assess this slice.
 
 ## Next Actions
 
-1. User corrects the matching Sandbox REST-app credential pair in `.env` and replies ready. Restart `npm run dev` at http://localhost:8080 and verify sandbox OAuth; output status/booleans only, never credentials or token. Keep `.env` uncommitted.
-2. Have the user start Cafe restock and approve in their own browser. Verify the resulting order/capture IDs and raw statuses with PayPal GET; refresh and compare capture count. Test a separate cancelled checkout and confirm zero captures. Record actual evidence separately from fixture tests.
+1. User opens http://localhost:8080, starts Cafe restock, acknowledges checkout and approves in their own browser with a personal sandbox buyer. An asynchronous request is pending for receipt order/capture IDs after refresh; no buyer credentials are requested.
+2. Independently GET that order to compare IDs, amount, status and capture count. Finish a separate browser PayPal-cancel test and confirm zero captures. Record actual evidence separately from fixture tests and the already verified server cancel action.
 3. Commit and push the real verification record when that test completes. Preserve current design and planning; do not expand into replanning or another payment product.
 
 ## Change Log
@@ -87,3 +91,4 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - 2026-10-02T19:15:41Z: User saved root `.env`; loader verified and dev restarted. Real sandbox OAuth returned HTTP 401 `invalid_client` (no order/capture). Browser shows the genuine rejection; running-server budget refusal passes. Corrected credential pair requested. Mobile error visibility fix is underway.
 - 2026-10-02T19:18:29Z: Error alert focus/scroll fix verified in mobile browser; genuine auth rejection visible, zero ledger entries and no receipt. Typecheck, scoped lint and build pass with `.env` configured; actual credential values absent from browser assets. Awaiting corrected sandbox app credentials; no order or capture has occurred.
 - 2026-10-02T19:19:42Z: Checkpoint `62721da` pushed and remote main independently verified; `.env` still ignored. Local dev remains running at localhost:8080. External blocker remains PayPal's HTTP 401 `invalid_client`; awaiting the corrected credential pair and user's ready reply, then personal-buyer approval.
+- 2026-10-02T19:49:50Z: Corrected credentials authenticate (sandbox OAuth 200). Real app-created order `7MM810398K324114K` verified by PayPal GET for one $160 purchase unit and exact catalog items. Edited and cancelled checkout capture requests both refused; independent GET shows CREATED and zero captures. User's personal-buyer approval/receipt evidence requested; browser cancel test underway. No secrets or token values printed.
