@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: `2026-10-02T14:07:56Z`
+Last updated: `2026-10-02T14:10:14Z`
 Status: `IMPLEMENTED — REAL SANDBOX VERIFICATION PENDING`
 Active objective: Replace Till's simulated checkout with one controlled-merchant PayPal sandbox create/approve/recheck/capture flow. Preserve design, mandate UI, and Grok planning.
 
@@ -10,7 +10,7 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - Worktree: `/home/rouma/till`
 - Branch: `main`, upstream `origin/main`
 - Initial commit: `d6755c29403fe1ec535a2cf05f7301713d172b50`; clean clone
-- Active commit before implementation checkpoint: the initial commit above. Feature changes are currently uncommitted; remote backup will be recorded after push verification.
+- Implementation checkpoint: `cacc85fb15acd3547d18f53743ad6374cb71f408`, pushed to `origin/main`. Local HEAD, tracking ref and `git ls-remote origin refs/heads/main` matched at 14:10 UTC; working tree clean. A documentation-only handoff commit may follow this recorded implementation commit.
 - No existing project state or frozen release was present. Platform shell, catalog and planning are preserved.
 - GitHub authentication passes. Branch-protection inspection returned HTTP 403 (private-repository feature unavailable); no protection override will be attempted.
 
@@ -56,6 +56,8 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 
 - Clone/status/worktree/remote and GitHub auth verified before editing.
 - At 14:07 UTC, the user-owned root `.env` was not present. Credential values are never printed or recorded.
+- Dev server restarted with the new environment wrapper; http://localhost:8080 returns HTTP 200. Presence-only child-process check at 14:09 UTC: both PayPal names remain unset. No sandbox API call has been made with real app credentials.
+- Disposable baseline checkout and temporary portable smoke-script copy removed. Test logs and ignored browser screenshots retained as evidence. Production preview stopped; local dev remains running for the user's test.
 
 ## Risks And Blockers
 
@@ -64,9 +66,9 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 
 ## Next Actions
 
-1. Commit the verified implementation and state, push `main`, and record the verified remote checkpoint.
-2. When the user saves `.env`, restart `npm run dev` at http://localhost:8080. Check variable presence only; never print values.
-3. Have the user start Cafe restock and approve in their own browser. Verify the resulting order/capture IDs and raw statuses with PayPal GET; refresh and compare capture count. Test a separate cancelled checkout and confirm zero captures. Record actual evidence separately from fixture tests.
+1. When the user saves `.env`, restart `npm run dev` at http://localhost:8080. Check variable presence only; never print values. The file is gitignored and must remain uncommitted.
+2. Have the user start Cafe restock and approve in their own browser. Verify the resulting order/capture IDs and raw statuses with PayPal GET; refresh and compare capture count. Test a separate cancelled checkout and confirm zero captures. Record actual evidence separately from fixture tests.
+3. Commit and push the real verification record when that test completes. Preserve current design and planning; do not expand into replanning or another payment product.
 
 ## Change Log
 
@@ -74,3 +76,4 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 
 - 2026-10-02T13:47:22+00:00: Payment implementation and setup written; 24 payment tests, typecheck, scoped lint and production build pass. Real sandbox credentials remain missing; browser/full-suite checks underway.
 - 2026-10-02T14:07:56Z: Implementation verified with 25 payment tests and 3 loader tests, typecheck, scoped lint, build and desktop/mobile dev/production browser checks. Reproduced all 16 broad-suite failures on the original commit. User authorized root `.env`; loader and judge documentation updated. Real sandbox approval is pending user credentials and browser action.
+- 2026-10-02T14:10:14Z: Feature checkpoint `cacc85f` pushed and independently verified on GitHub; dev server restarted and HTTP 200 verified. Presence-only check still finds no PayPal credentials. Disposed of our temporary baseline/smoke-script copy, retaining verification evidence. Ready for the user's sandbox credentials and personal-buyer approval.
