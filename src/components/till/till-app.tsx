@@ -97,10 +97,17 @@ export function TillApp() {
   const [payment, setPayment] = useState<PayPalReceipt | null>(null);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [paymentBusy, setPaymentBusy] = useState(false);
+  const paymentErrorRef = useRef<HTMLParagraphElement>(null);
   const checkoutKey = useRef("");
   const checkoutBusy = useRef(false);
   const token = useRef(0);
   const timers = useRef<number[]>([]);
+
+  useEffect(() => {
+    if (!paymentError) return;
+    paymentErrorRef.current?.focus({ preventScroll: true });
+    paymentErrorRef.current?.scrollIntoView({ block: "center" });
+  }, [paymentError]);
 
   useEffect(() => {
     setReceipts(loadReceipts());
@@ -393,7 +400,12 @@ export function TillApp() {
       </header>
 
       {paymentError ? (
-        <p role="alert" className="mt-6 rounded-2xl border border-ink/15 bg-card px-4 py-4 text-sm">
+        <p
+          ref={paymentErrorRef}
+          role="alert"
+          tabIndex={-1}
+          className="mt-6 rounded-2xl border border-ink/15 bg-card px-4 py-4 text-sm"
+        >
           {paymentError}
         </p>
       ) : null}

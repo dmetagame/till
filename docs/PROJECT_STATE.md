@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: `2026-10-02T14:10:14Z`
+Last updated: `2026-10-02T19:18:29Z`
 Status: `IMPLEMENTED — REAL SANDBOX VERIFICATION PENDING`
 Active objective: Replace Till's simulated checkout with one controlled-merchant PayPal sandbox create/approve/recheck/capture flow. Preserve design, mandate UI, and Grok planning.
 
@@ -11,6 +11,7 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - Branch: `main`, upstream `origin/main`
 - Initial commit: `d6755c29403fe1ec535a2cf05f7301713d172b50`; clean clone
 - Implementation checkpoint: `cacc85fb15acd3547d18f53743ad6374cb71f408`, pushed to `origin/main`. Local HEAD, tracking ref and `git ls-remote origin refs/heads/main` matched at 14:10 UTC; working tree clean. A documentation-only handoff commit may follow this recorded implementation commit.
+- Session resumed on `main` at `b25bc3cd0509b2372200e7e14292418d4a25a6af` (documentation handoff), clean and tracking `origin/main`; GitHub authentication verified again.
 - No existing project state or frozen release was present. Platform shell, catalog and planning are preserved.
 - GitHub authentication passes. Branch-protection inspection returned HTTP 403 (private-repository feature unavailable); no protection override will be attempted.
 
@@ -39,6 +40,7 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - README documents sandbox app, two server variables, personal sandbox buyer, cafe flow, independent PayPal GET, cancellation/refresh checks, and cookie scope.
 - `scripts/with-app-env.mjs` now reads only the two PayPal names from an optional root `.env`, with process-environment precedence. `scripts/paypal-env.test.mjs` verifies child-process loading without logging values. The file remains gitignored and is not created or committed by Codex.
 - Cancel/edit invalidation needs no OAuth call. Missing or expired cookies can be discarded without preventing a new mandate. The server prevents subsequent capture of the browser's cancelled checkout.
+- Checkout errors now focus the existing alert and scroll it into view, so a buyer clicking near the bottom of mobile checkout can read the actual PayPal failure. This changes error behavior only, preserving the design.
 - Initial `npm ci` failed due to pre-existing lockfile inconsistencies (`ajv`, `json-schema-traverse`, `fast-uri`, `require-from-string`). `npm install --ignore-scripts --no-audit --no-fund` repaired the lock against existing dependency declarations; no direct dependency added.
 
 ## Verification
@@ -57,16 +59,20 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - Clone/status/worktree/remote and GitHub auth verified before editing.
 - At 14:07 UTC, the user-owned root `.env` was not present. Credential values are never printed or recorded.
 - Dev server restarted with the new environment wrapper; http://localhost:8080 returns HTTP 200. Presence-only child-process check at 14:09 UTC: both PayPal names remain unset. No sandbox API call has been made with real app credentials.
+- At 19:13 UTC the user reported `.env` ready. Restarted the local dev server; both variables are present and match the root file (boolean checks only). Root `.env` remains ignored. Sandbox OAuth POST returned HTTP 401 `invalid_client`; no token or order was received. Requested a matching Sandbox REST-app credential pair, without values in chat.
+- Browser cafe checkout displays PayPal `invalid_client`, remains on checkout and retains Ledger 0; no receipt or local Paid stamp. Mobile regression check after the alert fix: auth error visible, alert fully in viewport, alert focused, local ledger count zero, no receipt IDs. Screenshot: ignored `screenshots/sandbox-oauth-rejected.png`, visually inspected.
+- Running-server over-budget check: $160 cafe cart with a $100 cap returns HTTP 400, `ok:false`, no order ID or receipt. Actual credential strings are absent from the existing browser JS assets (boolean checks only).
+- With the root `.env` loaded, `npm run typecheck`, scoped ESLint and `npm run build` pass after the error fix. A fresh browser-asset scan confirms neither actual credential value nor server OAuth/client/signing markers appear in the built browser JavaScript. No credentials or access token were printed or committed.
 - Disposable baseline checkout and temporary portable smoke-script copy removed. Test logs and ignored browser screenshots retained as evidence. Production preview stopped; local dev remains running for the user's test.
 
 ## Risks And Blockers
 
-- Real sandbox approval/capture verification requires the user to save the two app credentials in `/home/rouma/till/.env`, then approve the cafe order in their browser with their personal sandbox buyer. No real sandbox order or capture has been verified yet; do not call the end-to-end acceptance criteria complete.
+- Real sandbox OAuth rejects the supplied app credential pair with HTTP 401 `invalid_client`. The root file loads correctly and the server is running, but the user must correct the matching Sandbox REST-app Client ID/Secret before order creation and personal-buyer approval can proceed. No real sandbox order or capture has been verified yet; do not call the end-to-end acceptance criteria complete.
 - The existing broad test command stops at the pre-existing template failures; use the independent focused checks above to assess this slice.
 
 ## Next Actions
 
-1. When the user saves `.env`, restart `npm run dev` at http://localhost:8080. Check variable presence only; never print values. The file is gitignored and must remain uncommitted.
+1. User corrects the matching Sandbox REST-app credential pair in `.env` and replies ready. Restart `npm run dev` at http://localhost:8080 and verify sandbox OAuth; output status/booleans only, never credentials or token. Keep `.env` uncommitted.
 2. Have the user start Cafe restock and approve in their own browser. Verify the resulting order/capture IDs and raw statuses with PayPal GET; refresh and compare capture count. Test a separate cancelled checkout and confirm zero captures. Record actual evidence separately from fixture tests.
 3. Commit and push the real verification record when that test completes. Preserve current design and planning; do not expand into replanning or another payment product.
 
@@ -77,3 +83,5 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - 2026-10-02T13:47:22+00:00: Payment implementation and setup written; 24 payment tests, typecheck, scoped lint and production build pass. Real sandbox credentials remain missing; browser/full-suite checks underway.
 - 2026-10-02T14:07:56Z: Implementation verified with 25 payment tests and 3 loader tests, typecheck, scoped lint, build and desktop/mobile dev/production browser checks. Reproduced all 16 broad-suite failures on the original commit. User authorized root `.env`; loader and judge documentation updated. Real sandbox approval is pending user credentials and browser action.
 - 2026-10-02T14:10:14Z: Feature checkpoint `cacc85f` pushed and independently verified on GitHub; dev server restarted and HTTP 200 verified. Presence-only check still finds no PayPal credentials. Disposed of our temporary baseline/smoke-script copy, retaining verification evidence. Ready for the user's sandbox credentials and personal-buyer approval.
+- 2026-10-02T19:15:41Z: User saved root `.env`; loader verified and dev restarted. Real sandbox OAuth returned HTTP 401 `invalid_client` (no order/capture). Browser shows the genuine rejection; running-server budget refusal passes. Corrected credential pair requested. Mobile error visibility fix is underway.
+- 2026-10-02T19:18:29Z: Error alert focus/scroll fix verified in mobile browser; genuine auth rejection visible, zero ledger entries and no receipt. Typecheck, scoped lint and build pass with `.env` configured; actual credential values absent from browser assets. Awaiting corrected sandbox app credentials; no order or capture has occurred.
