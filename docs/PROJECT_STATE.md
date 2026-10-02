@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: `2026-10-02T20:02:23Z`
+Last updated: `2026-10-02T20:05:04Z`
 Status: `IMPLEMENTED — REAL SANDBOX VERIFICATION PENDING`
 Active objective: Replace Till's simulated checkout with one controlled-merchant PayPal sandbox create/approve/recheck/capture flow. Preserve design, mandate UI, and Grok planning.
 
@@ -18,6 +18,7 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - Browser cancellation evidence checkpoint: `7efb2d630806b9e326c46679c272f7e3a7ed3489`, pushed; HEAD, tracking main and remote main matched at 19:54 UTC with a clean tree. `.env` remains ignored. Documentation-only handoff commits may follow; latest app code remains `62721da`.
 - Funding-help session starts on clean `main` at `b862a8105c7905d73d3bbba71fe9cea038db903c`; repository, remote and GitHub authentication verified before documentation edits.
 - Funded-buyer setup checkpoint `4eb10fb95e38e4d2b3430efbef2772693d69aac9` pushed; HEAD, tracking main and remote main matched before the user's card-form clarification.
+- Buyer-login/test-funding documentation checkpoint: `437ea5768e5face1503b63dfccae6ae8f8e84f6d`, pushed and matched against remote main at 20:05 UTC; clean tree, `.env` ignored. Latest app code remains `62721da`.
 - No existing project state or frozen release was present. Platform shell, catalog and planning are preserved.
 - GitHub authentication passes. Branch-protection inspection returned HTTP 403 (private-repository feature unavailable); no protection override will be attempted.
 
@@ -103,3 +104,4 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - 2026-10-02T19:54:46Z: Real sandbox verification record pushed in `7efb2d6` and remote main verified; clean tree and ignored root credential file confirmed. All independent checks in this session are complete. Awaiting the user's approval and receipt IDs; dev server remains available at http://localhost:8080.
 - 2026-10-02T19:58:00Z: Buyer reports funds unavailable; exact location/order remains unknown. Verified current official PayPal sandbox account instructions and added funded personal-buyer setup to README. No app/payment behavior changed; approval/capture acceptance remains pending.
 - 2026-10-02T20:02:23Z: User clarified a PayPal card-entry requirement. Existing sandbox approval page independently shows a Log In path; no account/card values were accessed. Verified PayPal's official sandbox-card guidance, documented personal-buyer login and private test funding within PayPal. Merchant credentials and app code unchanged; capture/receipt verification still pending user approval.
+- 2026-10-02T20:05:04Z: Documentation checkpoint `437ea57` pushed and remote verified. Buyer guidance is ready: sandbox personal login, privately configured test funding on PayPal if requested, then approval and receipt IDs. No real-money funding or card data in the app/agent is required. Approval/capture remains unverified until the user provides the outcome.
