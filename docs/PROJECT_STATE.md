@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: `2026-10-02T20:05:04Z`
+Last updated: `2026-10-04T14:42:22Z`
 Status: `IMPLEMENTED — REAL SANDBOX VERIFICATION PENDING`
 Active objective: Replace Till's simulated checkout with one controlled-merchant PayPal sandbox create/approve/recheck/capture flow. Preserve design, mandate UI, and Grok planning.
 
@@ -19,6 +19,7 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - Funding-help session starts on clean `main` at `b862a8105c7905d73d3bbba71fe9cea038db903c`; repository, remote and GitHub authentication verified before documentation edits.
 - Funded-buyer setup checkpoint `4eb10fb95e38e4d2b3430efbef2772693d69aac9` pushed; HEAD, tracking main and remote main matched before the user's card-form clarification.
 - Buyer-login/test-funding documentation checkpoint: `437ea5768e5face1503b63dfccae6ae8f8e84f6d`, pushed and matched against remote main at 20:05 UTC; clean tree, `.env` ignored. Latest app code remains `62721da`.
+- OTP-help session starts on clean `main` at `c0342dc8dfb3acca1235ec3a8f235758c75e8e81`; repository, remote and GitHub authentication verified. On October 4, local dev still returns HTTP 200; `.env` is still ignored. No frozen artifacts or new source changes observed.
 - No existing project state or frozen release was present. Platform shell, catalog and planning are preserved.
 - GitHub authentication passes. Branch-protection inspection returned HTTP 403 (private-repository feature unavailable); no protection override will be attempted.
 
@@ -81,11 +82,13 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - Sandbox authentication and order creation are verified. Real personal-buyer approval, capture/receipt ID comparison and receipt-refresh acceptance remain pending the user's own browser action. Do not call the end-to-end acceptance criteria complete yet. Earlier invalid_client errors were resolved by the corrected credential pair.
 - User reports “Funds not available” during the buyer test. Likely a buyer funding issue; exact screen/location and order ID are not yet supplied. Asked whether it appeared on PayPal approval or Till after return. Current official sandbox account documentation supports custom buyer test values and editing balance during account duplication; README now includes funded-buyer setup. No payment success is inferred from this report.
 - User clarified that the PayPal payment page required credit/debit-card entry; insufficient balance is not confirmed. Read-only inspection of existing test order `5R4237005G696803X` still returns CREATED and an official approval link. Its anonymous sandbox page shows Log In/email entry and no card field. Checked only sign-in controls/field existence, never buyer or card values. README now explains personal sandbox login and, if funding is required after login, adding a PayPal-generated test card privately within PayPal sandbox. No app card collection or payment-flow changes introduced.
+- October 4: user is blocked by phone verification because an OTP is not arriving. User answered “yes and yes” to a bundled question; treat sandbox domain/personal-buyer login as provisionally confirmed, but the exact heading/flow is unknown. A follow-up requests only the heading (security check, phone confirmation or Fastlane); no OTP, phone, login or card values. Official Fastlane/native-checkout sandbox OTP examples do not establish a code for Till's standard hosted checkout, so no universal code is assumed.
+- A cart frozen on October 2 has exceeded this slice's three-hour cookie lifetime. After buyer authentication is resolved, start a fresh Cafe mandate/order rather than relying on the old return URL. Do not capture manually or present an expired/unapproved order as paid.
 - The existing broad test command stops at the pre-existing template failures; use the independent focused checks above to assess this slice.
 
 ## Next Actions
 
-1. User selects Log In on PayPal's approval page and signs in using a personal sandbox buyer. If that sandbox wallet requests funding, the user adds a generated sandbox test card privately on PayPal, or uses the documented funded test-buyer setup. No real money/card, card data in Till/chat/agent, changed cart price/cap or changed merchant credentials are needed. Then obtain approved receipt order/capture IDs after refresh.
+1. Identify the OTP screen from its exact heading and sandbox hostname. Guide the user through the documented personal sandbox buyer login; do not guess an OTP or apply another product's test code to ordinary PayPal verification. Once authenticated, start a fresh Cafe checkout because the old frozen state expires after three hours. If wallet funding is requested, retain the PayPal-only test funding guidance. No buyer credentials/phone/card/OTP values in chat or the agent.
 2. Independently GET that approved order to compare IDs, amount, status and capture count. Cancellation and refusal paths already have genuine sandbox evidence above. Record approval/capture evidence separately from unit fixtures; do not infer success from localStorage or an unapproved order.
 3. Commit and push the real verification record when that test completes. Preserve current design and planning; do not expand into replanning or another payment product.
 
@@ -105,3 +108,4 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - 2026-10-02T19:58:00Z: Buyer reports funds unavailable; exact location/order remains unknown. Verified current official PayPal sandbox account instructions and added funded personal-buyer setup to README. No app/payment behavior changed; approval/capture acceptance remains pending.
 - 2026-10-02T20:02:23Z: User clarified a PayPal card-entry requirement. Existing sandbox approval page independently shows a Log In path; no account/card values were accessed. Verified PayPal's official sandbox-card guidance, documented personal-buyer login and private test funding within PayPal. Merchant credentials and app code unchanged; capture/receipt verification still pending user approval.
 - 2026-10-02T20:05:04Z: Documentation checkpoint `437ea57` pushed and remote verified. Buyer guidance is ready: sandbox personal login, privately configured test funding on PayPal if requested, then approval and receipt IDs. No real-money funding or card data in the app/agent is required. Approval/capture remains unverified until the user provides the outcome.
+- 2026-10-04T14:42:22Z: User reports missing phone-verification OTP. Confirmed repo/main/auth, ignored `.env` and dev HTTP 200; reviewed official sandbox account/OTP guidance. Exact OTP heading still needed; do not assume a universal test code. Old checkout cookie is expired by design after three hours; a fresh mandate is needed after authentication. No app/payment behavior changed, and no approval/capture has been verified.
