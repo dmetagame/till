@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: `2026-10-04T14:49:50Z`
+Last updated: `2026-10-04T14:50:49Z`
 Status: `IMPLEMENTED — REAL SANDBOX VERIFICATION PENDING`
 Active objective: Replace Till's simulated checkout with one controlled-merchant PayPal sandbox create/approve/recheck/capture flow. Preserve design, mandate UI, and Grok planning.
 
@@ -21,6 +21,7 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - Buyer-login/test-funding documentation checkpoint: `437ea5768e5face1503b63dfccae6ae8f8e84f6d`, pushed and matched against remote main at 20:05 UTC; clean tree, `.env` ignored. Latest app code remains `62721da`.
 - OTP-help session starts on clean `main` at `c0342dc8dfb3acca1235ec3a8f235758c75e8e81`; repository, remote and GitHub authentication verified. On October 4, local dev still returns HTTP 200; `.env` is still ignored. No frozen artifacts or new source changes observed.
 - OTP blocker checkpoint `1edb1eb1763a6799aead82a20ae2e7cfef546aa5` is verified on local HEAD, tracking main and remote main. Signup diagnosis resumes from this clean checkpoint; GitHub authentication and origin reconfirmed before documentation edits. Latest app code remains `62721da`.
+- Generated-buyer pre-login documentation checkpoint `a0f53cea18d48f1d24d618c31663df7ec190755c` pushed and independently matched against remote main at 14:50 UTC; clean working tree. This handoff record may be followed by a documentation-only commit; no payment code changed.
 - No existing project state or frozen release was present. Platform shell, catalog and planning are preserved.
 - GitHub authentication passes. Branch-protection inspection returned HTTP 403 (private-repository feature unavailable); no protection override will be attempted.
 
@@ -112,3 +113,4 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - 2026-10-02T20:05:04Z: Documentation checkpoint `437ea57` pushed and remote verified. Buyer guidance is ready: sandbox personal login, privately configured test funding on PayPal if requested, then approval and receipt IDs. No real-money funding or card data in the app/agent is required. Approval/capture remains unverified until the user provides the outcome.
 - 2026-10-04T14:42:22Z: User reports missing phone-verification OTP. Confirmed repo/main/auth, ignored `.env` and dev HTTP 200; reviewed official sandbox account/OTP guidance. Exact OTP heading still needed; do not assume a universal test code. Old checkout cookie is expired by design after three hours; a fresh mandate is needed after authentication. No app/payment behavior changed, and no approval/capture has been verified.
 - 2026-10-04T14:49:50Z: User's URL identifies sandbox signup with Nigeria selected. Read-only GET of the supplied order fails RESOURCE_NOT_FOUND; payment status remains unknown. Verified official generated-personal-buyer login instructions and updated README to pre-login before a fresh Cafe checkout. App/payment code unchanged. Documentation diff check is the proportionate verification; real approval/capture/refresh acceptance remains pending the buyer's browser action.
+- 2026-10-04T14:50:49Z: Pre-login guide and diagnosis checkpoint `a0f53ce` verified on remote main; diff check passed and tree clean. Handoff: user logs into sandbox with the generated Personal buyer, then starts a fresh Cafe mandate locally. Await receipt order/capture IDs for independent GET and refresh verification; do not infer payment from the old unavailable order.
