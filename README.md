@@ -10,7 +10,7 @@ Use Node 22.18+ and npm. No additional payment SDK or application dependency is 
 
 1. Sign into the [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/) with an ordinary developer account.
 2. Under **Apps & Credentials**, select **Sandbox** and create a REST app linked to a **Business sandbox account** you control. That account is the only merchant. Copy this app's sandbox Client ID and Secret, not live credentials.
-3. Under **Testing Tools → Sandbox Accounts**, create or select one **Personal sandbox account**, distinct from the merchant. Use its sandbox email and password when PayPal asks the buyer to log in. Give it sufficient test balance for the $160 cafe sample. Sandbox accounts do not require a PayPal employee account.
+3. Under **Testing Tools → Sandbox Accounts**, create or select one **Personal sandbox account**, distinct from the merchant. Open its **⋮ → View/Edit Account** to retrieve the generated buyer email and password privately. In the browser you will use for Till, first [sign into PayPal sandbox](https://www.sandbox.paypal.com/signin) with those personal sandbox credentials. Give it sufficient test balance for the $160 cafe sample. Sandbox accounts do not require a PayPal employee account. See [PayPal's account-login instructions](https://developer.paypal.com/api/rest/#3-get-sandbox-account-credentials).
 4. Clone this repository and install its existing dependencies:
 
    ```bash
@@ -40,6 +40,8 @@ Use Node 22.18+ and npm. No additional payment SDK or application dependency is 
 If PayPal reports **Funds not available**, configure a funded test buyer in **Testing Tools → Sandbox Accounts → Create account → Create Custom Account**. Choose **Personal**, **United States**, and a **USD 1,000 test balance**. Log out of the previous buyer on PayPal sandbox, then retry from Till using this buyer. Keep the merchant app credentials unchanged. If an existing account's balance cannot be edited, **Duplicate Account** supports editing the cloned balance. See [PayPal's sandbox account guide](https://developer.paypal.com/sandbox-testing/accounts). No real deposit is needed.
 
 If PayPal shows a credit/debit-card form, select **Log In** and use the **personal sandbox buyer**, rather than guest card checkout. If that buyer asks for a funding card after sign-in, use [PayPal's sandbox test-card generator](https://developer.paypal.com/sandbox-testing/card-testing) and add the generated test card to the buyer **only on www.sandbox.paypal.com**. Keep all card details within PayPal; Till and its agent never receive them. Then approve the order and return to Till.
+
+If the checkout URL contains `/checkoutweb/signup`, you are creating an account during checkout. Return to **Log In** with the personal buyer already created in Developer Dashboard; its generated credentials are separate from your regular PayPal login and the app's Client ID/Secret. Once signed in, start a fresh Cafe checkout in Till. A frozen checkout expires after three hours, so an old approval URL cannot complete the app's capture checks. Keep buyer credentials, phone numbers and verification codes out of Till and chat.
 
 ## Run the sandbox purchase
 
