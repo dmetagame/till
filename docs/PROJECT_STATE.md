@@ -2,15 +2,15 @@
 
 Current status: The repository is **public**, as explicitly requested by the user. The live cafe path is the **$180 story** ($160 in stock, $114 recovered). Every older checkpoint below is history, not current instructions. Audit guard fixes remain verified with network-free fixtures; earlier live payments remain historical. This visibility task made no payment or application-code changes.
 
-Last updated: `2026-10-05T21:43:35Z`
-Status: `PUBLIC VISIBILITY VERIFIED — DOCUMENTATION CHECKPOINT`
+Last updated: `2026-10-05T21:44:33Z`
+Status: `PUBLIC VISIBILITY VERIFIED — CHECKPOINT PUSHED`
 Active objective: Completed — make https://github.com/dmetagame/till public and verify anonymous access. User's latest visibility request supersedes the earlier audit-task publication restriction. Preserve application code, credentials and historical payment evidence; only this handoff changes locally.
 
 ## Current Visibility Checkpoint
 
 - Workspace `/home/rouma/till`, branch `main` tracking `origin/main`, clean starting commit `6cff0697c7fcc209d7fe9ead7161b1acb0ecb65c`; local HEAD and independent remote main matched before the change. Origin, GitHub authentication and ADMIN permission verified.
 - `gh repo edit dmetagame/till --visibility public` succeeded. Authenticated `gh repo view` reports `isPrivate: false`; anonymous GET of `https://api.github.com/repos/dmetagame/till` reports `private: false` and `visibility: public`.
-- No application edits, environment changes, PayPal/Gemini calls or transactions. Historical audit verification below remains applicable; no new fixture run is claimed for this settings/documentation task. Record this scope and visibility verification in a documentation-only checkpoint, push and verify remote main.
+- No application edits, environment changes, PayPal/Gemini calls or transactions. Historical audit verification below remains applicable; no new fixture run is claimed for this settings/documentation task. Documentation-only checkpoint `77ede6eac4f851af3c5796f29efceb2acd408cce` is pushed: local HEAD, upstream and independent remote main matched at 21:44 UTC with a clean worktree. `git diff --check` passed; this documentation-only handoff records that verified checkpoint.
 
 ## Historical Audit Fix Verification
 
@@ -152,7 +152,7 @@ Active objective: Completed — make https://github.com/dmetagame/till public an
 ## Next Actions
 
 - Preserve completed historical live acceptance: revised-story order `2TB52773F8180315G` / capture `3H158002EX0446249` (USD114), plus earlier `8J567318K9210721P` and `7GH61487DG719402X` written evidence unchanged.
-- Public visibility and anonymous access are verified. Finish the scoped documentation checkpoint and verify HEAD/upstream/remote main; then stop. No real order, capture, stock mutation, credential change or application change is authorized.
+- Public visibility, anonymous access and the pushed documentation checkpoint are verified; stop after this handoff. No real order, capture, stock mutation, credential change or application change is authorized.
 - Audit fixtures and documentation were verified in the preceding task; earlier private checkpoints and live results remain historical. Future submission/demo or live payment work requires a separate task.
 
 ## Historical Revised $180 Live Acceptance Checkpoint
@@ -239,3 +239,5 @@ Active objective: Completed — make https://github.com/dmetagame/till public an
 - 2026-10-05T21:15:40Z: Scoped implementation 509d937c4b6f197176753c8397f924cd234ebbe8 pushed to private origin/main and independently verified against local HEAD/upstream/remote main with a clean tree. All three pre-fix failing audit fixtures now refuse with zero mocked captures; current docs and historical evidence are reconciled. GitHub still reports isPrivate:true. No real PayPal/Gemini call, credential change or publication. This documentation-only handoff records the verified implementation checkpoint; task complete.
 
 - 2026-10-05T21:43:35Z: User explicitly requested public visibility, superseding the prior audit-task publication restriction. Clean main at 6cff0697c7fcc209d7fe9ead7161b1acb0ecb65c matched remote main; origin/authentication/ADMIN permission verified. Visibility edit succeeded and authenticated plus anonymous GitHub responses confirm public access. Only docs/PROJECT_STATE.md changes locally; application, credentials and all historical records preserved. No PayPal/Gemini call or transaction. Documentation checkpoint and push verification follow.
+
+- 2026-10-05T21:44:33Z: Visibility documentation checkpoint 77ede6eac4f851af3c5796f29efceb2acd408cce pushed and independently verified: HEAD, upstream and remote main match, clean tree. Diff check passed; only docs/PROJECT_STATE.md changed. Public access verified through both authenticated and anonymous GitHub responses. No application or credential changes, PayPal/Gemini calls or transactions; objective complete. This final documentation-only handoff records the verified checkpoint.
