@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: `2026-10-05T17:32:36Z`
+Last updated: `2026-10-05T17:33:09Z`
 Status: `CAFE $180 STORY CAPTURE VERIFIED — RECEIPT REFRESH PENDING`
 Active objective: Revised $180 story implemented and live $160 → stock-out → $114 sequence verified. Buyer-approved recovered order and sole $114 capture independently verified; only buyer receipt refresh/post-refresh GET remains. Earlier historical order evidence is unchanged.
 
@@ -205,3 +205,5 @@ Active objective: Revised $180 story implemented and live $160 → stock-out →
 - 2026-10-05T17:18:19Z: Implementation e0ff4fc independently verified on remote main with clean tree. QA preview and both task browsers closed; screenshots/test logs preserved. Dev HTTP200, left running after the one live sequence with 500-count cups unavailable. Buyer approval instructions sent for one fresh $114 order in their own browser; no actual create/capture by QA. Protected payment files and historical README evidence unchanged, credentials untouched/ignored. Remaining work waits for buyer return and new receipt IDs, then independent PayPal GET/refresh verification. No stock mutation or server restart while approval is pending.
 
 - 2026-10-05T17:32:36Z: Resumed clean main at 3408011408bac95dfe6f4cc5731cc78e5d53c21b; repository/worktree/upstream/origin/GitHub authentication reconfirmed. Buyer supplied revised-story order/capture IDs. Independent sandbox GET at 2026-10-05T17:31:34.988Z through existing server-only client/environment wrapper asserted order 2TB52773F8180315G COMPLETED, intent CAPTURE, one USD114 purchase unit/item_total, exactly beans1×72/cups-small1×18/oat1×24, and exactly one capture 3H158002EX0446249 COMPLETED USD114. All assertions pass. OAuth + GET only; no new create/capture, stock mutation, credentials or app-code change. Protected checkout.server.ts/paypal.server.ts compare unchanged against fbadfc4, .env ignored. README/state append this actual API evidence without editing earlier order evidence. Buyer refresh requested; post-refresh GET remains. Documentation-only diff check applies; existing application verification remains valid.
+
+- 2026-10-05T17:33:09Z: Revised-story capture evidence checkpoint 2b9b211dd2cfe68b0095bbd8545e273a4ea51f90 pushed and independently verified: HEAD, origin/main and remote main match with clean tree. Only README.md and docs/PROJECT_STATE.md changed; diff check passes. Real $114 recovered capture is verified, earlier written evidence preserved. Buyer receipt-refresh answer pending; no further payment or application change needed. Documentation-only handoff follows this verified checkpoint.
