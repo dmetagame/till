@@ -86,20 +86,28 @@ export async function handleCafeCheckout(
         return async (...args: Parameters<PayPalSandboxClient["order"]>) => {
           const [path, method] = args;
           if (method === "POST" && (path === "" || path.endsWith("/capture"))) {
-            const cart =
-              path === ""
-                ? freezeCart(input.cart)
-                : readCart(request.headers.get("cookie"), secret);
-            if (
-              input.cart?.cafeProof ||
-              isCafeMandate(cart.brief) ||
-              cart.lines.some((line) => getProduct(line.productId)?.category === "cafe")
-            )
-              assertCafeCheckout(
-                cart,
-                input.cart?.cafeProof,
-                dependencies?.catalog() ?? cafeSupplier.snapshot(),
-              );
+            const checkCafe = () => {
+              const cart =
+                path === ""
+                  ? freezeCart(input.cart)
+                  : readCart(request.headers.get("cookie"), secret);
+              if (
+                input.cart?.cafeProof ||
+                isCafeMandate(cart.brief) ||
+                cart.lines.some((line) => getProduct(line.productId)?.category === "cafe")
+              )
+                assertCafeCheckout(
+                  cart,
+                  input.cart?.cafeProof,
+                  dependencies?.catalog() ?? cafeSupplier.snapshot(),
+                );
+            };
+            checkCafe();
+            const beforeSend = args[4];
+            args[4] = () => {
+              beforeSend?.();
+              checkCafe();
+            };
           }
           return target.order(...args);
         };

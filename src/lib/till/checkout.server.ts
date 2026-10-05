@@ -1,5 +1,5 @@
 import "@tanstack/react-start/server-only";
-import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { getProduct, parseBudget } from "./catalog.ts";
 import type { CheckoutCart, PayPalReceipt } from "./checkout.ts";
 import {
@@ -19,7 +19,39 @@ type FrozenCart = CheckoutCart & {
   orderId?: string;
   createdAt: number;
   cancelled: boolean;
+  checkoutSessionId?: string;
+  stateId?: string;
+  returnedOrderId?: string;
 };
+
+// Process-local authority revokes every older signed generation. Restart fails closed.
+const processState = globalThis as typeof globalThis & {
+  tillActiveCheckouts?: Map<string, FrozenCart>;
+};
+const activeCheckouts = (processState.tillActiveCheckouts ??= new Map<string, FrozenCart>());
+
+function assertActiveCheckout(cart: FrozenCart) {
+  const current = cart.checkoutSessionId ? activeCheckouts.get(cart.checkoutSessionId) : undefined;
+  if (
+    !current ||
+    !cart.stateId ||
+    current.stateId !== cart.stateId ||
+    current.cartVersion !== cart.cartVersion ||
+    current.orderId !== cart.orderId ||
+    current.cancelled ||
+    cart.cancelled ||
+    Date.now() - current.createdAt > MAX_AGE * 1000
+  )
+    throw new CheckoutError(
+      "Checkout was cancelled, replaced or edited, expired, or the server restarted. No capture was attempted.",
+      409,
+    );
+}
+
+function rememberCheckout(cart: FrozenCart) {
+  cart.stateId = randomUUID();
+  activeCheckouts.set(cart.checkoutSessionId!, cart);
+}
 
 export function freezeCart(input: unknown): FrozenCart {
   const cart = input as CheckoutCart | null;
@@ -257,7 +289,12 @@ export async function handleCheckout(
   const headers = new Headers({ "Content-Type": "application/json", "Cache-Control": "no-store" });
   try {
     const url = new URL(request.url);
-    const action = request.method === "GET" ? "status" : undefined;
+    const action =
+      request.method === "GET"
+        ? url.searchParams.get("paypal") === "return"
+          ? "return"
+          : "status"
+        : undefined;
     if (request.method !== "GET" && request.method !== "POST")
       throw new CheckoutError("Method not allowed.", 405);
     if (
@@ -277,8 +314,10 @@ export async function handleCheckout(
           })
         : null;
     const operation = action ?? input?.action;
-    if (!["create", "capture", "status", "cancel"].includes(operation ?? ""))
+    if (!["create", "capture", "status", "cancel", "return"].includes(operation ?? ""))
       throw new CheckoutError("Unknown checkout action.");
+    if (operation === "return" && request.method !== "GET")
+      throw new CheckoutError("PayPal return must use the server return URL.", 405);
     if (operation === "cancel") {
       // Cancellation never needs an OAuth call. Invalid/expired checkout cookies
       // can be discarded safely so they do not block the next mandate.
@@ -292,7 +331,13 @@ export async function handleCheckout(
       if (cart && signingSecret) {
         if (input?.cartVersion && input.cartVersion !== cart.cartVersion)
           throw new CheckoutError("This checkout was replaced by another cart.", 409);
-        cart.cancelled = true;
+        if (cart.checkoutSessionId) {
+          const current = activeCheckouts.get(cart.checkoutSessionId);
+          if (current && current.stateId !== cart.stateId)
+            throw new CheckoutError("This checkout was replaced by another cart.", 409);
+          cart.cancelled = true;
+          rememberCheckout(cart);
+        } else cart.cancelled = true;
         headers.set("Set-Cookie", cookieFor(cart, signingSecret, request));
       } else {
         headers.set(
@@ -308,42 +353,60 @@ export async function handleCheckout(
 
     if (operation === "create") {
       const cart = freezeCart(input?.cart);
-      const returnUrl = new URL("/", url.origin);
+      let previous: FrozenCart | undefined;
+      try {
+        previous = readCart(request.headers.get("cookie"), secret);
+      } catch (error) {
+        if (!(error instanceof CheckoutError)) throw error;
+      }
+      for (const [id, checkout] of activeCheckouts)
+        if (Date.now() - checkout.createdAt > MAX_AGE * 1000) activeCheckouts.delete(id);
+      cart.checkoutSessionId = previous?.checkoutSessionId ?? randomUUID();
+      rememberCheckout(cart);
+      const returnUrl = new URL("/api/paypal/checkout", url.origin);
       returnUrl.searchParams.set("paypal", "return");
       returnUrl.searchParams.set("cartVersion", cart.cartVersion);
-      const cancelUrl = new URL(returnUrl);
+      const cancelUrl = new URL("/", url.origin);
       cancelUrl.searchParams.set("paypal", "cancel");
-      const order = await client.order("", "POST", cart.cartVersion, {
-        intent: "CAPTURE",
-        purchase_units: [
-          {
-            custom_id: cart.cartVersion,
-            amount: {
-              currency_code: "USD",
-              value: (cart.totalCents / 100).toFixed(2),
-              breakdown: {
-                item_total: { currency_code: "USD", value: (cart.totalCents / 100).toFixed(2) },
+      cancelUrl.searchParams.set("cartVersion", cart.cartVersion);
+      const order = await client.order(
+        "",
+        "POST",
+        cart.cartVersion,
+        {
+          intent: "CAPTURE",
+          purchase_units: [
+            {
+              custom_id: cart.cartVersion,
+              amount: {
+                currency_code: "USD",
+                value: (cart.totalCents / 100).toFixed(2),
+                breakdown: {
+                  item_total: { currency_code: "USD", value: (cart.totalCents / 100).toFixed(2) },
+                },
               },
+              items: cart.lines.map((line) => {
+                const product = getProduct(line.productId)!;
+                return {
+                  sku: product.id,
+                  name: product.name,
+                  quantity: String(line.qty),
+                  unit_amount: { currency_code: "USD", value: (product.price / 100).toFixed(2) },
+                };
+              }),
+              // No payee override: the merchant is the owner of the server's sandbox app.
             },
-            items: cart.lines.map((line) => {
-              const product = getProduct(line.productId)!;
-              return {
-                sku: product.id,
-                name: product.name,
-                quantity: String(line.qty),
-                unit_amount: { currency_code: "USD", value: (product.price / 100).toFixed(2) },
-              };
-            }),
-            // No payee override: the merchant is the owner of the server's sandbox app.
+          ],
+          application_context: {
+            return_url: returnUrl.href,
+            cancel_url: cancelUrl.href,
+            shipping_preference: "NO_SHIPPING",
+            user_action: "PAY_NOW",
           },
-        ],
-        application_context: {
-          return_url: returnUrl.href,
-          cancel_url: cancelUrl.href,
-          shipping_preference: "NO_SHIPPING",
-          user_action: "PAY_NOW",
         },
-      });
+        () => assertActiveCheckout(cart),
+      );
+      assertActiveCheckout(cart);
       cart.orderId = order.id;
       assertMatchingOrder(order, cart);
       headers.set("Set-Cookie", cookieFor(cart, secret, request));
@@ -358,6 +421,29 @@ export async function handleCheckout(
       }
     } else {
       const cart = readCart(request.headers.get("cookie"), secret);
+      assertActiveCheckout(cart);
+      if (operation === "return") {
+        if (
+          !cart.orderId ||
+          url.searchParams.get("token") !== cart.orderId ||
+          url.searchParams.get("cartVersion") !== cart.cartVersion
+        )
+          throw new CheckoutError(
+            "PayPal's return token or cart version does not match this checkout. No capture was attempted.",
+            409,
+          );
+        if (cart.returnedOrderId !== cart.orderId) {
+          cart.returnedOrderId = cart.orderId;
+          rememberCheckout(cart);
+        }
+        const destination = new URL("/", url.origin);
+        destination.searchParams.set("paypal", "return");
+        destination.searchParams.set("token", cart.orderId);
+        destination.searchParams.set("cartVersion", cart.cartVersion);
+        headers.set("Set-Cookie", cookieFor(cart, secret, request));
+        headers.set("Location", destination.href);
+        return new Response(null, { status: 302, headers });
+      }
       const orderId = operation === "status" ? url.searchParams.get("orderId") : input?.orderId;
       if (!cart.orderId || orderId !== cart.orderId)
         throw new CheckoutError(
@@ -365,6 +451,11 @@ export async function handleCheckout(
           409,
         );
       if (operation === "capture") {
+        if (cart.returnedOrderId !== cart.orderId)
+          throw new CheckoutError(
+            "PayPal must return this order to the server before capture. No capture was attempted.",
+            409,
+          );
         if (cart.cancelled)
           throw new CheckoutError(
             "Checkout was cancelled or edited. No capture was attempted.",
@@ -394,6 +485,8 @@ export async function handleCheckout(
           `/${encodeURIComponent(cart.orderId)}/capture`,
           "POST",
           cart.cartVersion,
+          undefined,
+          () => assertActiveCheckout(readCart(request.headers.get("cookie"), secret)),
         );
         const captureStatus = captured.purchase_units?.[0].payments?.captures?.[0]?.status;
         if (captureStatus && !["COMPLETED", "PENDING"].includes(captureStatus)) {

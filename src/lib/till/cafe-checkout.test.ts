@@ -123,6 +123,20 @@ function fixture(supplier: CafeSupplier) {
       assert.equal(result.ok, true, JSON.stringify(result));
       return { ...result, cookie: response.headers.get("set-cookie")!.split(";")[0] };
     },
+    async returned(created: { orderId: string; cartVersion: string; cookie: string }) {
+      const query = new URLSearchParams({
+        paypal: "return",
+        token: created.orderId,
+        cartVersion: created.cartVersion,
+      });
+      const response = await handle(
+        new Request(`${ORIGIN}/api/paypal/checkout?${query}`, {
+          headers: { cookie: created.cookie },
+        }),
+      );
+      assert.equal(response.status, 302);
+      created.cookie = response.headers.get("set-cookie")!.split(";")[0];
+    },
   };
 }
 
@@ -132,6 +146,7 @@ test("only verified Gemini lines enter existing $114 checkout; refresh remains G
     api = fixture(supplier);
   const created = await api.create(cart);
   api.approve();
+  await api.returned(created);
   const response = await api.handle(
     post(
       { action: "capture", cart, orderId: created.orderId, cartVersion: created.cartVersion },
@@ -163,6 +178,7 @@ test("stock changed after approval or during PayPal GET refuses before any captu
       api = fixture(supplier);
     const created = await api.create(cart);
     api.approve();
+    await api.returned(created);
     if (timing === "during") api.mutateDuringGet(() => supplier.setCupsInStock(true));
     else {
       supplier.setCupsInStock(true);
@@ -235,6 +251,7 @@ test("original frozen-cart edit refusal and buyer-approval requirement still run
     cart = await proposal(supplier),
     api = fixture(supplier),
     created = await api.create(cart);
+  await api.returned(created);
   const capture = (value: CheckoutCart) =>
     api.handle(
       post(

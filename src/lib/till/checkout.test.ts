@@ -116,12 +116,26 @@ function fakePayPal() {
     fail: (kind: typeof failure) => {
       failure = kind;
     },
-    async create() {
-      const response = await handle(post({ action: "create", cart: CART }));
+    async create(previousCookie?: string) {
+      const response = await handle(post({ action: "create", cart: CART }, previousCookie));
       const result = await response.json();
       assert.equal(result.ok, true, JSON.stringify(result));
       const cookie = response.headers.get("set-cookie")!.split(";")[0];
       return { result, cookie };
+    },
+    async returned(result: { orderId: string; cartVersion: string }, cookie: string) {
+      const query = new URLSearchParams({
+        paypal: "return",
+        token: result.orderId,
+        cartVersion: result.cartVersion,
+      });
+      const response = await handle(
+        new Request(`${ORIGIN}/api/paypal/checkout?${query}`, { headers: { cookie } }),
+      );
+      assert.equal(response.status, 302);
+      const returnedCookie = response.headers.get("set-cookie")!.split(";")[0];
+      assert.equal(readCart(returnedCookie, SECRET).returnedOrderId, result.orderId);
+      return returnedCookie;
     },
   };
 }
@@ -130,7 +144,7 @@ async function approvedCheckout() {
   const api = fakePayPal();
   const { result, cookie } = await api.create();
   api.order().status = "APPROVED";
-  return { api, result, cookie };
+  return { api, result, cookie: await api.returned(result, cookie) };
 }
 
 function captures(api: ReturnType<typeof fakePayPal>) {
@@ -167,8 +181,11 @@ test("cafe checkout uses exact catalog cents, one merchant, CAPTURE and app retu
 });
 
 test("create retries use the same cart request ID; buyer approval precedes capture; refresh only GETs", async () => {
-  const { api, result, cookie } = await approvedCheckout();
-  await api.create();
+  const api = fakePayPal();
+  const first = await api.create();
+  const { result, cookie: pendingCookie } = await api.create(first.cookie);
+  api.order().status = "APPROVED";
+  const cookie = await api.returned(result, pendingCookie);
   assert.equal(api.calls[0].requestId, api.calls[1].requestId);
   const body = {
     action: "capture",
@@ -196,7 +213,8 @@ test("create retries use the same cart request ID; buyer approval precedes captu
 
 test("unapproved order never captures", async () => {
   const api = fakePayPal();
-  const { result, cookie } = await api.create();
+  const { result, cookie: pendingCookie } = await api.create();
+  const cookie = await api.returned(result, pendingCookie);
   const response = await api.handle(
     post(
       { action: "capture", orderId: result.orderId, cartVersion: result.cartVersion, cart: CART },
@@ -296,7 +314,7 @@ test("cancel makes no PayPal call and prevents a later approved return from capt
     ),
   );
   assert.equal(response.status, 409);
-  assert.match((await response.json()).error, /cancelled or edited/);
+  assert.match((await response.json()).error, /cancelled.*edited/);
   assert.equal(captures(api).length, 0);
 });
 
@@ -328,8 +346,9 @@ for (const failure of ["oauth", "create", "capture"] as const) {
     const api = fakePayPal();
     let response: Response;
     if (failure === "capture") {
-      const { result, cookie } = await api.create();
+      const { result, cookie: pendingCookie } = await api.create();
       api.order().status = "APPROVED";
+      const cookie = await api.returned(result, pendingCookie);
       api.fail("capture");
       response = await api.handle(
         post(

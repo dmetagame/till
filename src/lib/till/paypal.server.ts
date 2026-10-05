@@ -61,10 +61,13 @@ export class PayPalSandboxClient {
     this.request = request;
   }
 
-  private async json(url: string, init: RequestInit): Promise<unknown> {
+  private async json(url: string, init: RequestInit, beforeSend?: () => void): Promise<unknown> {
     let response: Response;
+    const options = { ...init, signal: AbortSignal.timeout(25000) };
+    // Synchronous and outside the transport catch: guard failures keep their reason.
+    beforeSend?.();
     try {
-      response = await this.request(url, { ...init, signal: AbortSignal.timeout(25000) });
+      response = await this.request(url, options);
     } catch {
       throw new CheckoutError(
         "PayPal sandbox request timed out or could not connect. Retry this checkout to check its existing order.",
@@ -135,18 +138,28 @@ export class PayPalSandboxClient {
     }
   }
 
-  async order(path: string, method: "GET" | "POST", requestId?: string, body?: unknown) {
+  async order(
+    path: string,
+    method: "GET" | "POST",
+    requestId?: string,
+    body?: unknown,
+    beforeSend?: () => void,
+  ) {
     const token = await this.accessToken();
-    const result = (await this.json(`${BASE}/v2/checkout/orders${path}`, {
-      method,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-        Prefer: "return=representation",
-        ...(requestId ? { "PayPal-Request-Id": requestId } : {}),
+    const result = (await this.json(
+      `${BASE}/v2/checkout/orders${path}`,
+      {
+        method,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation",
+          ...(requestId ? { "PayPal-Request-Id": requestId } : {}),
+        },
+        ...(method === "POST" ? { body: JSON.stringify(body ?? {}) } : {}),
       },
-      ...(method === "POST" ? { body: JSON.stringify(body ?? {}) } : {}),
-    })) as PayPalOrder;
+      beforeSend,
+    )) as PayPalOrder;
     if (!result.id || !result.status) {
       throw new CheckoutError("PayPal did not return an order ID and status.", 502);
     }
