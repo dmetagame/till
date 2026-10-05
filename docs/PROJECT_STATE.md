@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: `2026-10-05T15:29:00Z`
+Last updated: `2026-10-05T16:48:00Z`
 Status: `CAFE CHECKOUT IMPLEMENTED — ONE BUYER APPROVAL/CAPTURE PENDING`
 Active objective: Connect the genuine cafe proposal after 500-count cups are out of stock to the existing buyer-approved PayPal sandbox checkout; verify one new approximately $114 capture and preserve the previous $160 evidence.
 
@@ -176,3 +176,5 @@ Active objective: Connect the genuine cafe proposal after 500-count cups are out
 - 2026-10-05T15:27:38Z: Cafe checkout connection implemented and verified with 18 cafe tests, 28 existing PayPal/env fixtures, typecheck, scoped lint, build, dev/production desktop/mobile live Gemini-to-$114-checkout checks and client-secret scan. Protected checkout/PayPal/credential-loader files unchanged. No new real order/capture yet; only buyer approval and independent receipt/refresh verification remain. Historical $160 evidence preserved.
 
 - 2026-10-05T15:29:00Z: Implementation 4d83ffc verified on remote main, clean tree. QA preview stopped; local dev HTTP 200 and current demo stock remains 500-count cups unavailable for the buyer test. Asked buyer to approve exactly one $114 checkout and supply new receipt IDs/amount/status plus refresh result. No real create/capture was attempted by Codex; real acceptance pending buyer response. Do not restart dev or change stock during approval.
+
+- 2026-10-05T16:48:00Z: Resumed clean main at 17bc2fc; repository/upstream/GitHub authentication verified. Buyer reported faded checkout after unmarking 500-count cups. Reproduced unchecked (in-stock) live Gemini $114 proposal with disabled checkout; checking the box marks cups unavailable, clears the old cart, and a genuine fresh Replan returns $114 with enabled checkout, explicit 500-cup stock refusal and $224/$120 premium refusal. Improved only cafe-restock.tsx guidance near the checkbox and above the disabled button, with accessible descriptions; no stock/checkout/payment guard or credential change. Typecheck, scoped ESLint, diff check and production build pass. Browser transaction guard records zero create/capture attempts. Desktop/mobile evidence: screenshots/cafe-checkbox-disabled-desktop.png and cafe-checkbox-enabled-{desktop,mobile}.png. Dev remains running, 500-count cups unavailable; do not restart or change stock during buyer approval. One new buyer-approved capture and independent receipt/refresh verification remain pending.
