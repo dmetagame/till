@@ -14,6 +14,8 @@ import {
 import { planMandate } from "@/lib/till/plan.functions";
 import { loadReceipts, saveReceipts, type Receipt } from "@/lib/till/ledger";
 import type { CheckoutCart, PayPalReceipt } from "@/lib/till/checkout";
+import { isCafeMandate } from "@/lib/till/cafe";
+import { CafeRestock } from "./cafe-restock";
 
 const PENDING_CHECKOUT = "till.paypal.pending.v1";
 type PendingCheckout = { cart: CheckoutCart; notes: Receipt };
@@ -67,7 +69,7 @@ function receiptNotes(payment: PayPalReceipt, notes?: Receipt): Receipt {
   };
 }
 
-type Phase = "brief" | "planning" | "review" | "pay" | "payment" | "done" | "ledger";
+type Phase = "brief" | "planning" | "review" | "pay" | "payment" | "done" | "ledger" | "cafe";
 
 const STEPS = [
   "Reading the brief",
@@ -447,10 +449,18 @@ export function TillApp() {
           brief={brief}
           budget={budgetPreview}
           onChange={setBrief}
-          onStart={() => void beforeEdit(() => void begin(brief, null))}
-          onPreset={(id, text) => void beforeEdit(() => void begin(text, id))}
+          onStart={() => {
+            if (isCafeMandate(brief)) setPhase("cafe");
+            else void beforeEdit(() => void begin(brief, null));
+          }}
+          onPreset={(id, text) => {
+            if (id === "cafe") { setBrief(text); setPhase("cafe"); }
+            else void beforeEdit(() => void begin(text, id));
+          }}
         />
       ) : null}
+
+      {phase === "cafe" ? <CafeRestock brief={brief} onBack={() => setPhase("brief")} /> : null}
 
       {phase === "planning" ? <Planning brief={brief} step={step} /> : null}
 

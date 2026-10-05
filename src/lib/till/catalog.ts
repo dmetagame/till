@@ -117,7 +117,7 @@ export const CATALOG: Product[] = [
   {
     id: "beans",
     name: "House espresso, 5 lb",
-    merchant: "Kiln Coffee",
+    merchant: "Counter Supply",
     category: "cafe",
     price: 7200,
     lead: "Tomorrow",
@@ -132,6 +132,26 @@ export const CATALOG: Product[] = [
     price: 6400,
     lead: "2 days",
     blurb: "Compostable, lids included.",
+    tags: ["cafe", "restock", "cups", "coffee"],
+  },
+  {
+    id: "cups-small",
+    name: "12 oz cups, 100",
+    merchant: "Counter Supply",
+    category: "cafe",
+    price: 1800,
+    lead: "2 days",
+    blurb: "A smaller compostable pack, lids included.",
+    tags: ["cafe", "restock", "cups", "coffee"],
+  },
+  {
+    id: "cups-premium",
+    name: "Premium cup case, 1,000",
+    merchant: "Counter Supply",
+    category: "cafe",
+    price: 12800,
+    lead: "2 days",
+    blurb: "A premium case that exceeds the $120 cafe mandate.",
     tags: ["cafe", "restock", "cups", "coffee"],
   },
   {
@@ -337,8 +357,8 @@ const PRESETS: Preset[] = [
   {
     id: "cafe",
     label: "Cafe restock",
-    hint: "Milk, beans, cups — two vendors",
-    brief: "Restock a cafe: oat milk, beans, and cups, under $220, from two vendors max.",
+    hint: "Counter Supply · $120 · live stock replan",
+    brief: "Restock a cafe: oat milk, beans, and cups, under $120, Counter Supply only.",
     plan: {
       title: "Two vendors, not three",
       summary:

@@ -1,6 +1,6 @@
 # Till
 
-Till proposes a cart inside a spending mandate. This slice replaces simulated checkout with a real **PayPal sandbox** order: create, redirect for buyer approval, server recheck, then capture. The agent cannot approve, change the payee, raise the budget, or capture.
+Till proposes a cart inside a spending mandate. The completed **PayPal sandbox** slice creates an order, redirects for buyer approval, rechecks the frozen cart on the server, then captures. The agent cannot approve, change the payee, raise the budget, or capture. The cafe sample now opens a separate stock-replanning demo, with no payment action.
 
 **PayPal sandbox · no real money.** All purchases go to the one sandbox business merchant that owns the configured REST app. Catalog vendor names are fictional labels, never PayPal payees. The existing mandate UI, sample carts, visual design and Grok planning remain in place.
 
@@ -26,7 +26,7 @@ Use Node 22.18+ and npm. No additional payment SDK or application dependency is 
    PAYPAL_CLIENT_SECRET=your_sandbox_app_secret
    ```
 
-   Start (or restart) the local server with `npm run dev`. The startup wrapper loads only these two root-file variables into the server process. The PayPal client reads them through `process.env`; neither uses a `VITE_` prefix or enters the browser bundle. Existing process environment variables take precedence. If you prefer process environment variables instead of a file, these Bash prompts avoid shell history:
+   Start (or restart) the local server with `npm run dev`. The startup wrapper loads these PayPal variables and the optional cafe `GEMINI_API_KEY` into the server process. The PayPal client reads its two values through `process.env`; none uses a `VITE_` prefix or enters the browser bundle. Existing process environment variables take precedence. If you prefer process environment variables instead of a file, these Bash prompts avoid shell history:
 
    ```bash
    read -r -p 'Sandbox Client ID: ' PAYPAL_CLIENT_ID
@@ -35,17 +35,30 @@ Use Node 22.18+ and npm. No additional payment SDK or application dependency is 
    npm run dev
    ```
 
-   Open **http://localhost:8080**. Use one stable app origin throughout checkout. Never commit credentials or share the business app secret with the buyer. Grok's optional `XAI_API_KEY` is not needed for the cafe sample. The sandbox personal buyer login is separate from these app credentials.
+   Open **http://localhost:8080**. Use one stable app origin throughout checkout. Never commit credentials or share the business app secret with the buyer. `GEMINI_API_KEY` is required for the cafe replanning demo; the non-cafe samples and payment slice do not need it. The sandbox personal buyer login is separate from these app credentials.
 
 If PayPal reports **Funds not available**, configure a funded test buyer in **Testing Tools → Sandbox Accounts → Create account → Create Custom Account**. Choose **Personal**, **United States**, and a **USD 1,000 test balance**. Log out of the previous buyer on PayPal sandbox, then retry from Till using this buyer. Keep the merchant app credentials unchanged. If an existing account's balance cannot be edited, **Duplicate Account** supports editing the cloned balance. See [PayPal's sandbox account guide](https://developer.paypal.com/sandbox-testing/accounts). No real deposit is needed.
 
 If PayPal shows a credit/debit-card form, select **Log In** and use the **personal sandbox buyer**, rather than guest card checkout. If that buyer asks for a funding card after sign-in, use [PayPal's sandbox test-card generator](https://developer.paypal.com/sandbox-testing/card-testing) and add the generated test card to the buyer **only on www.sandbox.paypal.com**. Keep all card details within PayPal; Till and its agent never receive them. Then approve the order and return to Till.
 
-If the checkout URL contains `/checkoutweb/signup`, you are creating an account during checkout. Return to **Log In** with the personal buyer already created in Developer Dashboard; its generated credentials are separate from your regular PayPal login and the app's Client ID/Secret. Once signed in, start a fresh Cafe checkout in Till. A frozen checkout expires after three hours, so an old approval URL cannot complete the app's capture checks. Keep buyer credentials, phone numbers and verification codes out of Till and chat.
+If the checkout URL contains `/checkoutweb/signup`, you are creating an account during checkout. Return to **Log In** with the personal buyer already created in Developer Dashboard; its generated credentials are separate from your regular PayPal login and the app's Client ID/Secret. Once signed in, start a fresh checkout in Till. A frozen checkout expires after three hours, so an old approval URL cannot complete the app's capture checks. Keep buyer credentials, phone numbers and verification codes out of Till and chat.
+
+## Cafe restock replan
+
+Add `GEMINI_API_KEY` privately to the gitignored root `.env`, without changing the existing PayPal values, and restart `npm run dev`. The loader reads it through the server environment only. The cafe server uses Google’s REST `generateContent` endpoint with `gemini-3.8-flash`, a current stable Flash model with a documented free tier ([model](https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash), [pricing](https://ai.google.dev/gemini-api/docs/pricing)). The key goes in the request header, never the URL. Each **Write the cart/Replan** click makes one capped Gemini Flash request; there is no background replanning or model fallback.
+
+1. Click **Cafe restock**, then **Write the cart**. The server supplies the current Counter Supply demo catalog to Gemini Flash, with only product IDs, integer-cent prices, merchant and stock, plus the mandate constraints.
+2. The original oat milk ($24), beans ($72) and 500-count cups ($64) total **$160**. With the chosen **$120** mandate, those cups are budget-refused from the start. The smaller 100-count pack costs **$18**, allowing all three needs for **$114**. The premium case costs **$128** ($224 with milk/beans) and is visibly refused for the dollar cap.
+3. Under the labeled **Demo supplier** control, mark 500-count cups out of stock. The previous proposal clears. Click **Replan**: the 500-count pack is now refused for current stock, premium cups remain refused for budget, and a fresh compliant smaller-pack proposal can appear. If the model cannot propose a complete restock that passes validation, the server refuses the whole cart.
+4. Remove any proposed line to recalculate the displayed total. Adding or replacing items requires **Replan**.
+
+Stock is owned by the server and shared across this demo process. Every cafe catalog product defaults to in stock; only the 500-count cups have a demo mutation control. Restarting the process resets stock. Prices and merchants come from the catalog, not the browser or model. The server drops unknown/foreign/out-of-stock/over-cap lines, recalculates totals, and rejects incomplete restocks. A stock revision change during the model call fails safely and requires another replan.
+
+Missing `GEMINI_API_KEY`, provider failures or malformed output show **“Could not replan. Retry.”** No canned cafe cart appears. The cafe screen never calls the payment endpoint, edits checkout cookies, changes the payee or creates/captures a PayPal order. Dinner, repair, gift and travel behavior remain as before.
 
 ## Run the sandbox purchase
 
-1. Click **Cafe restock**. Its unchanged sample cart has beans ($72), oat milk ($24), and cups ($64): **$160**, below its **$220** cap. Its two fictional catalog vendors do not create two PayPal payees.
+1. Click **Sunday dinner**. The existing sample cart costs **$61**, below its **$90** cap. Its fictional catalog vendors do not create multiple PayPal payees. Cafe restock is now a separate proposal demo without checkout; the completed $160 cafe payment remains historical verification evidence below.
 2. Optionally remove items, then click **Review PayPal checkout**.
 3. Review the amount and acknowledge the cart. Click **Continue to PayPal**.
 4. Till's server uses OAuth client credentials, creates one `CAPTURE` order with USD item amounts from the catalog, and sends you to PayPal's returned `payer-action` link (otherwise `approve`). Log in as the **personal sandbox buyer** and approve.
@@ -96,6 +109,7 @@ JS
 
 ```bash
 npm run test:paypal
+npm run test:cafe
 npm test
 npm run typecheck
 npm run build
@@ -107,6 +121,6 @@ Real sandbox acceptance was verified on October 5, 2026: cafe order `8J567318K92
 
 There is no database. A signed, HttpOnly, SameSite cookie retains **one active checkout per browser**, with a three-hour lifetime. It survives server restarts with unchanged credentials. New checkout replaces that cookie; older local ledger entries and missing/expired cookies cannot be used to authorize capture or independently verify an old receipt in the app. Keep cookies and this tab's session storage enabled. The independent PayPal GET above remains the way to inspect older orders. The same secret signs the frozen state server-side; changing credentials invalidates it.
 
-No stock replanning, AI changes, second PayPal merchant, invoices, payouts, authorization/void flow, database, roles, or sponsor integration is included.
+Cafe stock replanning is isolated from the completed payment slice. No second PayPal merchant, invoices, payouts, authorization/void flow, database, roles or sponsor integration is included.
 
 Implementation: `src/lib/till/paypal.server.ts`, `src/lib/till/checkout.server.ts`, `src/routes/api/paypal/checkout.ts`, and the existing `src/components/till/till-app.tsx`.

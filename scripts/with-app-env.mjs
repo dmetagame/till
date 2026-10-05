@@ -79,6 +79,17 @@ export function readPayPalEnv(root) {
   return env;
 }
 
+/** Cafe model key stays in the server process; never a VITE_ variable. */
+export function readCafeEnv(root) {
+  try {
+    const parsed = parseEnv(readFileSync(join(root, ".env"), "utf8"));
+    return typeof parsed.GEMINI_API_KEY === "string" ? { GEMINI_API_KEY: parsed.GEMINI_API_KEY } : {};
+  } catch (error) {
+    if (error?.code === "ENOENT") return {};
+    throw new Error("Could not read the root .env file.");
+  }
+}
+
 /** File values under the process environment: an explicit override wins. */
 export function mergeAppEnv(appEnv, processEnv) {
   return { ...appEnv, ...processEnv };
@@ -130,7 +141,7 @@ function main(argv) {
     process.exit(2);
   }
   const root = projectRoot();
-  const env = mergeAppEnv({ ...readAppEnv(root), ...readPayPalEnv(root) }, process.env);
+  const env = mergeAppEnv({ ...readAppEnv(root), ...readPayPalEnv(root), ...readCafeEnv(root) }, process.env);
   const child = spawn(command, args, { stdio: "inherit", env });
   // The dev server is long-running and is stopped by signalling this wrapper.
   for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"]) {

@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: `2026-10-05T12:33:30Z`
+Last updated: `2026-10-05T13:01:00Z`
 Status: `IN PROGRESS — CAFE REPLAN; PAYPAL SLICE FROZEN`
 Active objective: Build server-validated cafe stock replanning for the labeled demo supplier Counter Supply; preserve the completed PayPal slice and its evidence.
 
@@ -34,16 +34,31 @@ Active objective: Build server-validated cafe stock replanning for the labeled d
 - Buyer alone approves on PayPal; agent cannot capture. Server checks frozen cart before capture.
 - Current task authorizes cafe AI replanning only. No database, roles, sponsor integrations, new application dependencies, tax/shipping math or redesign. Checkout/capture/cookie code and PayPal credentials are frozen; no new PayPal order or capture during this task. Preserve order `8J567318K9210721P` and capture `87D25249NG9449623` as historical evidence.
 - User narrowed delivery to this payment slice and setup documentation; no video/license deliverable.
-- User authorized local testing with a gitignored root `.env`, overriding the template's generic prohibition. Load only the two PAYPAL variables into the server process; the user approves using their separate personal sandbox buyer in their browser.
+- User authorized local testing with a gitignored root `.env`, overriding the template's generic prohibition. The new cafe server reads GEMINI_API_KEY through process.env; root-file loading adds only that model key while retaining the existing PayPal loader unchanged. No secret output or browser prefixes. Do not create/capture another PayPal order.
 - Repository Grok instructions describe a different `/workspace` environment; use the explicitly authorized clone here. `.grok` skills/references are absent from the clone. Preserve existing startup/platform files.
 
 ## Current Context
 
 - TanStack Start app; checkout simulation is in `src/components/till/till-app.tsx`.
-- Prices are integer cents in `src/lib/till/catalog.ts`; cafe sample totals $160 under $220.
+- Prices are integer cents in `src/lib/till/catalog.ts`. Historical cafe PayPal evidence remains $160 under its original $220 mandate; the new cafe replan uses $120 and a $114 smaller-pack cart. Original $24/$72/$64 prices and IDs stay unchanged.
 - Existing general planning and non-cafe demos remain unchanged. Cafe replanning gets its own server functions/UI and no PayPal action. `src/lib/till/ledger.ts` remains unchanged and localStorage is not payment evidence.
 - Decision: signed HttpOnly checkout cookie retains frozen state without a database; PayPal GET verifies payment records. Use direct fetch to sandbox only.
 - One active checkout per browser, three-hour cookie lifetime. A replaced or expired cookie cannot verify an older receipt inside the app; independent PayPal GET remains available. Local storage is never payment evidence.
+
+## Cafe Replan Checkpoint
+
+- Preflight scope checkpoint `a3eab934254a0428fa234c2997e5a47df71e73e1` pushed and independently matched against remote main before the implementation checkpoint.
+- `src/lib/till/catalog.ts`: beans relabeled Counter Supply, $18/100-count small cups and $128 premium case added; cafe sample metadata now $120. The standalone cafe screen bypasses the legacy canned preset used by payment fixtures. Non-cafe catalog/products, dinner/repair/gift presets, travel fallback and general planner are unchanged against `cbea3b1`.
+- `src/lib/till/cafe.server.ts`: server-owned default-true stock for cafe products, one labeled supplier snapshot, 500-count stock mutation, live model proposal, strict price/merchant/stock/quantity/cap checks, whole-cart refusal if the complete restock cannot be validated, and rejection reasons from catalog facts. Stock revision changes during inference fail safely. Inventory is process-local/shared; restart resets it.
+- `src/lib/till/cafe.functions.ts`, `cafe.ts`, `src/components/till/cafe-restock.tsx`: stock control, fresh Replan, remove/recalculate, and retry-only error state. No payment endpoint, cookie, ledger or payee action in this flow. Existing checkout/capture implementation untouched.
+- Initial xAI implementation returned genuine HTTP 403: the key team has no API credits/licenses. User declined buying credits and explicitly switched the cafe flow to Gemini free tier. No further xAI call is authorized for the cafe task. No canned or intercepted cart is presented as live AI.
+- Cafe now reads GEMINI_API_KEY server-only and calls `gemini-3.8-flash:generateContent` via fetch with header authentication, capped output and structured JSON. Official Google model/pricing/REST pages identify this current stable Flash model and a free tier: https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash ; https://ai.google.dev/gemini-api/docs/pricing ; https://ai.google.dev/gemini-api/docs/generate-content/structured-output . General Grok planner remains unchanged.
+- `scripts/with-app-env.mjs` adds a separate GEMINI-only cafe loader; PayPal reader logic and values are preserved. Before restarting the dev server for the initial xAI key, a boolean comparison proved root PayPal values matched the running process. The agent has not edited `.env`.
+- `npm run test:cafe`: 11 policy/provider-fixture tests + 2 server-env tests pass after the Gemini change. Typecheck, scoped ESLint, production build and diff check pass. Existing PayPal 25 policy + 3 env fixture tests passed with the cafe catalog change, without genuine payment calls.
+- Desktop/mobile home smoke checks on dev and the first built checkpoint pass at 1280×800/390×844: no overflow, console errors or page errors; built text matches dev. Four screenshots visually inspected. Existing generic OG-placeholder note is preserved; this scoped replan does not redesign branding. Gemini source changed afterward, so final built-browser check remains due.
+- Genuine dev-browser missing-model/provider-failure path displays “Could not replan. Retry.”, focuses the alert and shows no canned cart. Mobile demo supplier switch marks 500-count cups out of stock, clears the proposal and requires Replan. Browser request monitor records zero PayPal calls and no payment action. Screenshots `screenshots/cafe-dev-provider-rejected-desktop.png`, `cafe-dev-provider-rejected-mobile.png`, `cafe-dev-stock-change-mobile.png`; first two visually inspected.
+- Built browser asset scan before Gemini change found no actual PayPal/model secret values or cafe server markers (boolean checks only). Repeat for final Gemini build once key is available.
+- Gemini key readiness is pending the user. Successful live-model proposal/replan and remove-total UI acceptance remain unverified; fixtures are not evidence of genuine model success.
 
 ## Work Completed
 
@@ -95,9 +110,9 @@ Active objective: Build server-validated cafe stock replanning for the labeled d
 
 ## Next Actions
 
-1. Implement the isolated cafe catalog/stock controls, Grok proposal and strict server filtering, then verify policy tests and desktop/mobile UI without any order/capture call.
+1. User adds GEMINI_API_KEY privately to root .env and replies ready. Restart via npm run dev; verify the actual Gemini Flash initial proposal, stock-change Replan, premium refusal and smaller-pack cart, plus removal/recalculation, on desktop/mobile without any PayPal order/capture.
 2. User selected the $120 demo after the arithmetic conflict was identified: the initial plan must already use smaller cups ($18 proposed, $114 total). The $64 pack is budget-refused initially and stock-refused after the change; premium case must visibly break the cap. Do not change original $24/$72/$64 prices.
-3. XAI_API_KEY is absent from root .env and current process (presence-only check); user was asked to configure it privately for genuine model/browser verification. Missing key/model failure must show “Could not replan. Retry.” No canned fallback.
+3. No further cafe xAI calls: user rejected its paid-credit requirement. Missing GEMINI_API_KEY or failed call shows “Could not replan. Retry.” No canned fallback. Final Gemini production/browser/secret-boundary checks are due after key readiness.
 4. Record verified changes in scoped commits/pushes. Frozen PayPal files/credentials and non-cafe behavior stay untouched.
 
 ## Change Log
@@ -124,3 +139,5 @@ Active objective: Build server-validated cafe stock replanning for the labeled d
 - 2026-10-05T12:25:33Z: Acceptance record and README verification summary committed in `8dc6760` and independently verified on remote main; clean tree. Completed handoff: sandbox slice works with buyer approval and one capture, refreshed receipt retains matching IDs, and setup/error/cancel/refusal evidence is documented. No secrets committed and no additional charge attempted during verification.
 
 - 2026-10-05T12:33:30Z: New cafe replan scope authorized; reconciled clean main at `cbea3b18b8d763422937987575f4a0377d4bd870` with remote and GitHub auth. Previous payment acceptance remains verified. User chose fixed $120 after original cart total $160 conflict; plan $18 smaller cups and $128 premium case. Standalone proposal UI avoids checkout/cookie paths. Missing XAI_API_KEY reported; server-only loading will be added without changing PayPal variables. Grok-specific skills/references are absent; preserve existing visual system and use official xAI REST documentation.
+
+- 2026-10-05T13:01:00Z: Cafe stock/planner/UI implemented; 13 cafe tests, typecheck, lint and build pass. Real xAI request refused with HTTP 403 (no credits/licenses); user switched to Gemini free tier without buying credits. Replaced only cafe provider/loader/badge with Gemini Flash REST and structured output; Gemini live verification awaits private key readiness. Confirmed non-cafe behavior and frozen payment files unchanged, and browser stock/error paths make zero PayPal calls. Historical verified order/capture retained.
