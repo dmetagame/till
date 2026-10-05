@@ -2,9 +2,9 @@
 
 Current status: The live cafe path is the **$180 story** ($160 in stock, $114 recovered). Every older checkpoint below is history, not current instructions. Audit guard fixes are verified with network-free fixtures; earlier live payments remain historical, with no new transaction or publication in this session.
 
-Last updated: `2026-10-05T21:14:06Z`
+Last updated: `2026-10-05T21:15:40Z`
 Status: `AUDIT FIXES COMPLETE — THREE REPRODUCED FAILURES NOW FAIL CLOSED`
-Active objective: Completed — server return token/version gating, signed-snapshot revocation, post-OAuth stock checking, and corrected current documentation. Preserve historical payment evidence and the unchanged $180/Gemini policy. Only a scoped private Git checkpoint remains; no further feature, live transaction or publication work is authorized.
+Active objective: Completed — server return token/version gating, signed-snapshot revocation, post-OAuth stock checking, and corrected current documentation. Preserve historical payment evidence and the unchanged $180/Gemini policy. Implementation checkpoint `509d937c4b6f197176753c8397f924cd234ebbe8` is pushed and independently verified on private remote main; stop with no further feature, live transaction or publication work.
 
 ## Audit Fix Verification — Current
 
@@ -16,11 +16,11 @@ Active objective: Completed — server return token/version gating, signed-snaps
 - Verification: `npm run test:paypal` succeeds (25 payment + 3 loader tests); `npm run test:cafe` succeeds (16 existing cafe/checkout + 3 reproduced audit regressions + 2 loader tests). `npm run typecheck`, scoped ESLint on the six modified TypeScript files, and `git diff --check` succeed. No new live payment acceptance is claimed.
 - `README.md` and this handoff label the $180 live path and old $120 history, complete-cart payment rule, server-only three-variable loader, historical catalog/ledger changes, return/revocation/restart limits and check → token refresh → check again → capture order. Obsolete latest pointers are historical labels. All three order/capture pairs and their amounts remain in both documents, including 7GH61487DG719402X / 1DR45640TU8797836 as the old $120 mandate.
 - Scope verified byte-for-byte against the starting commit: catalog/prices, cafe mandate/policy/model prompt, general planner, ledger and environment loader unchanged in this task. Configured credential values absent from tracked source and the new fixture (presence-only check); `.env`/`.env.*` remain ignored and untouched. Tests use injected HTTP, with no actual PayPal/Gemini calls, new orders/captures or publication.
-- Next action: commit only the nine audit-scope files, push the private branch checkpoint when permitted, verify HEAD/upstream/remote and record the checkpoint; then stop.
+- Private implementation checkpoint: `509d937c4b6f197176753c8397f924cd234ebbe8`, pushed to `origin/main`. Local HEAD, upstream and independent `git ls-remote origin refs/heads/main` matched at 21:15 UTC with a clean worktree; GitHub reports `isPrivate: true`. This documentation-only handoff may follow that verified implementation checkpoint. Next action: stop; no further live payment or publication work.
 
 ## Workspace and Historical Session Records
 
-- Audit-fix workspace: `/home/rouma/till`, `main` → `origin/main`, started from `3d504fcc42bee26f3c867f70ecc9602ca643bee8`; root, clean tree, origin, GitHub auth and independent remote main verified before edits. Current changes are local until a scoped checkpoint is pushed and verified. The entries below retain earlier session evidence.
+- Audit-fix workspace: `/home/rouma/till`, `main` → `origin/main`, started from `3d504fcc42bee26f3c867f70ecc9602ca643bee8`; root, clean tree, origin, GitHub auth and independent remote main verified before edits. Audit implementation checkpoint `509d937c4b6f197176753c8397f924cd234ebbe8` is pushed and verified against HEAD, upstream and independent remote main; worktree was clean before this documentation-only handoff. The entries below retain earlier session evidence.
 
 - Repository: https://github.com/dmetagame/till (private at clone time)
 - Worktree: `/home/rouma/till`
@@ -147,7 +147,7 @@ Active objective: Completed — server return token/version gating, signed-snaps
 
 - Preserve completed historical live acceptance: revised-story order `2TB52773F8180315G` / capture `3H158002EX0446249` (USD114), plus earlier `8J567318K9210721P` and `7GH61487DG719402X` written evidence unchanged.
 - No real order, capture, stock mutation, credential change or publication is authorized. Complete the three audit regressions and documentation checks; the current task narrowly authorizes the checkout/client guard changes described above.
-- Audit fixtures and documentation are complete; stop after the scoped checkpoint is verified. Future submission/demo or live payment work requires a separate task; earlier live results remain historical.
+- Audit fixtures, documentation and the private implementation checkpoint are verified; stop. Future submission/demo or live payment work requires a separate task; earlier live results remain historical.
 
 ## Historical Revised $180 Live Acceptance Checkpoint
 
@@ -229,3 +229,5 @@ Active objective: Completed — server return token/version gating, signed-snaps
 - 2026-10-05T17:35:18Z: Final acceptance checkpoint 20c8f4a8b12649bd3e79df59ce0b8c0ecba98e11 pushed and independently verified: HEAD, origin/main and remote main match, clean tree. Revised $180 stock-out story is complete with real $114 capture and unchanged receipt/sole capture after refresh. Earlier written evidence and protected PayPal files preserved. Only documentation changed in this verification session; no credentials, additional transaction or disposable task source files. This documentation-only handoff records the verified checkpoint.
 
 - 2026-10-05T21:14:06Z: Audit regressions reproduced before edits (3/3 fail), then fixed and re-run (3/3 fail closed with HTTP409 and zero mocked captures). Existing focused tests, typecheck, scoped lint, diff/hygiene checks succeed. Server return, active-generation revocation and dispatch-time post-OAuth stock guards implemented; README/state corrected without deleting earlier results. Prices, $180 cup policy, Gemini prompt, planner, ledger and credentials unchanged in this task. No real PayPal/Gemini request or publication; private checkpoint pending.
+
+- 2026-10-05T21:15:40Z: Scoped implementation 509d937c4b6f197176753c8397f924cd234ebbe8 pushed to private origin/main and independently verified against local HEAD/upstream/remote main with a clean tree. All three pre-fix failing audit fixtures now refuse with zero mocked captures; current docs and historical evidence are reconciled. GitHub still reports isPrivate:true. No real PayPal/Gemini call, credential change or publication. This documentation-only handoff records the verified implementation checkpoint; task complete.
