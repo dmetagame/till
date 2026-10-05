@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: `2026-10-05T16:57:02Z`
+Last updated: `2026-10-05T16:57:25Z`
 Status: `CAFE REPLAN → PAYPAL SANDBOX ACCEPTANCE COMPLETE`
 Active objective: Completed — genuine Gemini cafe replan after the 500-count cups became unavailable paid through existing sandbox checkout for $114; one capture and receipt refresh independently verified. Preserve both new $114 and earlier $160 evidence; no further transaction needed.
 
@@ -185,3 +185,5 @@ Active objective: Completed — genuine Gemini cafe replan after the 500-count c
 - 2026-10-05T16:55:58Z: Capture evidence checkpoint 7b9778000987b7c50d0577f4a598e2e51a72a7b4 pushed; local HEAD, origin/main and independent remote main match with clean tree. Only README.md and docs/PROJECT_STATE.md changed; diff check passes, existing application checks unchanged. Real $114 capture verified, earlier $160 evidence preserved. Buyer receipt refresh response pending; no additional transaction needed. Documentation-only handoff follows this verified checkpoint.
 
 - 2026-10-05T16:57:02Z: Buyer confirms refreshed receipt retains new order/capture IDs, COMPLETED statuses and $114. Post-refresh independent GET at 2026-10-05T16:56:28.609Z again asserted order 7GH61487DG719402X COMPLETED USD114, exact beans1×72/cups-small1×18/oat1×24, exactly one capture 1DR45640TU8797836 COMPLETED USD114. All assertions passed; GET only, no create/capture attempt. Acceptance complete for one buyer-approved replanned capture and unchanged receipt refresh; earlier $160 evidence preserved. README/state updated, diff check passes; application code and credentials unchanged. Previous evidence checkpoint a444d798efc87c0ebb05588596464aeda1701a20 independently matched remote main before this final documentation update.
+
+- 2026-10-05T16:57:25Z: Final acceptance checkpoint 966dfbca26d6ef23adb0e2174c1210e9128123ec pushed and independently verified: HEAD, origin/main and remote main match; clean tree. Scoped outcome complete: actual $114 sandbox capture, buyer-confirmed refreshed receipt, independent post-refresh GET with one unchanged capture. Only documentation changed in this session; no further transaction or credential action. This documentation-only handoff records the verified acceptance checkpoint.
