@@ -1,8 +1,8 @@
 # Project State
 
-Last updated: `2026-10-05T17:33:09Z`
-Status: `CAFE $180 STORY CAPTURE VERIFIED — RECEIPT REFRESH PENDING`
-Active objective: Revised $180 story implemented and live $160 → stock-out → $114 sequence verified. Buyer-approved recovered order and sole $114 capture independently verified; only buyer receipt refresh/post-refresh GET remains. Earlier historical order evidence is unchanged.
+Last updated: `2026-10-05T17:34:54Z`
+Status: `CAFE $180 STOCK-OUT STORY — ACCEPTANCE COMPLETE`
+Active objective: Completed — server-enforced $160 in-stock cart → stock-out → $114 recovered cart under $180, one buyer-approved sandbox capture, and unchanged receipt refresh independently verified. Preserve all earlier historical evidence; no further transaction needed.
 
 ## Workspace
 
@@ -129,9 +129,9 @@ Active objective: Revised $180 story implemented and live $160 → stock-out →
 
 ## Next Actions
 
-1. Buyer refreshes the completed receipt in the same tab and confirms order `2TB52773F8180315G`, capture `3H158002EX0446249`, both COMPLETED, USD114 remain unchanged. Question sent; response pending.
-2. After confirmation, independently GET the same order again and assert one unchanged capture and exact beans1×72/cups-small1×18/oat1×24, then mark scoped acceptance complete. No new order/capture or stock mutation needed.
-3. Preserve earlier `8J567318K9210721P` and `7GH61487DG719402X` written evidence unchanged. Leave app code, server process and credentials untouched.
+- Scoped acceptance complete. Preserve revised-story order `2TB52773F8180315G` / capture `3H158002EX0446249` (USD114), plus earlier `8J567318K9210721P` and `7GH61487DG719402X` written evidence unchanged.
+- No new order, capture, stock mutation, credential change or app-code change is needed. Leave local dev running. Original PayPal checkout/capture files remain protected and unchanged.
+- Future submission/demo work requires a separate task. Evidence and judge path are documented in README; focused fixture, live Gemini, buyer-approved capture and refresh checks are complete.
 
 ## Revised $180 Story Checkpoint
 
@@ -140,7 +140,7 @@ Active objective: Revised $180 story implemented and live $160 → stock-out →
 - CAFE_MAX_BUDGET 18000 and cafe brief/sample/on-screen copy use $180; no catalog product or price added/changed. Strict server validation accepts exactly oat1/beans1/cups1 when 500-count cups are available, or oat1/beans1/cups-small1 only after their stock-out. Wrong cups, second pack, duplicates, missing items or invalid model output produce the exact retry error with no payable/canned replacement.
 - The cafe checkout wrapper follows the new cap and complete-cart policy; initial $160 proposal is payable, partial removals cannot be paid. Original checkout.server.ts, paypal.server.ts, planning functions and environment loader compare unchanged against fbadfc4. README historical order evidence paragraphs compare byte-for-byte unchanged against fbadfc4.
 - npm run test:cafe: 16 cafe/checkout fixtures + 2 environment tests pass. Fake Gemini responses cover both stock states and invalid cup/quantity/complete-cart choices. Fake checkout tests cover stock changed after approval/during GET and changed then restored: all refuse before capture. npm run test:paypal: 25 payment + 3 loader fixtures pass. No real payment calls in tests. Typecheck, scoped ESLint, production build and diff check pass.
-- One genuine dev Gemini sequence: initial all-five-in-stock $160 with 500-count cups, small-pack preference refusal and premium $224/$180 refusal; only 500-count cups toggled unavailable clears the proposal; fresh live Replan $114 with small pack, original-cup stock refusal and premium cap refusal. Existing One-time checkout opened for $114 under $180. Desktop/mobile screenshots visually inspected, no overflow/page errors. QA fetch guard recorded zero create/capture attempts. QA created no order; buyer now supplied receipt IDs independently confirmed by PayPal GET as order 2TB52773F8180315G and sole capture 3H158002EX0446249, both COMPLETED USD114 with exact recovered items. Receipt refresh confirmation remains pending.
+- One genuine dev Gemini sequence: initial all-five-in-stock $160 with 500-count cups, small-pack preference refusal and premium $224/$180 refusal; only 500-count cups toggled unavailable clears the proposal; fresh live Replan $114 with small pack, original-cup stock refusal and premium cap refusal. Existing One-time checkout opened for $114 under $180. Desktop/mobile screenshots visually inspected, no overflow/page errors. QA fetch guard recorded zero create/capture attempts. QA created no order; buyer now supplied receipt IDs independently confirmed by PayPal GET as order 2TB52773F8180315G and sole capture 3H158002EX0446249, both COMPLETED USD114 with exact recovered items. Buyer confirmed unchanged receipt after refresh; independent post-refresh GET confirms the same sole capture, USD114 and exact recovered items. Acceptance complete.
 - Built desktop/mobile home and cafe catalog render checks pass without extra model/payment calls. Configured actual credentials and cafe server/signing markers absent from browser assets (boolean-only scan); .env stays ignored and untouched. Local dev restarted before this sequence to install the new class validator and reset initial stock; now leave it running with 500-count cups unavailable. Evidence under screenshots/cafe-180-*; QA preview/browser cleanup follows before handoff.
 
 ## Change Log
@@ -207,3 +207,5 @@ Active objective: Revised $180 story implemented and live $160 → stock-out →
 - 2026-10-05T17:32:36Z: Resumed clean main at 3408011408bac95dfe6f4cc5731cc78e5d53c21b; repository/worktree/upstream/origin/GitHub authentication reconfirmed. Buyer supplied revised-story order/capture IDs. Independent sandbox GET at 2026-10-05T17:31:34.988Z through existing server-only client/environment wrapper asserted order 2TB52773F8180315G COMPLETED, intent CAPTURE, one USD114 purchase unit/item_total, exactly beans1×72/cups-small1×18/oat1×24, and exactly one capture 3H158002EX0446249 COMPLETED USD114. All assertions pass. OAuth + GET only; no new create/capture, stock mutation, credentials or app-code change. Protected checkout.server.ts/paypal.server.ts compare unchanged against fbadfc4, .env ignored. README/state append this actual API evidence without editing earlier order evidence. Buyer refresh requested; post-refresh GET remains. Documentation-only diff check applies; existing application verification remains valid.
 
 - 2026-10-05T17:33:09Z: Revised-story capture evidence checkpoint 2b9b211dd2cfe68b0095bbd8545e273a4ea51f90 pushed and independently verified: HEAD, origin/main and remote main match with clean tree. Only README.md and docs/PROJECT_STATE.md changed; diff check passes. Real $114 recovered capture is verified, earlier written evidence preserved. Buyer receipt-refresh answer pending; no further payment or application change needed. Documentation-only handoff follows this verified checkpoint.
+
+- 2026-10-05T17:34:54Z: Resumed clean main 43da0f3ad9f52ad03b94258b516f68259ec52b35; worktree/origin/upstream/GitHub authentication verified. Buyer confirms receipt remains unchanged after refresh. Independent post-refresh sandbox GET at 2026-10-05T17:34:16.963Z asserts order 2TB52773F8180315G COMPLETED, intent CAPTURE, one USD114 unit/item_total, exact beans1×72/cups-small1×18/oat1×24, exactly one capture 3H158002EX0446249 COMPLETED USD114. All assertions pass. OAuth + GET only; no extra create/capture, stock or credential change. Revised $180 story acceptance complete; README/state updated, earlier README order evidence checked byte-for-byte unchanged. Documentation-only diff check applies; existing application tests/build/browser evidence remains valid.
