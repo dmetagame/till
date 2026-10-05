@@ -177,7 +177,7 @@ export async function proposeCafeRestock(
   if (!apiKey?.trim() || !budgetCents || budgetCents > CAFE_MAX_BUDGET) return failed();
   try {
     const response = await request(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent",
       {
         method: "POST",
         signal: AbortSignal.timeout(20000),
@@ -213,10 +213,10 @@ export async function proposeCafeRestock(
           ],
           generationConfig: {
             maxOutputTokens: 1024,
-            thinkingConfig: { thinkingLevel: "low" },
+            thinkingConfig: { thinkingLevel: "LOW" },
             responseFormat: {
               text: {
-                mimeType: "application/json",
+                mimeType: "APPLICATION_JSON",
                 schema: {
                   type: "object",
                   properties: {

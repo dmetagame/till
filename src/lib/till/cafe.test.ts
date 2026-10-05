@@ -147,7 +147,7 @@ test("fresh model sees only catalog facts and mandate constraints, never PayPal 
       calls += 1;
       assert.equal(
         String(url),
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent",
       );
       assert.equal(init?.method, "POST");
       assert.equal(new Headers(init?.headers).get("x-goog-api-key"), "unit-test-model-key");
@@ -166,6 +166,8 @@ test("fresh model sees only catalog facts and mandate constraints, never PayPal 
             JSON.stringify(["id", "inStock", "merchant", "priceCents"]),
         ),
       );
+      assert.equal(body.generationConfig.responseFormat.text.mimeType, "APPLICATION_JSON");
+      assert.equal(body.generationConfig.thinkingConfig.thinkingLevel, "LOW");
       assert.ok(!String(init?.body).includes("PAYPAL_CLIENT"));
       assert.ok(!String(init?.body).includes("api-m.sandbox.paypal.com"));
       return responseFor({ lines: lines() });

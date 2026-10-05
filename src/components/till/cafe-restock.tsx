@@ -170,7 +170,7 @@ export function CafeRestock({ brief, onBack }: { brief: string; onBack: () => vo
       {plan ? (
         <section className="mt-6" aria-label="Validated cafe proposal" aria-live="polite">
           <p className="text-sm font-medium text-teal">
-            Planned with Gemini Flash · checked by the server
+            Planned with Gemini Flash-Lite · checked by the server
           </p>
           <p className="mt-2 text-muted">{plan.summary}</p>
           <ul className="mt-4 flex flex-wrap gap-2">
