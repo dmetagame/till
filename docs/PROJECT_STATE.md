@@ -1,8 +1,8 @@
 # Project State
 
-Last updated: `2026-10-05T12:25:33Z`
-Status: `COMPLETE — PAYPAL SANDBOX SLICE ACCEPTANCE VERIFIED`
-Active objective: Replace Till's simulated checkout with one controlled-merchant PayPal sandbox create/approve/recheck/capture flow. Preserve design, mandate UI, and Grok planning.
+Last updated: `2026-10-05T12:33:30Z`
+Status: `IN PROGRESS — CAFE REPLAN; PAYPAL SLICE FROZEN`
+Active objective: Build server-validated cafe stock replanning for the labeled demo supplier Counter Supply; preserve the completed PayPal slice and its evidence.
 
 ## Workspace
 
@@ -32,7 +32,7 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - One sandbox merchant owned by the configured PayPal REST app; fictional catalog merchants are never payees.
 - Server-only PAYPAL_CLIENT_ID/PAYPAL_CLIENT_SECRET; no credential values in documentation, browser, or Git.
 - Buyer alone approves on PayPal; agent cannot capture. Server checks frozen cart before capture.
-- No AI replanning, database, role system, sponsor integrations, new application dependencies, tax/shipping math, or redesign.
+- Current task authorizes cafe AI replanning only. No database, roles, sponsor integrations, new application dependencies, tax/shipping math or redesign. Checkout/capture/cookie code and PayPal credentials are frozen; no new PayPal order or capture during this task. Preserve order `8J567318K9210721P` and capture `87D25249NG9449623` as historical evidence.
 - User narrowed delivery to this payment slice and setup documentation; no video/license deliverable.
 - User authorized local testing with a gitignored root `.env`, overriding the template's generic prohibition. Load only the two PAYPAL variables into the server process; the user approves using their separate personal sandbox buyer in their browser.
 - Repository Grok instructions describe a different `/workspace` environment; use the explicitly authorized clone here. `.grok` skills/references are absent from the clone. Preserve existing startup/platform files.
@@ -41,7 +41,7 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 
 - TanStack Start app; checkout simulation is in `src/components/till/till-app.tsx`.
 - Prices are integer cents in `src/lib/till/catalog.ts`; cafe sample totals $160 under $220.
-- `src/lib/till/plan.functions.ts` is out of scope. `src/lib/till/ledger.ts` localStorage is not payment evidence.
+- Existing general planning and non-cafe demos remain unchanged. Cafe replanning gets its own server functions/UI and no PayPal action. `src/lib/till/ledger.ts` remains unchanged and localStorage is not payment evidence.
 - Decision: signed HttpOnly checkout cookie retains frozen state without a database; PayPal GET verifies payment records. Use direct fetch to sandbox only.
 - One active checkout per browser, three-hour cookie lifetime. A replaced or expired cookie cannot verify an older receipt inside the app; independent PayPal GET remains available. Local storage is never payment evidence.
 
@@ -95,8 +95,10 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 
 ## Next Actions
 
-1. Scoped implementation and acceptance are complete. Use README for judge setup and this record for actual sandbox evidence; fixture tests remain explicitly separate.
-2. Preserve current design and planning. No further payment calls, AI replanning, extra merchant or sponsor integration are required for this slice.
+1. Implement the isolated cafe catalog/stock controls, Grok proposal and strict server filtering, then verify policy tests and desktop/mobile UI without any order/capture call.
+2. User selected the $120 demo after the arithmetic conflict was identified: the initial plan must already use smaller cups ($18 proposed, $114 total). The $64 pack is budget-refused initially and stock-refused after the change; premium case must visibly break the cap. Do not change original $24/$72/$64 prices.
+3. XAI_API_KEY is absent from root .env and current process (presence-only check); user was asked to configure it privately for genuine model/browser verification. Missing key/model failure must show “Could not replan. Retry.” No canned fallback.
+4. Record verified changes in scoped commits/pushes. Frozen PayPal files/credentials and non-cafe behavior stay untouched.
 
 ## Change Log
 
@@ -120,3 +122,5 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - 2026-10-05T12:23:07Z: Supplied receipt IDs independently verified against PayPal sandbox: order `8J567318K9210721P` COMPLETED, sole capture `87D25249NG9449623` COMPLETED, USD 160.00 and exact cafe items. Authentication/approval/capture outcome is real; buyer refresh requested and remains pending. No source/payment behavior changed or further charge attempted.
 - 2026-10-05T12:24:22Z: Buyer confirms unchanged receipt IDs and COMPLETED after refresh. Independent post-refresh GET confirms the same sole capture, status and USD 160.00 amount. Scoped acceptance is complete; only documentation changes in this session, with diff check used for checkpoint verification. Existing cancellation/refusal/browser/build checks remain applicable to unchanged app code.
 - 2026-10-05T12:25:33Z: Acceptance record and README verification summary committed in `8dc6760` and independently verified on remote main; clean tree. Completed handoff: sandbox slice works with buyer approval and one capture, refreshed receipt retains matching IDs, and setup/error/cancel/refusal evidence is documented. No secrets committed and no additional charge attempted during verification.
+
+- 2026-10-05T12:33:30Z: New cafe replan scope authorized; reconciled clean main at `cbea3b18b8d763422937987575f4a0377d4bd870` with remote and GitHub auth. Previous payment acceptance remains verified. User chose fixed $120 after original cart total $160 conflict; plan $18 smaller cups and $128 premium case. Standalone proposal UI avoids checkout/cookie paths. Missing XAI_API_KEY reported; server-only loading will be added without changing PayPal variables. Grok-specific skills/references are absent; preserve existing visual system and use official xAI REST documentation.
