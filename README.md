@@ -103,6 +103,8 @@ npm run build
 
 PayPal unit tests explicitly inject fake HTTP responses and use `UNIT-TEST-*` IDs. Passing them does **not** establish that a real sandbox buyer approved or that PayPal captured an actual sandbox order. See [project state](docs/PROJECT_STATE.md) for the current verification record.
 
+Real sandbox acceptance was verified on October 5, 2026: cafe order `8J567318K9210721P` and capture `87D25249NG9449623` both returned `COMPLETED` for USD 160.00 from independent PayPal GET. The buyer confirmed receipt refresh retained those IDs; a subsequent GET still showed exactly one unchanged capture. Genuine cancellation and edited/over-budget refusal evidence are also recorded in project state. These are sandbox transactions with no real money.
+
 There is no database. A signed, HttpOnly, SameSite cookie retains **one active checkout per browser**, with a three-hour lifetime. It survives server restarts with unchanged credentials. New checkout replaces that cookie; older local ledger entries and missing/expired cookies cannot be used to authorize capture or independently verify an old receipt in the app. Keep cookies and this tab's session storage enabled. The independent PayPal GET above remains the way to inspect older orders. The same secret signs the frozen state server-side; changing credentials invalidates it.
 
 No stock replanning, AI changes, second PayPal merchant, invoices, payouts, authorization/void flow, database, roles, or sponsor integration is included.
