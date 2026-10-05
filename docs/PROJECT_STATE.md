@@ -1,8 +1,8 @@
 # Project State
 
-Last updated: `2026-10-05T16:55:58Z`
-Status: `CAFE $114 CAPTURE VERIFIED — BUYER RECEIPT REFRESH PENDING`
-Active objective: Connect the genuine cafe proposal after 500-count cups are out of stock to the existing buyer-approved PayPal sandbox checkout; verify one new approximately $114 capture and preserve the previous $160 evidence.
+Last updated: `2026-10-05T16:57:02Z`
+Status: `CAFE REPLAN → PAYPAL SANDBOX ACCEPTANCE COMPLETE`
+Active objective: Completed — genuine Gemini cafe replan after the 500-count cups became unavailable paid through existing sandbox checkout for $114; one capture and receipt refresh independently verified. Preserve both new $114 and earlier $160 evidence; no further transaction needed.
 
 ## Workspace
 
@@ -125,13 +125,13 @@ Active objective: Connect the genuine cafe proposal after 500-count cups are out
 - UI transfers the live proposal into existing checkout, with proof alongside its pending cart in sessionStorage. It never rebuilds the old $160 preset. Shared wire types add the proof; catalog/ledger source types add Gemini metadata only (ledger remains local notes). Checkout button requires out-of-stock Replan; returning from checkout takes cafe users back to Replan.
 - `npm run test:cafe`: 16 policy/provider/checkout fixtures + 2 environment tests pass. New checks cover signed-proposal binding, premium/foreign/raised-budget/missing/forged refusals, $114 API amount, stock changed after approval/during GET before capture, removal, frozen edits and unchanged GET-only receipt after later stock changes. `npm run test:paypal`: 25 original payment + 3 loader tests pass. These are explicit fixtures, not real payments. Typecheck, scoped lint, production build and diff check pass.
 - Genuine Gemini browser flow in dev and production: $114 milk/beans/small-cups proposal, 500 cups stock-refused and premium $224/$120 budget-refused, then existing One-time checkout shows Continue to PayPal · $114.00. Desktop/mobile 1280×800/390×844 screenshots visually inspected, no overflow or console/page errors. Guarded QA browser records zero create/capture attempts; no real PayPal order created or capture attempted by Codex. Evidence: screenshots/cafe-checkout-proposal-desktop.png, cafe-checkout-pay-{desktop,mobile}.png, cafe-checkout-built-pay-{desktop,mobile}.png.
-- Final built client scan: actual configured key values and cafe server/signer markers absent (boolean output only); .env stays ignored and untouched. README describes the connected flow, stock check and process restart limitation. Actual buyer receipt IDs now independently verified via sandbox GET: order 7GH61487DG719402X and sole capture 1DR45640TU8797836, COMPLETED USD114. Exact items beans 1×72, cups-small 1×18, oat 1×24. No large or premium cups. Buyer refresh confirmation remains pending; this outcome is actual API evidence, separate from fixtures.
+- Final built client scan: actual configured key values and cafe server/signer markers absent (boolean output only); .env stays ignored and untouched. README describes the connected flow, stock check and process restart limitation. Actual buyer receipt IDs now independently verified via sandbox GET: order 7GH61487DG719402X and sole capture 1DR45640TU8797836, COMPLETED USD114. Exact items beans 1×72, cups-small 1×18, oat 1×24. No large or premium cups. Buyer confirmed unchanged receipt after refresh; post-refresh independent GET still confirms exactly one matching capture. Scoped acceptance complete; this outcome is actual API evidence, separate from fixtures.
 
 ## Next Actions
 
-1. Buyer refreshes the completed receipt in the same tab and confirms order `7GH61487DG719402X`, capture `1DR45640TU8797836`, USD114 and both COMPLETED remain unchanged. Question sent; response pending.
-2. After that confirmation, independently GET the same order again and verify one unchanged capture, then mark scoped acceptance complete. No new order creation or capture is authorized/needed; earlier order `8J567318K9210721P` remains preserved historical evidence.
-3. Leave local dev running and credentials untouched. Completed receipt refresh delegates to the unchanged GET-only path. No app-code changes or further test transactions needed.
+- Scoped cafe replan-to-checkout acceptance is complete. Preserve order `7GH61487DG719402X` / capture `1DR45640TU8797836` (USD114) and earlier order `8J567318K9210721P` / capture `87D25249NG9449623` (USD160).
+- No new orders/captures, payment changes or credentials are needed. Leave local dev running; current stock and proposal signing are process-local. Completed receipt refresh remains GET-only.
+- Future demo/presentation or submission work requires a separate task; no sponsor, video or platform expansion in this slice.
 
 ## Change Log
 
@@ -183,3 +183,5 @@ Active objective: Connect the genuine cafe proposal after 500-count cups are out
 - 2026-10-05T16:55:26Z: Resumed clean main at 203281e682829824b80bc15ace58171555c1d9ae; worktree/origin/upstream/GitHub authentication verified. User supplied new completed receipt IDs. Independent sandbox GET at 2026-10-05T16:54:23.307Z through existing server-only client and environment wrapper asserted order 7GH61487DG719402X COMPLETED, intent CAPTURE, one purchase unit USD114/item_total114, exact beans1×72/cups-small1×18/oat1×24, exactly one capture 1DR45640TU8797836 COMPLETED USD114. All assertions passed. OAuth + order GET only; no new create/capture, no credential change, no payer details or tokens retained. README/state record actual capture evidence and correct obsolete standalone-demo wording. Original $160 evidence preserved. Buyer refresh confirmation requested; remaining acceptance is unchanged receipt and one-capture post-refresh GET. Documentation-only diff check applies; existing app verification remains valid.
 
 - 2026-10-05T16:55:58Z: Capture evidence checkpoint 7b9778000987b7c50d0577f4a598e2e51a72a7b4 pushed; local HEAD, origin/main and independent remote main match with clean tree. Only README.md and docs/PROJECT_STATE.md changed; diff check passes, existing application checks unchanged. Real $114 capture verified, earlier $160 evidence preserved. Buyer receipt refresh response pending; no additional transaction needed. Documentation-only handoff follows this verified checkpoint.
+
+- 2026-10-05T16:57:02Z: Buyer confirms refreshed receipt retains new order/capture IDs, COMPLETED statuses and $114. Post-refresh independent GET at 2026-10-05T16:56:28.609Z again asserted order 7GH61487DG719402X COMPLETED USD114, exact beans1×72/cups-small1×18/oat1×24, exactly one capture 1DR45640TU8797836 COMPLETED USD114. All assertions passed; GET only, no create/capture attempt. Acceptance complete for one buyer-approved replanned capture and unchanged receipt refresh; earlier $160 evidence preserved. README/state updated, diff check passes; application code and credentials unchanged. Previous evidence checkpoint a444d798efc87c0ebb05588596464aeda1701a20 independently matched remote main before this final documentation update.
