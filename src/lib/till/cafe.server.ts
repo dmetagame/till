@@ -1,5 +1,6 @@
 import "@tanstack/react-start/server-only";
 import { CATALOG, money, parseBudget, type Product } from "./catalog.ts";
+import { issueCafeProposal } from "./cafe-proposal.server.ts";
 import {
   CAFE_MAX_BUDGET,
   CAFE_MERCHANT,
@@ -261,6 +262,7 @@ export async function proposeCafeRestock(
     // If inventory changes while the model is thinking, require another fresh search.
     if (supplier.snapshot().revision !== catalog.revision) return failed();
     const plan = supplier.validate(brief, raw);
+    if (plan?.lines.length) plan.checkoutProof = issueCafeProposal(brief, plan, catalog);
     return plan ? { ok: true, catalog: supplier.snapshot(), plan } : failed();
   } catch {
     return failed();

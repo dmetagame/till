@@ -5,6 +5,7 @@ export type CheckoutCart = {
   brief: string;
   budgetCents: number;
   lines: { productId: string; qty: number }[];
+  cafeProof?: string;
 };
 
 export type PayPalReceipt = {

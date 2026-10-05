@@ -27,6 +27,7 @@ export type CafePlan = {
   lines: CafeLine[];
   refused: CafeRefusal[];
   summary: string;
+  checkoutProof?: { token: string; checkoutKey: string };
 };
 export type CafePlanResult =
   | { ok: true; catalog: CafeCatalog; plan: CafePlan }

@@ -20,7 +20,7 @@ export type Rejection = {
   reason: string;
 };
 
-export type PlanSource = "preset" | "grok" | "device";
+export type PlanSource = "preset" | "grok" | "device" | "gemini";
 
 export type Plan = {
   title: string;

@@ -5,7 +5,15 @@ import { money, parseBudget } from "@/lib/till/catalog";
 import { CAFE_REPLAN_ERROR, type CafeCatalog, type CafePlan } from "@/lib/till/cafe";
 import { getCafeCatalog, replanCafe, setDemoCupsStock } from "@/lib/till/cafe.functions";
 
-export function CafeRestock({ brief, onBack }: { brief: string; onBack: () => void }) {
+export function CafeRestock({
+  brief,
+  onBack,
+  onCheckout,
+}: {
+  brief: string;
+  onBack: () => void;
+  onCheckout: (plan: CafePlan) => void;
+}) {
   const catalogFn = useServerFn(getCafeCatalog);
   const stockFn = useServerFn(setDemoCupsStock);
   const replanFn = useServerFn(replanCafe);
@@ -99,7 +107,7 @@ export function CafeRestock({ brief, onBack }: { brief: string; onBack: () => vo
       <h1 className="font-display mt-2 text-4xl font-semibold tracking-tight">Cafe restock</h1>
       <p className="mt-3 text-muted">{brief}</p>
       <p className="mt-2 text-sm text-muted">
-        The agent proposes a cart. This demo does not create a PayPal order.
+        The agent proposes a cart. You review checkout and approve on PayPal sandbox.
       </p>
 
       <div className="mt-6 rounded-2xl border border-ink/10 bg-card p-4 sm:p-5">
@@ -254,6 +262,22 @@ export function CafeRestock({ brief, onBack }: { brief: string; onBack: () => vo
           <p className="mt-4 text-sm text-muted">
             Removing a line recalculates the total. To add or replace items, click Replan.
           </p>
+          {lines.length && plan.checkoutProof ? (
+            <button
+              type="button"
+              disabled={busy || cupsInStock}
+              onClick={() => onCheckout({ ...plan, lines, totalCents: total })}
+              className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-teal px-5 font-medium text-paper disabled:opacity-40"
+            >
+              Review PayPal checkout · {money(total)}
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </button>
+          ) : null}
+          {plan.checkoutProof && cupsInStock ? (
+            <p className="mt-2 text-sm text-muted">
+              For this checkout demo, mark 500-count cups out of stock, then Replan.
+            </p>
+          ) : null}
         </section>
       ) : null}
 

@@ -14,7 +14,7 @@ import {
 import { planMandate } from "@/lib/till/plan.functions";
 import { loadReceipts, saveReceipts, type Receipt } from "@/lib/till/ledger";
 import type { CheckoutCart, PayPalReceipt } from "@/lib/till/checkout";
-import { isCafeMandate } from "@/lib/till/cafe";
+import { isCafeMandate, type CafePlan } from "@/lib/till/cafe";
 import { CafeRestock } from "./cafe-restock";
 
 const PENDING_CHECKOUT = "till.paypal.pending.v1";
@@ -82,6 +82,7 @@ const SOURCE_LABEL: Record<PlanSource, string> = {
   preset: "Sample mandate",
   grok: "Planned with Grok",
   device: "Planned on this device",
+  gemini: "Planned with Gemini Flash-Lite",
 };
 
 export function TillApp() {
@@ -101,6 +102,7 @@ export function TillApp() {
   const [paymentBusy, setPaymentBusy] = useState(false);
   const paymentErrorRef = useRef<HTMLParagraphElement>(null);
   const checkoutKey = useRef("");
+  const cafeProof = useRef<string | undefined>(undefined);
   const checkoutBusy = useRef(false);
   const token = useRef(0);
   const timers = useRef<number[]>([]);
@@ -171,6 +173,7 @@ export function TillApp() {
 
   function restoreCart(pending: PendingCheckout) {
     checkoutKey.current = pending.cart.checkoutKey;
+    cafeProof.current = pending.cart.cafeProof;
     setPlan({
       title: pending.notes.title,
       brief: pending.cart.brief,
@@ -244,6 +247,7 @@ export function TillApp() {
     const run = ++token.current;
     clearTimers();
     checkoutKey.current = crypto.randomUUID();
+    cafeProof.current = undefined;
     setPayment(null);
     setPaymentError(null);
     setBrief(clean);
@@ -274,6 +278,31 @@ export function TillApp() {
     if (token.current !== run) return;
     setPlan(next);
     setPhase("review");
+  }
+
+  async function reviewCafe(proposal: CafePlan) {
+    if (!proposal.checkoutProof || !proposal.lines.length) return;
+    await beforeEdit(() => {
+      checkoutKey.current = proposal.checkoutProof!.checkoutKey;
+      cafeProof.current = proposal.checkoutProof!.token;
+      setPlan({
+        title: "Cafe restock",
+        brief,
+        summary: proposal.summary,
+        budgetCents: proposal.budgetCents,
+        rules: [
+          `Spend at most ${money(proposal.budgetCents)}`,
+          "Counter Supply only",
+          "In-stock catalog items only",
+        ],
+        lines: proposal.lines,
+        rejected: proposal.refused.map(({ productId, reason }) => ({ productId, reason })),
+        source: "gemini",
+      });
+      setRemoved([]);
+      setAgreed(false);
+      setPhase("pay");
+    });
   }
 
   function visibleLines() {
@@ -334,6 +363,7 @@ export function TillApp() {
         brief: plan.brief,
         budgetCents: plan.budgetCents,
         lines: lines.map((line) => ({ productId: line.productId, qty: line.qty })),
+        ...(cafeProof.current ? { cafeProof: cafeProof.current } : {}),
       };
       window.sessionStorage.setItem(PENDING_CHECKOUT, JSON.stringify({ cart, notes: receipt }));
       const result = await paypalRequest({ action: "create", cart });
@@ -454,13 +484,21 @@ export function TillApp() {
             else void beforeEdit(() => void begin(brief, null));
           }}
           onPreset={(id, text) => {
-            if (id === "cafe") { setBrief(text); setPhase("cafe"); }
-            else void beforeEdit(() => void begin(text, id));
+            if (id === "cafe") {
+              setBrief(text);
+              setPhase("cafe");
+            } else void beforeEdit(() => void begin(text, id));
           }}
         />
       ) : null}
 
-      {phase === "cafe" ? <CafeRestock brief={brief} onBack={() => setPhase("brief")} /> : null}
+      {phase === "cafe" ? (
+        <CafeRestock
+          brief={brief}
+          onBack={() => setPhase("brief")}
+          onCheckout={(proposal) => void reviewCafe(proposal)}
+        />
+      ) : null}
 
       {phase === "planning" ? <Planning brief={brief} step={step} /> : null}
 
@@ -488,7 +526,9 @@ export function TillApp() {
           onAddress={setAddress}
           onAgreed={setAgreed}
           busy={paymentBusy}
-          onBack={() => void beforeEdit(() => setPhase("review"))}
+          onBack={() =>
+            void beforeEdit(() => setPhase(plan.source === "gemini" ? "cafe" : "review"))
+          }
           onCheckout={() => void checkout()}
         />
       ) : null}

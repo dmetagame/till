@@ -19,7 +19,7 @@ export type Receipt = {
   total: number;
   budgetCents: number;
   address: string;
-  source: "preset" | "grok" | "device";
+  source: "preset" | "grok" | "device" | "gemini";
 };
 
 const KEY = "till.receipts.v1";
