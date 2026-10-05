@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: `2026-10-05T12:24:22Z`
+Last updated: `2026-10-05T12:25:33Z`
 Status: `COMPLETE — PAYPAL SANDBOX SLICE ACCEPTANCE VERIFIED`
 Active objective: Replace Till's simulated checkout with one controlled-merchant PayPal sandbox create/approve/recheck/capture flow. Preserve design, mandate UI, and Grok planning.
 
@@ -23,6 +23,7 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - OTP blocker checkpoint `1edb1eb1763a6799aead82a20ae2e7cfef546aa5` is verified on local HEAD, tracking main and remote main. Signup diagnosis resumes from this clean checkpoint; GitHub authentication and origin reconfirmed before documentation edits. Latest app code remains `62721da`.
 - Generated-buyer pre-login documentation checkpoint `a0f53cea18d48f1d24d618c31663df7ec190755c` pushed and independently matched against remote main at 14:50 UTC; clean working tree. This handoff record may be followed by a documentation-only commit; no payment code changed.
 - October 5 session starts at `833a8183233fcf6466cdd2da01d4d6c4887d7079` on clean `main`, tracking `origin/main`; local HEAD and remote main independently match. Repository/worktree/origin/GitHub authentication reconfirmed before editing. Previous state described the preceding documentation checkpoint; latest app code remains `62721da`. Root `.env` remains ignored and local dev returns HTTP 200.
+- Acceptance evidence checkpoint `8dc6760b60417caa0c07b6ea25f86f637ec36f0f` pushed and verified by matching HEAD, `origin/main`, and `git ls-remote origin refs/heads/main` at `2026-10-05T12:25:33Z`; working tree clean. A documentation-only handoff commit may follow this recorded checkpoint.
 - No existing project state or frozen release was present. Platform shell, catalog and planning are preserved.
 - GitHub authentication passes. Branch-protection inspection returned HTTP 403 (private-repository feature unavailable); no protection override will be attempted.
 
@@ -118,3 +119,4 @@ Active objective: Replace Till's simulated checkout with one controlled-merchant
 - 2026-10-04T14:50:49Z: Pre-login guide and diagnosis checkpoint `a0f53ce` verified on remote main; diff check passed and tree clean. Handoff: user logs into sandbox with the generated Personal buyer, then starts a fresh Cafe mandate locally. Await receipt order/capture IDs for independent GET and refresh verification; do not infer payment from the old unavailable order.
 - 2026-10-05T12:23:07Z: Supplied receipt IDs independently verified against PayPal sandbox: order `8J567318K9210721P` COMPLETED, sole capture `87D25249NG9449623` COMPLETED, USD 160.00 and exact cafe items. Authentication/approval/capture outcome is real; buyer refresh requested and remains pending. No source/payment behavior changed or further charge attempted.
 - 2026-10-05T12:24:22Z: Buyer confirms unchanged receipt IDs and COMPLETED after refresh. Independent post-refresh GET confirms the same sole capture, status and USD 160.00 amount. Scoped acceptance is complete; only documentation changes in this session, with diff check used for checkpoint verification. Existing cancellation/refusal/browser/build checks remain applicable to unchanged app code.
+- 2026-10-05T12:25:33Z: Acceptance record and README verification summary committed in `8dc6760` and independently verified on remote main; clean tree. Completed handoff: sandbox slice works with buyer approval and one capture, refreshed receipt retains matching IDs, and setup/error/cancel/refusal evidence is documented. No secrets committed and no additional charge attempted during verification.
