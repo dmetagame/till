@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: `2026-10-05T15:27:38Z`
+Last updated: `2026-10-05T15:29:00Z`
 Status: `CAFE CHECKOUT IMPLEMENTED — ONE BUYER APPROVAL/CAPTURE PENDING`
 Active objective: Connect the genuine cafe proposal after 500-count cups are out of stock to the existing buyer-approved PayPal sandbox checkout; verify one new approximately $114 capture and preserve the previous $160 evidence.
 
@@ -116,6 +116,8 @@ Active objective: Connect the genuine cafe proposal after 500-count cups are out
 
 ## Cafe Checkout Checkpoint
 
+- Implementation checkpoint `4d83ffcd43411b74ac7b4439db370aa6685d1ad0` is pushed and independently verified: local HEAD, origin/main and remote main match with a clean tree. A documentation-only handoff commit follows.
+
 - Reconciled clean main at fdcbc87 against upstream/remote and GitHub authentication. User superseded the earlier no-transaction boundary only for one new buyer-approved cafe sandbox capture, retaining the $160 evidence.
 - `cafe-proposal.server.ts` signs the server-validated Gemini proposal with an ephemeral process key (no credential reuse). Proof binds checkout key, brief/budget, proposed IDs/quantities/prices and stock revision. Model sees no proof secret or payment credential and has no payment tool.
 - `cafe-checkout.server.ts` wraps the existing handler/client at order POST boundaries. Cafe carts require a genuine signed proposal after 500-count cups were marked out of stock, Counter Supply-only lines within the $120 cap, matching catalog prices and unchanged/current stock. Removals can be paid; adding/changing quantities requires Replan. Capture guard runs after the original frozen-cart/order/APPROVED checks and immediately before its capture POST, including a stock change during order GET.
@@ -127,7 +129,7 @@ Active objective: Connect the genuine cafe proposal after 500-count cups are out
 
 ## Next Actions
 
-1. Buyer opens http://localhost:8080 → Cafe restock → marks 500-count cups out of stock → Replan → confirms oat $24, beans $72 and small cups $18, total $114 with premium refusal → Review PayPal checkout → acknowledges → Continue to PayPal → personal sandbox buyer approves. Keep supplier stock unchanged during this single success test; do not restart the dev process while approval is pending.
+1. Buyer opens http://localhost:8080 → Cafe restock → ensures 500-count cups out of stock is checked → Write the cart or Replan → confirms oat $24, beans $72 and small cups $18, total $114 with premium refusal → Review PayPal checkout → acknowledges → Continue to PayPal → personal sandbox buyer approves. Keep supplier stock unchanged during this single success test; do not restart the dev process while approval is pending.
 2. Buyer sends only new receipt order/capture IDs and statuses, then refreshes the same receipt. Independently GET that supplied order with the unchanged sandbox client and verify USD114, exact beans/cups-small/oat items, one capture, matching IDs/status and unchanged sole capture after refresh. Preserve earlier order 8J567318K9210721P/capture 87D25249NG9449623.
 3. No extra real orders for failure tests. Stock-after-approval refusal is fixture-verified, including stock changed during GET. Additional captures, sponsors, dependencies and video delivery remain outside this task.
 4. Before handoff verify scoped commit/push against remote, stop our QA preview, leave local dev running. Signed proposal/inventory remain process-local; restart requires Replan. Completed receipt refresh delegates to the unchanged GET-only path.
@@ -172,3 +174,5 @@ Active objective: Connect the genuine cafe proposal after 500-count cups are out
 - 2026-10-05T15:14:42Z: New cafe-to-checkout scope reconciled against clean main fdcbc87, upstream/remote/auth verified. Earlier no-payment boundary superseded only for one buyer-approved new cafe capture. Design: signed Gemini proposal and stock revision carried with checkout input, guard at actual PayPal POST boundary using the existing injectable client, original checkout.server.ts/paypal.server.ts/cookie logic unchanged. Refusal checks use unit fixtures; buyer performs the one actual approval locally.
 
 - 2026-10-05T15:27:38Z: Cafe checkout connection implemented and verified with 18 cafe tests, 28 existing PayPal/env fixtures, typecheck, scoped lint, build, dev/production desktop/mobile live Gemini-to-$114-checkout checks and client-secret scan. Protected checkout/PayPal/credential-loader files unchanged. No new real order/capture yet; only buyer approval and independent receipt/refresh verification remain. Historical $160 evidence preserved.
+
+- 2026-10-05T15:29:00Z: Implementation 4d83ffc verified on remote main, clean tree. QA preview stopped; local dev HTTP 200 and current demo stock remains 500-count cups unavailable for the buyer test. Asked buyer to approve exactly one $114 checkout and supply new receipt IDs/amount/status plus refresh result. No real create/capture was attempted by Codex; real acceptance pending buyer response. Do not restart dev or change stock during approval.
