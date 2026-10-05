@@ -1,12 +1,18 @@
 # Project State
 
-Current status: The live cafe path is the **$180 story** ($160 in stock, $114 recovered). Every older checkpoint below is history, not current instructions. Audit guard fixes are verified with network-free fixtures; earlier live payments remain historical, with no new transaction or publication in this session.
+Current status: The repository is **public**, as explicitly requested by the user. The live cafe path is the **$180 story** ($160 in stock, $114 recovered). Every older checkpoint below is history, not current instructions. Audit guard fixes remain verified with network-free fixtures; earlier live payments remain historical. This visibility task made no payment or application-code changes.
 
-Last updated: `2026-10-05T21:15:40Z`
-Status: `AUDIT FIXES COMPLETE — THREE REPRODUCED FAILURES NOW FAIL CLOSED`
-Active objective: Completed — server return token/version gating, signed-snapshot revocation, post-OAuth stock checking, and corrected current documentation. Preserve historical payment evidence and the unchanged $180/Gemini policy. Implementation checkpoint `509d937c4b6f197176753c8397f924cd234ebbe8` is pushed and independently verified on private remote main; stop with no further feature, live transaction or publication work.
+Last updated: `2026-10-05T21:43:35Z`
+Status: `PUBLIC VISIBILITY VERIFIED — DOCUMENTATION CHECKPOINT`
+Active objective: Completed — make https://github.com/dmetagame/till public and verify anonymous access. User's latest visibility request supersedes the earlier audit-task publication restriction. Preserve application code, credentials and historical payment evidence; only this handoff changes locally.
 
-## Audit Fix Verification — Current
+## Current Visibility Checkpoint
+
+- Workspace `/home/rouma/till`, branch `main` tracking `origin/main`, clean starting commit `6cff0697c7fcc209d7fe9ead7161b1acb0ecb65c`; local HEAD and independent remote main matched before the change. Origin, GitHub authentication and ADMIN permission verified.
+- `gh repo edit dmetagame/till --visibility public` succeeded. Authenticated `gh repo view` reports `isPrivate: false`; anonymous GET of `https://api.github.com/repos/dmetagame/till` reports `private: false` and `visibility: public`.
+- No application edits, environment changes, PayPal/Gemini calls or transactions. Historical audit verification below remains applicable; no new fixture run is claimed for this settings/documentation task. Record this scope and visibility verification in a documentation-only checkpoint, push and verify remote main.
+
+## Historical Audit Fix Verification
 
 - Start: clean `/home/rouma/till`, `main` tracking `origin/main`, HEAD and independent remote main `3d504fcc42bee26f3c867f70ecc9602ca643bee8`; origin and GitHub auth verified. Repository `isPrivate: true` reconfirmed; visibility unchanged.
 - `checkout.server.ts`: PayPal return now goes through the server callback, validates `token` and cart version against the frozen order, records the returned order in signed state, then redirects to the existing UI. Capture requires that return and the current process-held checkout generation. Cancel/replacement rotates the generation, revoking all older snapshots in that signed session. The original three-hour lifetime remains; restart fails closed for unfinished checkouts. Current app receipt lookup requires the active session; historical payments remain inspectable through independent PayPal GET.
@@ -48,9 +54,9 @@ Active objective: Completed — server return token/version gating, signed-snaps
 - One sandbox merchant owned by the configured PayPal REST app; fictional catalog merchants are never payees.
 - Server-only PAYPAL_CLIENT_ID/PAYPAL_CLIENT_SECRET; no credential values in documentation, browser, or Git.
 - Buyer alone approves on PayPal; agent cannot capture. Server checks frozen cart before capture.
-- Current user authorizes only the audit guard fixes and documentation. The earlier protection of checkout/cookie/client implementation is superseded for the return gate, process-local revocation and final transport guard only. Do not create/capture a real PayPal order, publish/change visibility, edit credentials, change prices/the $180 cup policy, or change the Gemini prompt. No database, new dependencies, sponsors or redesign.
+- Current user explicitly authorizes public repository visibility and the required handoff update. The prior audit task authorized only return gating, process-local revocation, final transport guards and documentation; its no-publication restriction is historical and superseded by the latest request. Do not create/capture a real PayPal order, edit credentials or application code, change prices/the $180 cup policy, or change the Gemini prompt. No database, new dependencies, sponsors or redesign.
 - User narrowed delivery to this payment slice and setup documentation; no video/license deliverable.
-- User authorized local testing with a gitignored root `.env`, overriding the template's generic prohibition. The new cafe server reads GEMINI_API_KEY through process.env; root-file loading adds only that model key while retaining the existing PayPal loader unchanged. No secret output or browser prefixes. That earlier buyer-approved capture authorization is historical; the current audit-fix session permits injected fixtures only and no real order/capture.
+- User authorized local testing with a gitignored root `.env`, overriding the template's generic prohibition. The new cafe server reads GEMINI_API_KEY through process.env; root-file loading adds only that model key while retaining the existing PayPal loader unchanged. No secret output or browser prefixes. That earlier buyer-approved capture authorization is historical; the completed audit-fix session permitted injected fixtures only, and this visibility task authorizes no real order/capture.
 - Repository Grok instructions describe a different `/workspace` environment; use the explicitly authorized clone here. `.grok` skills/references are absent from the clone. Preserve existing startup/platform files.
 
 ## Current Context
@@ -146,8 +152,8 @@ Active objective: Completed — server return token/version gating, signed-snaps
 ## Next Actions
 
 - Preserve completed historical live acceptance: revised-story order `2TB52773F8180315G` / capture `3H158002EX0446249` (USD114), plus earlier `8J567318K9210721P` and `7GH61487DG719402X` written evidence unchanged.
-- No real order, capture, stock mutation, credential change or publication is authorized. Complete the three audit regressions and documentation checks; the current task narrowly authorizes the checkout/client guard changes described above.
-- Audit fixtures, documentation and the private implementation checkpoint are verified; stop. Future submission/demo or live payment work requires a separate task; earlier live results remain historical.
+- Public visibility and anonymous access are verified. Finish the scoped documentation checkpoint and verify HEAD/upstream/remote main; then stop. No real order, capture, stock mutation, credential change or application change is authorized.
+- Audit fixtures and documentation were verified in the preceding task; earlier private checkpoints and live results remain historical. Future submission/demo or live payment work requires a separate task.
 
 ## Historical Revised $180 Live Acceptance Checkpoint
 
@@ -231,3 +237,5 @@ Active objective: Completed — server return token/version gating, signed-snaps
 - 2026-10-05T21:14:06Z: Audit regressions reproduced before edits (3/3 fail), then fixed and re-run (3/3 fail closed with HTTP409 and zero mocked captures). Existing focused tests, typecheck, scoped lint, diff/hygiene checks succeed. Server return, active-generation revocation and dispatch-time post-OAuth stock guards implemented; README/state corrected without deleting earlier results. Prices, $180 cup policy, Gemini prompt, planner, ledger and credentials unchanged in this task. No real PayPal/Gemini request or publication; private checkpoint pending.
 
 - 2026-10-05T21:15:40Z: Scoped implementation 509d937c4b6f197176753c8397f924cd234ebbe8 pushed to private origin/main and independently verified against local HEAD/upstream/remote main with a clean tree. All three pre-fix failing audit fixtures now refuse with zero mocked captures; current docs and historical evidence are reconciled. GitHub still reports isPrivate:true. No real PayPal/Gemini call, credential change or publication. This documentation-only handoff records the verified implementation checkpoint; task complete.
+
+- 2026-10-05T21:43:35Z: User explicitly requested public visibility, superseding the prior audit-task publication restriction. Clean main at 6cff0697c7fcc209d7fe9ead7161b1acb0ecb65c matched remote main; origin/authentication/ADMIN permission verified. Visibility edit succeeded and authenticated plus anonymous GitHub responses confirm public access. Only docs/PROJECT_STATE.md changes locally; application, credentials and all historical records preserved. No PayPal/Gemini call or transaction. Documentation checkpoint and push verification follow.
