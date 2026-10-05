@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: `2026-10-05T17:34:54Z`
+Last updated: `2026-10-05T17:35:18Z`
 Status: `CAFE $180 STOCK-OUT STORY — ACCEPTANCE COMPLETE`
 Active objective: Completed — server-enforced $160 in-stock cart → stock-out → $114 recovered cart under $180, one buyer-approved sandbox capture, and unchanged receipt refresh independently verified. Preserve all earlier historical evidence; no further transaction needed.
 
@@ -209,3 +209,5 @@ Active objective: Completed — server-enforced $160 in-stock cart → stock-out
 - 2026-10-05T17:33:09Z: Revised-story capture evidence checkpoint 2b9b211dd2cfe68b0095bbd8545e273a4ea51f90 pushed and independently verified: HEAD, origin/main and remote main match with clean tree. Only README.md and docs/PROJECT_STATE.md changed; diff check passes. Real $114 recovered capture is verified, earlier written evidence preserved. Buyer receipt-refresh answer pending; no further payment or application change needed. Documentation-only handoff follows this verified checkpoint.
 
 - 2026-10-05T17:34:54Z: Resumed clean main 43da0f3ad9f52ad03b94258b516f68259ec52b35; worktree/origin/upstream/GitHub authentication verified. Buyer confirms receipt remains unchanged after refresh. Independent post-refresh sandbox GET at 2026-10-05T17:34:16.963Z asserts order 2TB52773F8180315G COMPLETED, intent CAPTURE, one USD114 unit/item_total, exact beans1×72/cups-small1×18/oat1×24, exactly one capture 3H158002EX0446249 COMPLETED USD114. All assertions pass. OAuth + GET only; no extra create/capture, stock or credential change. Revised $180 story acceptance complete; README/state updated, earlier README order evidence checked byte-for-byte unchanged. Documentation-only diff check applies; existing application tests/build/browser evidence remains valid.
+
+- 2026-10-05T17:35:18Z: Final acceptance checkpoint 20c8f4a8b12649bd3e79df59ce0b8c0ecba98e11 pushed and independently verified: HEAD, origin/main and remote main match, clean tree. Revised $180 stock-out story is complete with real $114 capture and unchanged receipt/sole capture after refresh. Earlier written evidence and protected PayPal files preserved. Only documentation changed in this verification session; no credentials, additional transaction or disposable task source files. This documentation-only handoff records the verified checkpoint.
