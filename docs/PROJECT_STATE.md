@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: `2026-10-05T17:17:01Z`
+Last updated: `2026-10-05T17:18:19Z`
 Status: `CAFE $180 STORY VERIFIED — BUYER APPROVAL PENDING`
 Active objective: Enforce a complete $160 in-stock cart and $114 recovered cart under the new $180 mandate; run one live stock sequence, open recovered checkout, then stop for buyer sandbox approval. Existing historical evidence remains unchanged.
 
@@ -135,6 +135,8 @@ Active objective: Enforce a complete $160 in-stock cart and $114 recovered cart 
 
 ## Revised $180 Story Checkpoint
 
+- Implementation e0ff4fc784cb9ba61d1012ff77bd1acabf81810e is pushed and independently verified: local HEAD, origin/main and remote main match, clean tree. Documentation-only handoff follows.
+
 - CAFE_MAX_BUDGET 18000 and cafe brief/sample/on-screen copy use $180; no catalog product or price added/changed. Strict server validation accepts exactly oat1/beans1/cups1 when 500-count cups are available, or oat1/beans1/cups-small1 only after their stock-out. Wrong cups, second pack, duplicates, missing items or invalid model output produce the exact retry error with no payable/canned replacement.
 - The cafe checkout wrapper follows the new cap and complete-cart policy; initial $160 proposal is payable, partial removals cannot be paid. Original checkout.server.ts, paypal.server.ts, planning functions and environment loader compare unchanged against fbadfc4. README historical order evidence paragraphs compare byte-for-byte unchanged against fbadfc4.
 - npm run test:cafe: 16 cafe/checkout fixtures + 2 environment tests pass. Fake Gemini responses cover both stock states and invalid cup/quantity/complete-cart choices. Fake checkout tests cover stock changed after approval/during GET and changed then restored: all refuse before capture. npm run test:paypal: 25 payment + 3 loader fixtures pass. No real payment calls in tests. Typecheck, scoped ESLint, production build and diff check pass.
@@ -199,3 +201,5 @@ Active objective: Enforce a complete $160 in-stock cart and $114 recovered cart 
 - 2026-10-05T17:06:20Z: New user scope reconciled against clean main fbadfc4ac38423406bed4420bb2808acf336b9e2, correct origin/upstream/GitHub authentication. Change cafe mandate to $180; enforce exactly oat1/beans1/one stock-selected cup on server, retry-only invalid proposals. Initial in-stock $160 must be payable; recovered $114 checkout follows stock-out. Protected checkout.server.ts/paypal.server.ts and all credential values remain untouched. Earlier order evidence is historical and preserved verbatim. User authorizes one new recovered order and one capture only after buyer approval/return; stop at approval first.
 
 - 2026-10-05T17:17:01Z: Revised $180 server policy, UI and judge path implemented and verified as above. Real Gemini $160 → stock-out → $114 sequence and existing checkout handoff pass; stop before buyer payment. No new PayPal create/capture, no credential change; protected payment files and earlier order evidence preserved. Focused tests, build, browser checks and secret scan pass. Next required action is one approval in the buyer’s own sandbox browser, followed by unchanged server return/capture and independent receipt/refresh verification. Scoped implementation checkpoint follows.
+
+- 2026-10-05T17:18:19Z: Implementation e0ff4fc independently verified on remote main with clean tree. QA preview and both task browsers closed; screenshots/test logs preserved. Dev HTTP200, left running after the one live sequence with 500-count cups unavailable. Buyer approval instructions sent for one fresh $114 order in their own browser; no actual create/capture by QA. Protected payment files and historical README evidence unchanged, credentials untouched/ignored. Remaining work waits for buyer return and new receipt IDs, then independent PayPal GET/refresh verification. No stock mutation or server restart while approval is pending.
