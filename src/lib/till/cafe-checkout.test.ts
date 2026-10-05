@@ -29,7 +29,7 @@ async function proposal(supplier: CafeSupplier, stockOut = true): Promise<Checko
                   lines: [
                     { productId: "oat", qty: 1 },
                     { productId: "beans", qty: 1 },
-                    { productId: "cups-small", qty: 1 },
+                    { productId: stockOut ? "cups-small" : "cups", qty: 1 },
                   ],
                 }),
               },
@@ -44,7 +44,7 @@ async function proposal(supplier: CafeSupplier, stockOut = true): Promise<Checko
     checkoutKey: result.plan.checkoutProof.checkoutKey,
     title: "Cafe restock",
     brief: CAFE_BRIEF,
-    budgetCents: 12000,
+    budgetCents: 18000,
     cafeProof: result.plan.checkoutProof.token,
     lines: result.plan.lines.map(({ productId, qty }) => ({ productId, qty })),
   };
@@ -157,14 +157,17 @@ test("only verified Gemini lines enter existing $114 checkout; refresh remains G
 });
 
 test("stock changed after approval or during PayPal GET refuses before any capture POST", async () => {
-  for (const duringGet of [false, true]) {
+  for (const timing of ["after", "during", "restored"]) {
     const supplier = new CafeSupplier(),
       cart = await proposal(supplier),
       api = fixture(supplier);
     const created = await api.create(cart);
     api.approve();
-    if (duringGet) api.mutateDuringGet(() => supplier.setCupsInStock(true));
-    else supplier.setCupsInStock(true);
+    if (timing === "during") api.mutateDuringGet(() => supplier.setCupsInStock(true));
+    else {
+      supplier.setCupsInStock(true);
+      if (timing === "restored") supplier.setCupsInStock(false);
+    }
     const response = await api.handle(
       post(
         { action: "capture", cart, orderId: created.orderId, cartVersion: created.cartVersion },
@@ -177,7 +180,7 @@ test("stock changed after approval or during PayPal GET refuses before any captu
   }
 });
 
-test("missing/forged proposal, initial in-stock plan, premium, foreign lines and raised budget cannot create orders", async () => {
+test("missing/forged proposal, premium, foreign lines and raised budget cannot create orders", async () => {
   const supplier = new CafeSupplier(),
     cart = await proposal(supplier),
     api = fixture(supplier);
@@ -187,21 +190,17 @@ test("missing/forged proposal, initial in-stock plan, premium, foreign lines and
     { ...cart, cafeProof: "forged.token" },
     { ...cart, lines: [{ productId: "cups-premium", qty: 1 }] },
     { ...cart, lines: [{ productId: "sourdough", qty: 1 }] },
-    { ...cart, budgetCents: 22000, brief: CAFE_BRIEF.replace("$120", "$220") },
+    { ...cart, budgetCents: 22000, brief: CAFE_BRIEF.replace("$180", "$220") },
   ];
   for (const value of bad) {
     const response = await api.handle(post({ action: "create", cart: value }));
     assert.ok(response.status >= 400);
     assert.equal((await response.json()).ok, false);
   }
-  const initial = await proposal(supplier, false);
-  const response = await api.handle(post({ action: "create", cart: initial }));
-  assert.equal(response.status, 409);
-  assert.match((await response.json()).error, /out of stock.*Replan/);
   assert.deepEqual(api.counts(), { creates: 0, captures: 0 });
 });
 
-test("changed catalog price or unavailable line fails; removal alone is allowed and never adds a line", async () => {
+test("changed catalog price, unavailable line, incomplete cart or second cup pack fails", async () => {
   const supplier = new CafeSupplier(),
     cart = await proposal(supplier),
     catalog = supplier.snapshot();
@@ -211,12 +210,23 @@ test("changed catalog price or unavailable line fails; removal alone is allowed 
   product.inStock = true;
   product.priceCents++;
   assert.throws(() => assertCafeCheckout(cart, cart.cafeProof, catalog), /prices changed/);
-  assert.doesNotThrow(() =>
-    assertCafeCheckout(
-      { ...cart, lines: cart.lines.filter((l) => l.productId !== "cups-small") },
-      cart.cafeProof,
-      supplier.snapshot(),
-    ),
+  assert.throws(
+    () =>
+      assertCafeCheckout(
+        { ...cart, lines: cart.lines.filter((l) => l.productId !== "cups-small") },
+        cart.cafeProof,
+        supplier.snapshot(),
+      ),
+    /payable cafe restock/,
+  );
+  assert.throws(
+    () =>
+      assertCafeCheckout(
+        { ...cart, lines: [...cart.lines, { productId: "cups", qty: 1 }] },
+        cart.cafeProof,
+        supplier.snapshot(),
+      ),
+    /payable cafe restock/,
   );
 });
 
@@ -244,4 +254,20 @@ test("original frozen-cart edit refusal and buyer-approval requirement still run
     /edited after checkout was frozen/,
   );
   assert.deepEqual(api.counts(), { creates: 1, captures: 0 });
+});
+
+test("verified in-stock $160 proposal is payable without bypassing the catalog guard", async () => {
+  const supplier = new CafeSupplier();
+  const cart = await proposal(supplier, false);
+  assert.equal(cart.budgetCents, 18000);
+  assert.deepEqual(
+    cart.lines.map((l) => l.productId),
+    ["oat", "beans", "cups"],
+  );
+  assert.doesNotThrow(() => assertCafeCheckout(cart, cart.cafeProof, supplier.snapshot()));
+  supplier.setCupsInStock(false);
+  assert.throws(
+    () => assertCafeCheckout(cart, cart.cafeProof, supplier.snapshot()),
+    /stock changed/,
+  );
 });

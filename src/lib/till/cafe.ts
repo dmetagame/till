@@ -1,7 +1,7 @@
 export const CAFE_MERCHANT = "Counter Supply";
-export const CAFE_MAX_BUDGET = 12000;
+export const CAFE_MAX_BUDGET = 18000;
 export const CAFE_BRIEF =
-  "Restock a cafe: oat milk, beans, and cups, under $120, Counter Supply only.";
+  "Restock a cafe: oat milk, beans, and cups, under $180, Counter Supply only.";
 export const CAFE_REPLAN_ERROR = "Could not replan. Retry.";
 
 export function isCafeMandate(brief: string) {

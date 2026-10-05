@@ -1,8 +1,8 @@
 # Project State
 
-Last updated: `2026-10-05T16:57:25Z`
-Status: `CAFE REPLAN → PAYPAL SANDBOX ACCEPTANCE COMPLETE`
-Active objective: Completed — genuine Gemini cafe replan after the 500-count cups became unavailable paid through existing sandbox checkout for $114; one capture and receipt refresh independently verified. Preserve both new $114 and earlier $160 evidence; no further transaction needed.
+Last updated: `2026-10-05T17:17:01Z`
+Status: `CAFE $180 STORY VERIFIED — BUYER APPROVAL PENDING`
+Active objective: Enforce a complete $160 in-stock cart and $114 recovered cart under the new $180 mandate; run one live stock sequence, open recovered checkout, then stop for buyer sandbox approval. Existing historical evidence remains unchanged.
 
 ## Workspace
 
@@ -40,7 +40,7 @@ Active objective: Completed — genuine Gemini cafe replan after the 500-count c
 ## Current Context
 
 - TanStack Start app; genuine sandbox checkout is in `src/components/till/till-app.tsx`, with cafe proposals isolated in `cafe-restock.tsx`.
-- Prices are integer cents in `src/lib/till/catalog.ts`. Historical cafe PayPal evidence remains $160 under its original $220 mandate; the new cafe replan uses $120 and a $114 smaller-pack cart. Original $24/$72/$64 prices and IDs stay unchanged.
+- Prices are integer cents in `src/lib/till/catalog.ts`. Historical cafe PayPal evidence remains $160 under its original $220 mandate; the revised cafe replan uses $180, accepts $160 with 500-count cups in stock, and recovers to $114 only after their stock-out. The prior $120 version and its payment evidence remain historical. Original $24/$72/$64 prices and IDs stay unchanged.
 - Existing general planning and non-cafe demos remain unchanged. Cafe replanning has its own server functions/UI; the buyer can pass its verified proposal to the existing PayPal checkout. `src/lib/till/ledger.ts` remains unchanged and localStorage is not payment evidence.
 - Decision: signed HttpOnly checkout cookie retains frozen state without a database; PayPal GET verifies payment records. Use direct fetch to sandbox only.
 - One active checkout per browser, three-hour cookie lifetime. A replaced or expired cookie cannot verify an older receipt inside the app; independent PayPal GET remains available. Local storage is never payment evidence.
@@ -129,9 +129,17 @@ Active objective: Completed — genuine Gemini cafe replan after the 500-count c
 
 ## Next Actions
 
-- Scoped cafe replan-to-checkout acceptance is complete. Preserve order `7GH61487DG719402X` / capture `1DR45640TU8797836` (USD114) and earlier order `8J567318K9210721P` / capture `87D25249NG9449623` (USD160).
-- No new orders/captures, payment changes or credentials are needed. Leave local dev running; current stock and proposal signing are process-local. Completed receipt refresh remains GET-only.
-- Future demo/presentation or submission work requires a separate task; no sponsor, video or platform expansion in this slice.
+1. Buyer uses their own browser at http://localhost:8080: Cafe restock → leave the 500-count stock-out box checked → Write the cart/Replan → $114 recovered cart → Review PayPal checkout → acknowledge → Continue to PayPal · $114.00 → approve once with the sandbox personal buyer. The buyer browser must retain its own checkout cookie/sessionStorage for return; the isolated QA browser stopped at Till’s one-time checkout, not a separately shareable PayPal order.
+2. Keep supplier stock unchanged and do not restart dev during this approval. Existing checkout captures only after return/APPROVED/frozen-cart checks; the cafe wrapper also requires the unchanged stock revision, canonical prices, signed proposal and complete three-line cart. No manual capture or extra order for refusal testing.
+3. Buyer supplies only new receipt IDs/statuses/total, confirms refresh unchanged. Independently GET that order and verify new order, one COMPLETED $114 capture, beans1×72/cups-small1×18/oat1×24. Earlier 8J567318K9210721P and 7GH61487DG719402X evidence must remain unchanged.
+
+## Revised $180 Story Checkpoint
+
+- CAFE_MAX_BUDGET 18000 and cafe brief/sample/on-screen copy use $180; no catalog product or price added/changed. Strict server validation accepts exactly oat1/beans1/cups1 when 500-count cups are available, or oat1/beans1/cups-small1 only after their stock-out. Wrong cups, second pack, duplicates, missing items or invalid model output produce the exact retry error with no payable/canned replacement.
+- The cafe checkout wrapper follows the new cap and complete-cart policy; initial $160 proposal is payable, partial removals cannot be paid. Original checkout.server.ts, paypal.server.ts, planning functions and environment loader compare unchanged against fbadfc4. README historical order evidence paragraphs compare byte-for-byte unchanged against fbadfc4.
+- npm run test:cafe: 16 cafe/checkout fixtures + 2 environment tests pass. Fake Gemini responses cover both stock states and invalid cup/quantity/complete-cart choices. Fake checkout tests cover stock changed after approval/during GET and changed then restored: all refuse before capture. npm run test:paypal: 25 payment + 3 loader fixtures pass. No real payment calls in tests. Typecheck, scoped ESLint, production build and diff check pass.
+- One genuine dev Gemini sequence: initial all-five-in-stock $160 with 500-count cups, small-pack preference refusal and premium $224/$180 refusal; only 500-count cups toggled unavailable clears the proposal; fresh live Replan $114 with small pack, original-cup stock refusal and premium cap refusal. Existing One-time checkout opened for $114 under $180. Desktop/mobile screenshots visually inspected, no overflow/page errors. QA fetch guard recorded zero create/capture attempts. Buyer approval/capture for this revised story remains pending; no new PayPal order was created by QA.
+- Built desktop/mobile home and cafe catalog render checks pass without extra model/payment calls. Configured actual credentials and cafe server/signing markers absent from browser assets (boolean-only scan); .env stays ignored and untouched. Local dev restarted before this sequence to install the new class validator and reset initial stock; now leave it running with 500-count cups unavailable. Evidence under screenshots/cafe-180-*; QA preview/browser cleanup follows before handoff.
 
 ## Change Log
 
@@ -187,3 +195,7 @@ Active objective: Completed — genuine Gemini cafe replan after the 500-count c
 - 2026-10-05T16:57:02Z: Buyer confirms refreshed receipt retains new order/capture IDs, COMPLETED statuses and $114. Post-refresh independent GET at 2026-10-05T16:56:28.609Z again asserted order 7GH61487DG719402X COMPLETED USD114, exact beans1×72/cups-small1×18/oat1×24, exactly one capture 1DR45640TU8797836 COMPLETED USD114. All assertions passed; GET only, no create/capture attempt. Acceptance complete for one buyer-approved replanned capture and unchanged receipt refresh; earlier $160 evidence preserved. README/state updated, diff check passes; application code and credentials unchanged. Previous evidence checkpoint a444d798efc87c0ebb05588596464aeda1701a20 independently matched remote main before this final documentation update.
 
 - 2026-10-05T16:57:25Z: Final acceptance checkpoint 966dfbca26d6ef23adb0e2174c1210e9128123ec pushed and independently verified: HEAD, origin/main and remote main match; clean tree. Scoped outcome complete: actual $114 sandbox capture, buyer-confirmed refreshed receipt, independent post-refresh GET with one unchanged capture. Only documentation changed in this session; no further transaction or credential action. This documentation-only handoff records the verified acceptance checkpoint.
+
+- 2026-10-05T17:06:20Z: New user scope reconciled against clean main fbadfc4ac38423406bed4420bb2808acf336b9e2, correct origin/upstream/GitHub authentication. Change cafe mandate to $180; enforce exactly oat1/beans1/one stock-selected cup on server, retry-only invalid proposals. Initial in-stock $160 must be payable; recovered $114 checkout follows stock-out. Protected checkout.server.ts/paypal.server.ts and all credential values remain untouched. Earlier order evidence is historical and preserved verbatim. User authorizes one new recovered order and one capture only after buyer approval/return; stop at approval first.
+
+- 2026-10-05T17:17:01Z: Revised $180 server policy, UI and judge path implemented and verified as above. Real Gemini $160 → stock-out → $114 sequence and existing checkout handoff pass; stop before buyer payment. No new PayPal create/capture, no credential change; protected payment files and earlier order evidence preserved. Focused tests, build, browser checks and secret scan pass. Next required action is one approval in the buyer’s own sandbox browser, followed by unchanged server return/capture and independent receipt/refresh verification. Scoped implementation checkpoint follows.

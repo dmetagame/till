@@ -151,7 +151,7 @@ export const CATALOG: Product[] = [
     category: "cafe",
     price: 12800,
     lead: "2 days",
-    blurb: "A premium case that exceeds the $120 cafe mandate.",
+    blurb: "A premium case that exceeds the $180 cafe mandate with milk and beans.",
     tags: ["cafe", "restock", "cups", "coffee"],
   },
   {
@@ -357,8 +357,8 @@ const PRESETS: Preset[] = [
   {
     id: "cafe",
     label: "Cafe restock",
-    hint: "Counter Supply · $120 · live stock replan",
-    brief: "Restock a cafe: oat milk, beans, and cups, under $120, Counter Supply only.",
+    hint: "Counter Supply · $180 · live stock replan",
+    brief: "Restock a cafe: oat milk, beans, and cups, under $180, Counter Supply only.",
     plan: {
       title: "Two vendors, not three",
       summary:

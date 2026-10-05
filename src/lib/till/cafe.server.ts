@@ -60,100 +60,70 @@ export class CafeSupplier {
     if (!budgetCents || budgetCents > CAFE_MAX_BUDGET || !raw || typeof raw !== "object")
       return null;
     const record = raw as Record<string, unknown>;
-    if (!Array.isArray(record.lines) || record.lines.length > 16) return null;
-    const refused = new Map<string, CafeRefusal>();
-    const refuse = (productId: string, reason: string) => {
-      const product = this.products.find((item) => item.id === productId);
-      refused.set(productId, { productId, name: product?.name ?? productId, reason });
-    };
-    const requiredTotal = REQUIRED_IDS.reduce(
-      (sum, id) => sum + (this.products.find((product) => product.id === id)?.price ?? 0),
-      0,
-    );
-
-    // Facts remain visible even when the model omits a rejected candidate.
-    for (const product of this.products.filter(
-      (item) => item.category === "cafe" && item.merchant === CAFE_MERCHANT,
-    )) {
-      if (!this.stock.get(product.id))
-        refuse(product.id, "Out of stock in the demo supplier catalog.");
-      else if (CUP_IDS.includes(product.id) && requiredTotal + product.price > budgetCents) {
-        refuse(
-          product.id,
-          `With oat milk and beans, this cart would cost ${money(requiredTotal + product.price)} and break the ${money(budgetCents)} dollar cap.`,
-        );
-      }
-    }
-
-    const lines: CafeLine[] = [];
+    // A model proposes all three lines. Validation never repairs its cup choice.
+    if (!Array.isArray(record.lines) || record.lines.length !== 3) return null;
+    const cupsInStock = this.stock.get("cups") === true;
+    const cupId = cupsInStock ? "cups" : "cups-small";
+    const expectedIds = [...REQUIRED_IDS, cupId];
     const seen = new Set<string>();
+    const lines: CafeLine[] = [];
     let totalCents = 0;
     for (const value of record.lines) {
-      if (!value || typeof value !== "object") continue;
+      if (!value || typeof value !== "object") return null;
       const line = value as Record<string, unknown>;
-      if (typeof line.productId !== "string") continue;
-      const id = line.productId.slice(0, 80);
-      const product = this.products.find((item) => item.id === id);
-      if (!product) {
-        refuse(id, "Not in the server catalog.");
-        continue;
-      }
-      if (product.merchant !== CAFE_MERCHANT || product.category !== "cafe") {
-        refuse(id, "Outside the Counter Supply-only supplier mandate.");
-        continue;
-      }
-      if (!this.stock.get(id)) {
-        refuse(id, "Out of stock in the demo supplier catalog.");
-        continue;
-      }
-      if (!Number.isSafeInteger(line.qty) || (line.qty !== 1 && line.qty !== 2)) {
-        refuse(id, "Invalid quantity; the catalog allows one or two packs.");
-        continue;
-      }
-      if (seen.has(id)) continue;
-      seen.add(id);
-      const cost = product.price * line.qty;
-      if (CUP_IDS.includes(id) && requiredTotal + cost > budgetCents) {
-        refuse(
-          id,
-          `With oat milk and beans, this cart would cost ${money(requiredTotal + cost)} and break the ${money(budgetCents)} dollar cap.`,
-        );
-        continue;
-      }
-      if (totalCents + cost > budgetCents) {
-        refuse(id, `This line would break the ${money(budgetCents)} dollar cap.`);
-        continue;
-      }
+      if (
+        typeof line.productId !== "string" ||
+        !expectedIds.includes(line.productId) ||
+        seen.has(line.productId) ||
+        line.qty !== 1
+      )
+        return null;
+      const product = this.products.find((item) => item.id === line.productId);
+      if (
+        !product ||
+        product.category !== "cafe" ||
+        product.merchant !== CAFE_MERCHANT ||
+        !this.stock.get(product.id)
+      )
+        return null;
+      seen.add(product.id);
+      totalCents += product.price;
       lines.push({
-        productId: id,
-        qty: line.qty,
-        why: CUP_IDS.includes(id)
-          ? "An in-stock cup pack inside the dollar cap."
-          : "In stock at Counter Supply; catalog price checked by the server.",
+        productId: product.id,
+        qty: 1,
+        why:
+          product.id === cupId
+            ? cupsInStock
+              ? "The 500-count cups are in stock and fit the cap."
+              : "The 500-count cups are out of stock; this smaller pack fits the cap."
+            : "In stock at Counter Supply; catalog price checked by the server.",
       });
-      totalCents += cost;
     }
+    if (totalCents > budgetCents || !expectedIds.every((id) => seen.has(id))) return null;
 
-    const complete =
-      REQUIRED_IDS.every((id) => lines.some((line) => line.productId === id)) &&
-      lines.some((line) => CUP_IDS.includes(line.productId));
-    if (!complete) {
-      for (const line of lines)
-        refuse(
-          line.productId,
-          `The full oat milk, beans and cups restock could not be validated inside the ${money(budgetCents)} dollar cap and current stock.`,
-        );
-      lines.length = 0;
-      totalCents = 0;
+    // Refusal reasons come from catalog facts, including candidates the model omitted.
+    const refused: CafeRefusal[] = [];
+    const requiredTotal = REQUIRED_IDS.reduce(
+      (sum, id) => sum + this.products.find((product) => product.id === id)!.price,
+      0,
+    );
+    for (const product of this.products.filter((item) => CUP_IDS.includes(item.id))) {
+      if (product.id === cupId) continue;
+      const reason = !this.stock.get(product.id)
+        ? "Out of stock in the demo supplier catalog."
+        : product.id === "cups-small" && cupsInStock
+          ? "The 500-count cups are in stock and fit the cap."
+          : `With oat milk and beans, this cart would cost ${money(requiredTotal + product.price)} and break the ${money(budgetCents)} dollar cap.`;
+      refused.push({ productId: product.id, name: product.name, reason });
     }
     return {
       budgetCents,
       totalCents,
       lines,
-      refused: [...refused.values()],
-      summary: complete
-        ? "A fresh model proposal, checked against Counter Supply’s current stock and catalog prices."
-        : `Restock refused: the proposal cannot cover oat milk, beans and cups within current stock and the ${money(budgetCents)} dollar cap.`,
+      refused,
+      summary: cupsInStock
+        ? "The 500-count pack is available: a complete $160 restock within your cap."
+        : "The 500-count pack is unavailable: a fresh $114 restock with the smaller pack.",
     };
   }
 }
@@ -187,7 +157,7 @@ export async function proposeCafeRestock(
           systemInstruction: {
             parts: [
               {
-                text: 'Propose a cafe restock using only the supplied catalog. Cover one oat milk, one beans and one cup pack. Choose an in-stock cup pack that fits the entire cart under the dollar cap; prefer the larger cups pack if it fits. Never raise the budget or use another merchant. Return JSON {"lines":[{"productId":"catalog id","qty":1}]}. If nothing fits, return an empty lines array. You have no payment capability.',
+                text: 'Propose a cafe restock using only the supplied catalog. Cover one oat milk, one beans and one cup pack. Use cups (500-count) when it is in stock and the complete cart fits the cap. Only when cups is out of stock, use cups-small. Never use cups-premium or a second cup pack. Each required product must have quantity 1. Never raise the budget or use another merchant. Return JSON {"lines":[{"productId":"catalog id","qty":1}]}. If nothing fits, return an empty lines array. You have no payment capability.',
               },
             ],
           },
@@ -223,12 +193,13 @@ export async function proposeCafeRestock(
                   properties: {
                     lines: {
                       type: "array",
-                      maxItems: 5,
+                      minItems: 3,
+                      maxItems: 3,
                       items: {
                         type: "object",
                         properties: {
                           productId: { type: "string" },
-                          qty: { type: "integer", minimum: 1, maximum: 2 },
+                          qty: { type: "integer", minimum: 1, maximum: 1 },
                         },
                         required: ["productId", "qty"],
                         additionalProperties: false,

@@ -99,6 +99,7 @@ export function CafeRestock({
   );
   const budget = plan?.budgetCents ?? parseBudget(brief);
   const cupsInStock = catalog?.products.find((product) => product.id === "cups")?.inStock ?? true;
+  const complete = lines.length === 3;
   const ratio = budget ? Math.min(100, Math.round((total / budget) * 100)) : 0;
 
   return (
@@ -113,8 +114,8 @@ export function CafeRestock({
       <div className="mt-6 rounded-2xl border border-ink/10 bg-card p-4 sm:p-5">
         <p className="text-sm font-medium">Demo supplier</p>
         <p id="cafe-stock-instructions" className="mt-1 text-sm text-muted">
-          For the checkout demo, keep this box checked and click Replan. Unchecking it
-          puts the 500-count cups back in stock and disables checkout.
+          Start with this box unchecked for the $160 cart. Check it to mark the 500-count cups
+          unavailable, then Replan for the $114 replacement.
         </p>
         <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-3">
           <input
@@ -262,22 +263,22 @@ export function CafeRestock({
             </div>
           ) : null}
           <p className="mt-4 text-sm text-muted">
-            Removing a line recalculates the total. To add or replace items, click Replan.
+            Removing a line recalculates the total. Checkout needs the complete three-item restock;
+            click Replan to restore or replace items.
           </p>
-          {plan.checkoutProof && cupsInStock ? (
+          {plan.checkoutProof && !complete ? (
             <p
               id="cafe-checkout-blocked"
               className="mt-4 rounded-2xl border border-ink/10 bg-card p-4 text-sm"
             >
-              Checkout is disabled: 500-count cups are still in stock. Check “Mark
-              500-count cups out of stock” above, leave it checked, then click Replan.
+              Checkout needs one oat milk, one beans and exactly one cup pack. Click Replan.
             </p>
           ) : null}
           {lines.length && plan.checkoutProof ? (
             <button
               type="button"
-              disabled={busy || cupsInStock}
-              aria-describedby={cupsInStock ? "cafe-checkout-blocked" : undefined}
+              disabled={busy || !complete}
+              aria-describedby={!complete ? "cafe-checkout-blocked" : undefined}
               onClick={() => onCheckout({ ...plan, lines, totalCents: total })}
               className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-teal px-5 font-medium text-paper disabled:opacity-40"
             >

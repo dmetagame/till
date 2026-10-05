@@ -28,11 +28,20 @@ export function assertCafeCheckout(cart: CheckoutCart, token: unknown, catalog: 
     proposal.budgetCents !== cart.budgetCents ||
     cart.budgetCents > CAFE_MAX_BUDGET
   )
-    refuse("This cafe cart does not match the Gemini proposal and $120 limit. Replan.");
-  if (proposal.cupsInStock)
-    refuse("Mark the 500-count cups out of stock, then Replan before checkout.");
+    refuse("This cafe cart does not match the Gemini proposal and $180 limit. Replan.");
   if (proposal.stockRevision !== catalog.revision)
     refuse("Demo supplier stock changed since this proposal. Replan before checkout.");
+  const cupId = catalog.products.find((item) => item.id === "cups")?.inStock
+    ? "cups"
+    : "cups-small";
+  const expectedIds = ["oat", "beans", cupId];
+  if (
+    cart.lines.length !== 3 ||
+    !expectedIds.every((id) => cart.lines.some((line) => line.productId === id && line.qty === 1))
+  )
+    refuse(
+      "A payable cafe restock needs one oat milk, one beans and exactly one current cup pack. Replan.",
+    );
   let total = 0;
   for (const line of cart.lines) {
     const product = catalog.products.find((item) => item.id === line.productId);
@@ -50,7 +59,7 @@ export function assertCafeCheckout(cart: CheckoutCart, token: unknown, catalog: 
     total += product.priceCents * line.qty;
   }
   if (total <= 0 || total > cart.budgetCents || total > CAFE_MAX_BUDGET)
-    refuse("This cafe cart breaks the $120 dollar cap.");
+    refuse("This cafe cart breaks the $180 dollar cap.");
 }
 
 // Preserve the existing order payload, frozen-cart/cookie checks and capture rules.
