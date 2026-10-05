@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: `2026-10-05T16:55:26Z`
+Last updated: `2026-10-05T16:55:58Z`
 Status: `CAFE $114 CAPTURE VERIFIED — BUYER RECEIPT REFRESH PENDING`
 Active objective: Connect the genuine cafe proposal after 500-count cups are out of stock to the existing buyer-approved PayPal sandbox checkout; verify one new approximately $114 capture and preserve the previous $160 evidence.
 
@@ -181,3 +181,5 @@ Active objective: Connect the genuine cafe proposal after 500-count cups are out
 - 2026-10-05T16:48:44Z: UI guidance checkpoint 5bc72381197119bf57486358defd32cc81e4bf11 pushed and independently verified: HEAD, origin/main and remote main match; clean tree. Desktop/mobile screenshots visually inspected; 390px layout has no overflow. QA browser closed without any payment attempt. Only checkbox/disabled-button copy and accessible descriptions changed; server and payment files untouched. Buyer next action: keep the out-of-stock box checked, Replan, Review the $114 checkout, approve once on PayPal sandbox, then supply new receipt IDs/status/amount and refresh result. Documentation-only handoff follows this verified checkpoint.
 
 - 2026-10-05T16:55:26Z: Resumed clean main at 203281e682829824b80bc15ace58171555c1d9ae; worktree/origin/upstream/GitHub authentication verified. User supplied new completed receipt IDs. Independent sandbox GET at 2026-10-05T16:54:23.307Z through existing server-only client and environment wrapper asserted order 7GH61487DG719402X COMPLETED, intent CAPTURE, one purchase unit USD114/item_total114, exact beans1×72/cups-small1×18/oat1×24, exactly one capture 1DR45640TU8797836 COMPLETED USD114. All assertions passed. OAuth + order GET only; no new create/capture, no credential change, no payer details or tokens retained. README/state record actual capture evidence and correct obsolete standalone-demo wording. Original $160 evidence preserved. Buyer refresh confirmation requested; remaining acceptance is unchanged receipt and one-capture post-refresh GET. Documentation-only diff check applies; existing app verification remains valid.
+
+- 2026-10-05T16:55:58Z: Capture evidence checkpoint 7b9778000987b7c50d0577f4a598e2e51a72a7b4 pushed; local HEAD, origin/main and independent remote main match with clean tree. Only README.md and docs/PROJECT_STATE.md changed; diff check passes, existing application checks unchanged. Real $114 capture verified, earlier $160 evidence preserved. Buyer receipt refresh response pending; no additional transaction needed. Documentation-only handoff follows this verified checkpoint.
