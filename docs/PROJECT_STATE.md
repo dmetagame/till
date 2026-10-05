@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: `2026-10-05T14:53:56Z`
+Last updated: `2026-10-05T14:55:21Z`
 Status: `CAFE REPLAN VERIFIED COMPLETE; PAYPAL SLICE FROZEN`
 Active objective: Cafe stock replanning is implemented and live-model/browser verified for Counter Supply. Preserve the frozen PayPal slice and its historical evidence.
 
@@ -46,6 +46,8 @@ Active objective: Cafe stock replanning is implemented and live-model/browser ve
 - One active checkout per browser, three-hour cookie lifetime. A replaced or expired cookie cannot verify an older receipt inside the app; independent PayPal GET remains available. Local storage is never payment evidence.
 
 ## Cafe Replan Checkpoint
+
+- Completed live-model implementation checkpoint `281f1f21bcf73e10a95e012f605a66bc8bd0c3a8` is pushed and independently verified: HEAD, origin/main and remote main match, clean tree. This documentation-only handoff follows the final app implementation.
 
 - Implementation checkpoint `647218d431d040829c592bc1bb075fcc0a169fc7` is pushed to `origin/main`; local HEAD, tracking main and independent remote main match. GitHub authentication reconfirmed. A documentation-only handoff commit follows this implementation record.
 
@@ -153,3 +155,5 @@ Active objective: Cafe stock replanning is implemented and live-model/browser ve
 - Live Gemini diagnosis: guide example application/json was rejected with HTTP 400 INVALID_ARGUMENT. Corrected REST enum to APPLICATION_JSON and thinking enum LOW per official API reference; added regression assertions. Gemini 3.8 Flash repeatedly returned HTTP 503 high demand despite valid model metadata/key. Selected current stable Gemini 3.5 Flash-Lite, officially free-tier and recommended for new low-latency projects; genuine direct proposal returned HTTP 200/STOP, 11400 cents, three required lines, 160/224 vs 120 cap refusals. This is the fixed model choice, not runtime fallback. Browser live acceptance underway; PayPal frozen files unchanged.
 
 - 2026-10-05T14:53:56Z: Live cafe replan acceptance complete with genuine Gemini 3.5 Flash-Lite calls. Dev and production fresh plans total $114 (oat $24, beans $72, small cups $18); 500 cups refused at $160/$120 and premium at $224/$120. Actual server stock toggle clears the old proposal; fresh Replan excludes 500 cups with Out of stock reason, retains premium cap refusal, and returns $114. Removing small cups gives $96 in both builds; live dev Replan restores them to $114. Desktop/mobile 1280×800/390×844 screenshots visually inspected; no overflow, browser console/page errors or PayPal requests. Evidence: screenshots/cafe-gemini-live-initial-desktop.png, cafe-gemini-live-replan-{desktop,mobile}.png and cafe-gemini-live-built-{initial-mobile,replan-mobile,replan-desktop}.png (ignored local evidence). 13 cafe tests, typecheck, scoped lint, build and diff check pass; current actual secret values and server-only cafe markers absent from client assets. Frozen checkout/server/ledger/general-planner files unchanged against cbea3b1. No new order/capture, no PayPal call, no credentials printed/edited/committed. Final scoped implementation checkpoint follows.
+
+- 2026-10-05T14:55:21Z: Final implementation 281f1f2 pushed and independently verified on remote main with a clean tree. Gemini key remains ignored/private; no PayPal calls or credential changes. Live dev supplier restored to its in-stock baseline through its existing control; fresh catalog confirms all five demo products in stock, no proposal until explicit Write the cart. Our QA preview stopped; local dev remains running on 8080. Evidence screenshots/logs preserved; no new disposable source files remain. Scoped work complete; README documents setup and acceptance.
