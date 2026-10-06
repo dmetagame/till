@@ -28,6 +28,7 @@ export function CafeRestock({
   const [plan, setPlan] = useState<CafePlan | null>(null);
   const [removed, setRemoved] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+  const [work, setWork] = useState<"stock" | "replan" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [changed, setChanged] = useState(false);
   const [attempted, setAttempted] = useState(false);
@@ -67,6 +68,7 @@ export function CafeRestock({
     if (operation.current) return;
     operation.current = true;
     setBusy(true);
+    setWork("stock");
     setError(null);
     setPlan(null);
     setRemoved([]);
@@ -78,6 +80,7 @@ export function CafeRestock({
     } finally {
       operation.current = false;
       setBusy(false);
+      setWork(null);
     }
   }
 
@@ -85,6 +88,7 @@ export function CafeRestock({
     if (operation.current) return;
     operation.current = true;
     setBusy(true);
+    setWork("replan");
     setError(null);
     setPlan(null);
     setRemoved([]);
@@ -101,6 +105,7 @@ export function CafeRestock({
     } finally {
       operation.current = false;
       setBusy(false);
+      setWork(null);
     }
   }
 
@@ -160,7 +165,13 @@ export function CafeRestock({
             ) : (
               <ArrowRight size={18} aria-hidden="true" />
             )}
-            {busy ? "Writing the cart…" : attempted || changed ? "Replan" : "Write the cart"}
+            {busy
+              ? work === "stock"
+                ? "Updating stock…"
+                : "Writing the cart…"
+              : attempted || changed
+                ? "Replan"
+                : "Write the cart"}
           </button>
           <p className="ticket-note">
             A proposal first.
@@ -266,8 +277,12 @@ export function CafeRestock({
             <i />
           </span>
           <div>
-            <p>Reading current stock.</p>
-            <p className="ticket-note">Checking your cap. Writing a fresh ticket.</p>
+            <p>
+              {work === "stock"
+                ? "Updating demo supplier stock."
+                : "Waiting for a Gemini proposal."}
+            </p>
+            <p className="ticket-note">No cart is payable until the server validates it.</p>
           </div>
         </div>
       ) : null}
@@ -308,7 +323,8 @@ export function CafeRestock({
             <div className="cart-annotations">
               <RefusalLines items={plan.refused} />
               <p className="cart-provenance">
-                Proposed with Gemini Flash-Lite. Catalog, stock and cap checked by the server.
+                Gemini must return the server’s required cup choice. Catalog, stock and cap checked
+                by the server.
               </p>
               <p className="ticket-note">
                 Removing a line recalculates. Restock needs all three items; Replan to add or

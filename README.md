@@ -2,7 +2,7 @@
 
 Till proposes a cart inside a spending mandate. The completed **PayPal sandbox** slice creates an order, redirects for buyer approval, rechecks the frozen cart on the server, then captures. The agent cannot approve, change the payee, raise the budget, or capture. The cafe sample proposes a fresh Gemini cart after a demo stock change and passes that verified cart into the same buyer-approved sandbox checkout.
 
-**PayPal sandbox · no real money.** All purchases go to the one sandbox business merchant that owns the configured REST app. Catalog vendor names are fictional labels, never PayPal payees. The cafe frontend follows [design.md](design.md): a paper order ticket beside a separate PayPal slip. Other mandates and Grok planning remain available under **Other mandates**; local notes are not payment evidence.
+**PayPal sandbox · no real money.** All purchases go to the one sandbox business merchant that owns the configured REST app. Catalog vendor names are fictional labels, never PayPal payees. The cafe frontend follows [design.md](design.md): a paper order ticket beside a separate PayPal slip. The **Mandates** chooser opens illustrated dinner, repair, gift, travel and custom slips; local notes are not payment evidence.
 
 **Live cafe demo: [till.rouma.online](https://till.rouma.online).** One AWS EC2
 instance runs one Till Node process behind Caddy HTTPS. The October 6 deployment
@@ -116,9 +116,17 @@ The proof and inventory belong to this demo server process; restarting it invali
 
 The revised **$180** story has real buyer-approved sandbox evidence: order `2TB52773F8180315G` and its sole capture `3H158002EX0446249` are both **COMPLETED for USD 114.00**, independently verified by PayPal GET on October 5, 2026. Items are exactly one beans ($72), one smaller cup pack ($18) and one oat milk ($24). The buyer confirmed receipt refresh retained these IDs, statuses and total; a post-refresh independent GET still showed exactly one unchanged capture. The earlier order evidence above remains unchanged.
 
+## Other mandates and truthful planning
+
+Open **Mandates** (or **Other mandates** at the cafe footer), choose a job, review its editable brief and click **Write the cart**. Untouched dinner, repair and gift samples load their original carts immediately and say **Sample cart · prewritten**. Editing a sample routes through existing custom-brief planning. Travel prefills the Lisbon brief and uses that custom path; no room, pass or trip is booked.
+
+Custom briefs show **Waiting for a model proposal** only while the actual request is pending. There are no timed scoring milestones or artificial minimum delay. An available Grok request yields **Grok proposal**; failure or missing server `XAI_API_KEY` yields **Local catalog rules · model unavailable**, a rules engine, not an on-device model. The current deployed environment uses this local-rules path for custom briefs. Leaving a pending request prevents its late result from replacing another mandate. Cafe is separate: its required Gemini proposal must match the server's predetermined cup; failure remains **Could not replan. Retry.** with no canned payable cart.
+
+All carts show catalog-cents amounts, the cap, remaining budget and stamped refusals. Remove a line to recalculate; rewrite the brief to add or restore one (Replan for cafe). An incomplete cafe restock cannot proceed. The ink payment action opens a separate sandbox review; creating an order still requires acknowledging the cart and clicking **Continue to PayPal**.
+
 ## Run the sandbox purchase
 
-1. Open **Other mandates**, then click **Sunday dinner**. The existing sample cart costs **$61**, below its **$90** cap. Its fictional catalog vendors do not create multiple PayPal payees. Cafe restock now uses its genuine replanned cart for this same checkout after the demo stock change; the completed $160 cafe payment remains historical verification evidence below.
+1. Open **Mandates**, choose **Sunday dinner**, then click **Write the cart** without editing its brief. The existing sample cart costs **$61**, below its **$90** cap. Its fictional catalog vendors do not create multiple PayPal payees. Cafe restock now uses its genuine replanned cart for this same checkout after the demo stock change; the completed $160 cafe payment remains historical verification evidence below.
 2. Optionally remove items, then click **Review PayPal checkout**.
 3. Review the amount and acknowledge the cart. Click **Continue to PayPal**.
 4. Till's server uses OAuth client credentials, creates one `CAPTURE` order with USD item amounts from the catalog, and sends you to PayPal's returned `payer-action` link (otherwise `approve`). Log in as the **personal sandbox buyer** and approve.

@@ -76,18 +76,11 @@ function receiptNotes(payment: PayPalReceipt, notes?: Receipt): Receipt {
 type Phase =
   "mandates" | "brief" | "planning" | "review" | "pay" | "payment" | "done" | "ledger" | "cafe";
 
-const STEPS = [
-  "Reading the brief",
-  "Scoring the catalog",
-  "Dropping anything outside the mandate",
-  "Preparing a one-time cart for your approval",
-];
-
 const SOURCE_LABEL: Record<PlanSource, string> = {
-  preset: "Sample mandate",
-  grok: "Planned with Grok",
-  device: "Planned on this device",
-  gemini: "Planned with Gemini Flash-Lite",
+  preset: "Sample cart · prewritten",
+  grok: "Grok proposal",
+  device: "Local catalog rules · model unavailable",
+  gemini: "Gemini proposal · server-validated",
 };
 
 export function TillApp() {
@@ -96,7 +89,6 @@ export function TillApp() {
   const [brief, setBrief] = useState(CAFE_BRIEF);
   const [draftKind, setDraftKind] = useState<MandateKind>("cafe");
   const [draftPreset, setDraftPreset] = useState<string | null>(null);
-  const [step, setStep] = useState(0);
   const [plan, setPlan] = useState<Plan | null>(null);
   const [removed, setRemoved] = useState<string[]>([]);
   const [agreed, setAgreed] = useState(false);
@@ -113,7 +105,6 @@ export function TillApp() {
   const cafeProof = useRef<string | undefined>(undefined);
   const checkoutBusy = useRef(false);
   const token = useRef(0);
-  const timers = useRef<number[]>([]);
 
   useEffect(() => {
     if (!["mandates", "brief", "review", "planning", "ledger"].includes(phase)) return;
@@ -181,7 +172,6 @@ export function TillApp() {
     }
     return () => {
       token.current += 1;
-      timers.current.forEach((id) => window.clearTimeout(id));
     };
   }, []);
 
@@ -250,14 +240,8 @@ export function TillApp() {
 
   const budgetPreview = parseBudget(brief);
 
-  function clearTimers() {
-    timers.current.forEach((id) => window.clearTimeout(id));
-    timers.current = [];
-  }
-
   function openMandates() {
     token.current += 1;
-    clearTimers();
     void beforeEdit(() => setPhase("mandates"));
   }
 
@@ -273,34 +257,20 @@ export function TillApp() {
     const clean = nextBrief.trim();
     if (clean.length < 8) return;
     const run = ++token.current;
-    clearTimers();
     checkoutKey.current = crypto.randomUUID();
     cafeProof.current = undefined;
     setPayment(null);
     setPaymentError(null);
     setBrief(clean);
-    setStep(0);
     setAgreed(false);
     setRemoved([]);
     setFromLedger(false);
     setPhase("planning");
-    STEPS.forEach((_, index) => {
-      const id = window.setTimeout(() => {
-        if (token.current === run) setStep(index);
-      }, index * 420);
-      timers.current.push(id);
-    });
-    const minWait = new Promise((resolve) => {
-      const id = window.setTimeout(resolve, 1600);
-      timers.current.push(id);
-    });
     let next: Plan;
     if (presetId) {
-      await minWait;
       next = planFromPreset(presetId, clean) ?? localPlan(clean);
     } else {
-      const remote = planFn({ data: { brief: clean } }).catch(() => null);
-      const [result] = await Promise.all([remote, minWait]);
+      const result = await planFn({ data: { brief: clean } }).catch(() => null);
       next = result && result.ok ? result.plan : localPlan(clean);
     }
     if (token.current !== run) return;
@@ -468,7 +438,10 @@ export function TillApp() {
             <button
               type="button"
               disabled={paymentBusy}
-              onClick={() => setPhase("ledger")}
+              onClick={() => {
+                token.current += 1;
+                setPhase("ledger");
+              }}
               className="ticket-text-button"
             >
               Local notes <span className="amount">{receipts.length}</span>
@@ -548,7 +521,7 @@ export function TillApp() {
         />
       ) : null}
 
-      {phase === "planning" ? <Planning brief={brief} step={step} /> : null}
+      {phase === "planning" ? <Planning brief={brief} onBack={openMandates} /> : null}
 
       {phase === "review" && plan ? (
         <Review
@@ -609,29 +582,51 @@ export function TillApp() {
   );
 }
 
-function Planning({ brief, step }: { brief: string; step: number }) {
+function Planning({ brief, onBack }: { brief: string; onBack: () => void }) {
+  const budget = parseBudget(brief);
   return (
-    <div className="rise mt-10">
-      <p className="text-sm font-medium text-teal">Working the mandate</p>
-      <h1 className="font-display mt-2 text-3xl font-semibold tracking-tight">{brief}</h1>
-      <ol className="mt-8 space-y-3">
-        {STEPS.map((label, index) => {
-          const state = index < step ? "done" : index === step ? "live" : "wait";
-          return (
-            <li key={label} className="flex items-center gap-3 text-base">
-              <span
-                className={`grid size-6 place-items-center rounded-full text-xs ${
-                  state === "wait" ? "bg-ink/10 text-muted" : "bg-teal text-paper"
-                } ${state === "live" ? "step-live" : ""}`}
-              >
-                {index + 1}
-              </span>
-              <span className={state === "wait" ? "text-muted" : "text-ink"}>{label}</span>
-            </li>
-          );
-        })}
-      </ol>
-    </div>
+    <main
+      className="planning-ticket rise"
+      data-till-view
+      tabIndex={-1}
+      aria-labelledby="planning-title"
+    >
+      <div className="order-ticket pending-slip">
+        <div className="ticket-heading">
+          <p className="ticket-label">Custom brief / proposal pending</p>
+          <span className="ticket-mark" aria-hidden="true">
+            T.
+          </span>
+        </div>
+        <h1 id="planning-title">Waiting for a model proposal.</h1>
+        <div role="status" className="writing-status">
+          <span className="writing-motif" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+          <p>No cart is payable while this request is pending.</p>
+        </div>
+        <div className="pending-brief">
+          <p className="ticket-label">Your brief</p>
+          <p>{brief}</p>
+        </div>
+        {budget ? (
+          <div className="pending-cap">
+            <p className="ticket-label">Your dollar cap</p>
+            <p className="amount">{money(budget)}</p>
+          </div>
+        ) : null}
+        <div className="ticket-tear pending-footer">
+          <p className="ticket-note">
+            If the model is unavailable, Till uses local catalog rules and labels the result.
+          </p>
+          <button type="button" onClick={onBack} className="ticket-text-button">
+            Choose another mandate
+          </button>
+        </div>
+      </div>
+    </main>
   );
 }
 
