@@ -89,8 +89,7 @@ export function MandateComposer({
               Write the cart <ArrowRight size={18} aria-hidden="true" />
             </button>
             <p className="ticket-note">
-              A proposal first.
-              <br />
+              A proposal first. <br />
               Your approval on PayPal.
             </p>
           </div>

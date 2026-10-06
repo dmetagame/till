@@ -174,8 +174,7 @@ export function CafeRestock({
                 : "Write the cart"}
           </button>
           <p className="ticket-note">
-            A proposal first.
-            <br />
+            A proposal first. <br />
             You approve the payment.
           </p>
         </div>
