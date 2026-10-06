@@ -1,10 +1,10 @@
 # Project State
 
-Current status: The illustrated cafe counter is deployed at **https://till.rouma.online**. The user has authorized the proposed all-mandate UI upgrade and truthful planning feedback, now in progress. Preserve prices, the $180 cafe cup rule, Gemini prompt, general server planner, payment guards and historical evidence. No new PayPal order or charge is authorized. Older checkpoints are history.
+Current status: The all-mandate ticket interface and truthful planning feedback are deployed at **https://till.rouma.online**. Cafe remains the default; dinner, repair, gift, travel and custom briefs have illustrated slips and shared carts. All authorized stages are complete. Preserve prices, the $180 cafe cup rule, Gemini prompt, general server planner, payment guards and historical evidence. No new PayPal order or charge was created or is authorized. Older checkpoints are history.
 
-Last updated: `2026-10-06T14:42:23Z`
-Status: `ALL-MANDATE PRESENTATION AND TRUTHFUL FEEDBACK IN PROGRESS`
-Objective: Mandate selection → individual scenario designs → unified carts/errors → truthful loading, then desktop/390px verification and the existing single-process deployment. No PayPal create/capture.
+Last updated: `2026-10-06T15:01:11Z`
+Status: `ALL-MANDATE UI COMPLETE — DEPLOYED AND VERIFIED`
+Objective: Completed mandate selection → scenario slips → shared carts/errors → truthful request feedback and the existing single-process deployment. No PayPal create/capture. Deployed application source: `444c44c0182e44053f5b986d0937ffde9593d541`; a documentation-only handoff commit may follow.
 
 ## Current All-Mandate Checkpoint
 
@@ -33,6 +33,13 @@ Objective: Mandate selection → individual scenario designs → unified carts/e
 
 - Implementation checkpoint `e698d6cd79c636296eef1c5c46b4e640660303bd` was pushed and independently matched remote main. Image e698d6c (SHA256 b518d3412ff6ae9e6de06f9f9a1d1546b651865a879ff5f407cbf7dbb856a382) was deployed to the same EC2 container after stopping its predecessor, with untouched runtime environment/proxy; exactly one Node, zero restarts. HTTPS200 and public no-checkout/no-return capture409 confirmed. Public composer checks pass at1280/390/320/1024, samples retain correct totals/reviews/removal/empty blocking, live missing-XAI-key travel shows local rules $244, genuine cafe Gemini160→114 and separate recovered review pass. No create/capture; stock restored to in-stock.
 - Public screenshots inspected. Caught missing whitespace between the two approval-note sentences when phone CSS hides the desktop br; added a literal space in mandate-composer/cafe-restock only. No payment/policy change. Next: rebuild/redeploy this tiny presentation correction, verify the public phone note, then record final handoff.
+
+
+- Final presentation checkpoint `444c44c0182e44053f5b986d0937ffde9593d541` is pushed and independently matched origin/main. Typecheck, scoped ESLint and the rebuilt Docker image pass; dev/public 390px approval-note whitespace assertions and final screenshot inspection pass. Only two literal text spaces differ from the fully verified e698d6c application source, so payment/cafe guard code and general planner are unchanged; no redundant model/payment transaction was introduced for this correction.
+- Final deployment: image `till-counter:444c44c`, SHA256 `b46b72606dc79560afbba34c2439a280e5aaa6541b5d874d89bc975d6f6b894b`, loaded with matching local/host ID and replaced its predecessor after stopping/removing it. One EC2 Till Node (PID34674), zero restarts, same non-root/512MB/loopback8080/restart policy, untouched private runtime environment and Caddy/public origin. No overlap or second serving process. e698d6c/68f5505 images remain rollback options.
+- Final public smoke: cafe starts in stock under $180, gift sample is $28, mobile sentences read correctly, no overflow/page errors, configured credentials absent from 6 inspected browser HTML/CSS/JS responses. Latest deployed no-cookie/no-return capture POST again returns409 before any capture. This smoke is distinct from the valid signed-snapshot unit fixtures above. Public edited dinner $60 independently takes the existing custom/local-rules path, stays under its cap and does not reuse the original sample. Actual Gemini160→114 acceptance, sample reviews/removal and desktop/390/320/1024 checks are recorded above for the identical application behavior before the two-space correction.
+- Final boundaries: all eight protected files still byte-identical to bf783e7; all three historical README payment-evidence paragraphs intact. No new PayPal order/capture, no credentials/env-file changes, no dependency or provider/prompt change, no visibility change, and no new payment approval requested. Host XAI_API_KEY remains absent: custom briefs use honestly labeled local rules; cafe uses Gemini and can only repeat the server's required cup.
+- Handoff: `/home/rouma/till`, `main` → `origin/main`, application source444c44c verified on the remote. Updated design.md, README and this state alongside scoped commits. Browser screenshots/test harness evidence and test/build logs are retained in ignored screenshots/mandates-* and artifacts/mandates-*; removed only task-created local/host transfer archives and temporary text snippets, and closed the QA browser. Local dev and private access files remain intact. The final documentation-only checkpoint is followed by Git/upstream/remote verification. Next: stop; no additional charge or video is part of this completed UI scope.
 
 ## Previous Visual Refinement Checkpoint
 
