@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowRight, LockKeyhole, ScrollText, ShieldCheck } from "lucide-react";
+import { ArrowRight, LockKeyhole } from "lucide-react";
 import {
   getProduct,
   listPresets,
@@ -14,7 +14,7 @@ import {
 import { planMandate } from "@/lib/till/plan.functions";
 import { loadReceipts, saveReceipts, type Receipt } from "@/lib/till/ledger";
 import type { CheckoutCart, PayPalReceipt } from "@/lib/till/checkout";
-import { isCafeMandate, type CafePlan } from "@/lib/till/cafe";
+import { CAFE_BRIEF, isCafeMandate, type CafePlan } from "@/lib/till/cafe";
 import { CafeRestock } from "./cafe-restock";
 
 const PENDING_CHECKOUT = "till.paypal.pending.v1";
@@ -87,8 +87,8 @@ const SOURCE_LABEL: Record<PlanSource, string> = {
 
 export function TillApp() {
   const planFn = useServerFn(planMandate);
-  const [phase, setPhase] = useState<Phase>("brief");
-  const [brief, setBrief] = useState("");
+  const [phase, setPhase] = useState<Phase>("cafe");
+  const [brief, setBrief] = useState(CAFE_BRIEF);
   const [step, setStep] = useState(0);
   const [plan, setPlan] = useState<Plan | null>(null);
   const [removed, setRemoved] = useState<string[]>([]);
@@ -408,27 +408,25 @@ export function TillApp() {
   }
 
   return (
-    <div className="mx-auto min-h-screen w-full max-w-2xl px-4 pb-24 pt-6 sm:px-6">
-      <header className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <span className="grid size-9 place-items-center rounded-lg bg-teal text-sm font-semibold text-paper">
-            T
+    <div className="till-app">
+      <header className="counter-masthead">
+        <div className="counter-brand">
+          <span className="counter-wordmark">
+            Till<span className="text-teal">.</span>
           </span>
-          <div>
-            <p className="font-display text-xl leading-none font-semibold tracking-tight">Till</p>
-            <p className="text-sm text-muted">Buyer agent</p>
-          </div>
+          <span className="ticket-label">The cafe counter</span>
         </div>
-        <button
-          type="button"
-          disabled={paymentBusy}
-          onClick={() => setPhase("ledger")}
-          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-ink/15 bg-card px-4 text-sm font-medium transition-transform duration-150 ease-out active:scale-95"
-        >
-          <ScrollText className="size-4" aria-hidden="true" />
-          Ledger
-          <span className="tabular-nums text-muted">{receipts.length}</span>
-        </button>
+        <div className="counter-masthead-note">
+          <span className="ticket-label">Restock within your rules</span>
+          <button
+            type="button"
+            disabled={paymentBusy}
+            onClick={() => setPhase("ledger")}
+            className="ticket-text-button"
+          >
+            Local notes <span className="amount">{receipts.length}</span>
+          </button>
+        </div>
       </header>
 
       {paymentError ? (
@@ -443,7 +441,7 @@ export function TillApp() {
       ) : null}
 
       {phase === "payment" ? (
-        <div className="rise mt-10" aria-live="polite">
+        <div className="payment-slip rise" aria-live="polite">
           <p className="text-sm font-medium text-teal">PayPal sandbox · no real money</p>
           <h1 className="font-display mt-2 text-4xl font-semibold tracking-tight">
             {paymentBusy ? "Checking PayPal" : "Checkout not confirmed"}
@@ -578,25 +576,12 @@ function Brief({
   return (
     <div className="rise">
       <h1 className="font-display mt-10 text-4xl leading-tight font-semibold tracking-tight sm:text-5xl">
-        Spend only what you wrote down.
+        Write your mandate.
       </h1>
       <p className="mt-4 max-w-xl text-lg text-muted">
         Till shops a catalog inside a mandate you write. You approve one checkout on PayPal; the
         server checks the frozen cart before capturing. The agent cannot approve or capture.
       </p>
-
-      <ol className="mt-8 grid gap-3 sm:grid-cols-3">
-        {[
-          ["01", "You write the rules"],
-          ["02", "The agent stays inside them"],
-          ["03", "PayPal settles once"],
-        ].map(([index, label]) => (
-          <li key={index} className="rounded-2xl border border-ink/10 bg-card px-4 py-3">
-            <p className="font-display text-sm text-teal">{index}</p>
-            <p className="mt-1 font-medium">{label}</p>
-          </li>
-        ))}
-      </ol>
 
       <form
         className="mt-8 rounded-2xl border border-ink/10 bg-card p-4 sm:p-5"
@@ -836,94 +821,108 @@ function Pay({
   busy: boolean;
 }) {
   return (
-    <div className="rise mt-10">
-      <p className="text-sm font-medium text-teal">PayPal sandbox · no real money</p>
-      <h1 className="font-display mt-2 text-4xl font-semibold tracking-tight">One-time checkout</h1>
-      <p className="mt-3 text-muted">
-        You’ll approve this exact cart on PayPal sandbox. When you return, the server checks the
-        frozen cart before capturing. The agent cannot approve, change the payee, or capture.
-      </p>
-
-      <div className="mt-6 overflow-hidden rounded-2xl border border-ink/10 bg-card">
-        <div className="bg-teal px-5 py-4 text-paper">
-          <p className="text-sm">Amount to capture</p>
-          <p className="font-display text-4xl tabular-nums">{money(total)}</p>
-        </div>
-        <dl className="grid gap-4 px-5 py-5 sm:grid-cols-2">
-          <div>
-            <dt className="text-sm text-muted">Payer</dt>
-            <dd className="font-medium">You</dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted">Agent</dt>
-            <dd className="font-medium">Till, proposal only</dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted">Payee</dt>
-            <dd className="font-medium">Till’s controlled sandbox merchant</dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted">Payment environment</dt>
-            <dd className="inline-flex items-center gap-1 font-medium">
-              <ShieldCheck className="size-4 text-teal" aria-hidden="true" />
-              Sandbox test funds
-            </dd>
-          </div>
-        </dl>
+    <main className="payment-slip rise" aria-labelledby="payment-title">
+      <div className="payment-slip-heading">
+        <span className="ticket-label">PayPal sandbox · no real money</span>
+        <span className="ticket-mark" aria-hidden="true">
+          T.
+        </span>
       </div>
-
-      <label className="mt-4 block text-sm font-medium" htmlFor="address">
-        Delivery note · demo only
-      </label>
-      <input
-        id="address"
-        value={address}
-        disabled={busy}
-        onChange={(event) => onAddress(event.target.value)}
-        className="mt-2 min-h-11 w-full rounded-xl border border-ink/15 bg-card px-3 text-base outline-none focus:border-teal"
-      />
-
-      <p className="mt-2 text-sm text-muted">
-        No delivery is arranged. Fictional catalog vendors are not PayPal payees.
-      </p>
-      <ul className="mt-4 space-y-1 text-sm text-muted">
-        {plan.rules.map((rule) => (
-          <li key={rule}>{rule}</li>
-        ))}
+      <h1 id="payment-title" className="payment-title">
+        Review this ticket.
+      </h1>
+      <p className="ticket-note">{plan.title} · one-time checkout</p>
+      <div className="payment-amount-row">
+        <div>
+          <p className="ticket-label">Amount for approval</p>
+          <p className="amount payment-amount">{money(total)}</p>
+        </div>
+        <p className="approval-stamp">
+          Buyer approval
+          <br />
+          required
+        </p>
+      </div>
+      <ul className="payment-items" aria-label="Checkout items">
+        {lines.map((line) => {
+          const product = getProduct(line.productId);
+          return product ? (
+            <li key={line.productId}>
+              <span>
+                {product.name}
+                {line.qty > 1 ? ` × ${line.qty}` : ""}
+              </span>
+              <span className="amount">{money(product.price * line.qty)}</span>
+            </li>
+          ) : null;
+        })}
       </ul>
-
-      <label className="mt-5 flex min-h-11 items-start gap-3 text-sm">
+      <dl className="payment-parties">
+        <div>
+          <dt>Payee</dt>
+          <dd>Till’s controlled sandbox merchant</dd>
+        </div>
+        <div>
+          <dt>Your cap</dt>
+          <dd className="amount">{money(plan.budgetCents)}</dd>
+        </div>
+      </dl>
+      <p className="payment-explanation">
+        You approve this exact cart on PayPal sandbox. When you return, the server rechecks the
+        frozen cart and current stock before capture. The agent cannot approve or pay.
+      </p>
+      {plan.source !== "gemini" ? (
+        <div className="payment-delivery">
+          <label htmlFor="address" className="ticket-label">
+            Delivery note · demo only
+          </label>
+          <input
+            id="address"
+            value={address}
+            disabled={busy}
+            onChange={(event) => onAddress(event.target.value)}
+          />
+          <p className="ticket-note">No delivery is arranged. Catalog suppliers are fictional.</p>
+        </div>
+      ) : (
+        <p className="ticket-note">
+          Counter Supply is a demo catalog, not a separate PayPal payee. No delivery is arranged.
+        </p>
+      )}
+      <label className="payment-acknowledgement">
         <input
           type="checkbox"
           checked={agreed}
           disabled={busy}
           onChange={(event) => onAgreed(event.target.checked)}
-          className="mt-1 size-4 accent-teal"
         />
         <span>
           I reviewed this cart. I’ll approve payment on PayPal; a new purchase needs a new mandate.
         </span>
       </label>
-
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+      <div className="payment-actions ticket-tear">
         <button
           type="button"
           disabled={busy || !agreed || lines.length === 0 || total <= 0 || total > plan.budgetCents}
           onClick={onCheckout}
-          className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-teal px-5 font-medium text-paper tabular-nums transition-transform duration-150 ease-out active:scale-95 disabled:opacity-40"
+          className="counter-button payment-button"
         >
-          {busy ? "Opening PayPal…" : `Continue to PayPal · ${money(total)}`}
+          {busy ? (
+            "Opening PayPal…"
+          ) : (
+            <>
+              Continue to PayPal · <span className="amount">{money(total)}</span>
+            </>
+          )}
         </button>
-        <button
-          type="button"
-          onClick={onBack}
-          disabled={busy}
-          className="inline-flex min-h-11 items-center justify-center rounded-full border border-ink/15 bg-card px-5 font-medium transition-transform duration-150 ease-out active:scale-95"
-        >
-          Send back
+        <button type="button" onClick={onBack} disabled={busy} className="ticket-text-button">
+          Send back to the ticket
         </button>
       </div>
-    </div>
+      <p className="ticket-note payment-footnote">
+        Sandbox test funds only. Payment status comes from PayPal.
+      </p>
+    </main>
   );
 }
 
@@ -949,86 +948,77 @@ function Done({
     minute: "2-digit",
   });
   return (
-    <div className="rise mt-10">
-      <p className="text-sm font-medium text-teal">PayPal sandbox · no real money</p>
-      <h1 className="font-display mt-2 text-4xl font-semibold tracking-tight">{receipt.title}</h1>
-      <p className="mt-2 text-sm text-muted tabular-nums">
+    <main className="payment-slip receipt-slip rise" aria-labelledby="receipt-title">
+      <div className="payment-slip-heading">
+        <span className="ticket-label">PayPal sandbox · no real money</span>
+        <span className="ticket-mark" aria-hidden="true">
+          T.
+        </span>
+      </div>
+      <h1 id="receipt-title" className="payment-title">
+        {receipt.title}
+      </h1>
+      <p className="ticket-note">
         {when} ·{" "}
         {checking
           ? "Checking PayPal…"
           : payment
             ? "Checked against PayPal"
             : "Local mandate · payment not verified"}
-        {fromLedger ? " · From your local ledger" : ""}
+        {fromLedger ? " · From your local notes" : ""}
       </p>
+      <div className="payment-amount-row">
+        <div>
+          <p className="ticket-label">{payment ? "PayPal order amount" : "Local cart amount"}</p>
+          <p className="amount payment-amount">{money(receipt.total)}</p>
+        </div>
+        {payment ? <span className="approval-stamp">{payment.orderStatus}</span> : null}
+      </div>
       {payment ? (
-        <dl className="mt-5 space-y-3 rounded-2xl border border-ink/10 bg-card px-4 py-4 text-sm">
+        <dl className="payment-identifiers">
           <div>
-            <dt className="text-muted">PayPal order ID</dt>
-            <dd className="break-all font-medium">{payment.orderId}</dd>
+            <dt>PayPal order ID</dt>
+            <dd>{payment.orderId}</dd>
           </div>
           <div>
-            <dt className="text-muted">PayPal order status</dt>
-            <dd className="font-medium">{payment.orderStatus}</dd>
+            <dt>PayPal order status</dt>
+            <dd>{payment.orderStatus}</dd>
           </div>
           <div>
-            <dt className="text-muted">PayPal capture ID</dt>
-            <dd className="break-all font-medium">
-              {payment.captureId ?? "None — no capture returned by PayPal"}
-            </dd>
+            <dt>PayPal capture ID</dt>
+            <dd>{payment.captureId ?? "None — no capture returned by PayPal"}</dd>
           </div>
           <div>
-            <dt className="text-muted">PayPal capture status</dt>
-            <dd className="font-medium">{payment.captureStatus ?? "Not captured"}</dd>
+            <dt>PayPal capture status</dt>
+            <dd>{payment.captureStatus ?? "Not captured"}</dd>
           </div>
         </dl>
       ) : null}
-      <p className="font-display mt-4 text-4xl tabular-nums">{money(receipt.total)}</p>
-      <p className="mt-2 text-muted">{receipt.summary}</p>
-
-      <ul className="mt-6 divide-y divide-ink/10 rounded-2xl border border-ink/10 bg-card">
+      <ul className="payment-items" aria-label="Receipt items">
         {receipt.lines.map((line) => (
-          <li key={line.productId} className="flex items-start justify-between gap-3 px-4 py-3">
-            <div>
-              <p className="font-medium">
-                {line.name}
-                {line.qty > 1 ? ` × ${line.qty}` : ""}
-              </p>
-              <p className="text-sm text-muted">{line.merchant} · fictional catalog label</p>
-            </div>
-            <p className="tabular-nums">{money(line.price * line.qty)}</p>
+          <li key={line.productId}>
+            <span>
+              {line.name}
+              {line.qty > 1 ? ` × ${line.qty}` : ""}
+            </span>
+            <span className="amount">{money(line.price * line.qty)}</span>
           </li>
         ))}
       </ul>
-
-      <div className="mt-6 rounded-2xl border border-ink/10 bg-card px-4 py-4">
-        <p className="text-sm font-medium">What the agent was allowed to do</p>
-        <ol className="mt-3 space-y-2 text-sm text-muted">
-          <li>Propose catalog items inside your mandate.</li>
-          <li>Never approve payment, change the payee, raise the budget, or capture.</li>
-          <li>You approve on PayPal. The server rechecks the frozen cart before capture.</li>
-          <li>Only the PayPal IDs and statuses above are payment evidence.</li>
-        </ol>
-        <p className="mt-3 text-sm">Delivery note (demo only): {receipt.address}</p>
-      </div>
-
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-        <button
-          type="button"
-          onClick={onNew}
-          className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-teal px-5 font-medium text-paper transition-transform duration-150 ease-out active:scale-95"
-        >
+      <p className="payment-explanation">
+        Only the PayPal IDs and statuses above are payment evidence. The agent proposed catalog
+        items; you approved on PayPal and the server checked the frozen cart.
+      </p>
+      <p className="ticket-note">Catalog labels are fictional. No delivery is arranged.</p>
+      <div className="payment-actions ticket-tear">
+        <button type="button" onClick={onNew} className="counter-button plan-button">
           New mandate
         </button>
-        <button
-          type="button"
-          onClick={onLedger}
-          className="inline-flex min-h-11 items-center justify-center rounded-full border border-ink/15 bg-card px-5 font-medium transition-transform duration-150 ease-out active:scale-95"
-        >
-          Open ledger
+        <button type="button" onClick={onLedger} className="ticket-text-button">
+          Open local notes
         </button>
       </div>
-    </div>
+    </main>
   );
 }
 

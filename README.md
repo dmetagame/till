@@ -2,7 +2,49 @@
 
 Till proposes a cart inside a spending mandate. The completed **PayPal sandbox** slice creates an order, redirects for buyer approval, rechecks the frozen cart on the server, then captures. The agent cannot approve, change the payee, raise the budget, or capture. The cafe sample proposes a fresh Gemini cart after a demo stock change and passes that verified cart into the same buyer-approved sandbox checkout.
 
-**PayPal sandbox · no real money.** All purchases go to the one sandbox business merchant that owns the configured REST app. Catalog vendor names are fictional labels, never PayPal payees. The existing mandate UI, sample carts, visual design and Grok planning remain in place.
+**PayPal sandbox · no real money.** All purchases go to the one sandbox business merchant that owns the configured REST app. Catalog vendor names are fictional labels, never PayPal payees. The cafe frontend follows [design.md](design.md): a paper order ticket beside a separate PayPal slip. Other mandates and Grok planning remain available under **Other mandates**; local notes are not payment evidence.
+
+## Single-process Node deployment
+
+The build uses Nitro **node-server**, with one Node listener and no cluster. Build
+with `npm ci` and `npm run build`, then start with `npm start`. The Dockerfile
+builds without credentials and copies only `.output` into the runtime image;
+`.dockerignore` excludes `.env`, `.env.*`, Git history and local test artifacts.
+
+In a dedicated long-running service, configure **one replica in one region**,
+disable sleeping, and disable overlapping deployments. Set these variables in
+the host's private runtime environment, never in Git or browser-prefixed values:
+
+- `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET`: the existing sandbox app pair.
+- `GEMINI_API_KEY`: the existing cafe model key.
+- `PUBLIC_ORIGIN`: the service's public HTTPS origin, without a path or query.
+- `PORT`: the service listener port (`8080` in the Docker image).
+
+`scripts/node-entry.mjs` pins incoming transport URLs to `PUBLIC_ORIGIN` before
+routing, preserving request methods, bodies, cookies and return query fields.
+Checkout's unchanged origin check and return/cancel URL construction therefore
+use the public HTTPS origin; arbitrary forwarded hosts cannot choose it. The
+Node process reads secrets from its runtime environment. No environment file is
+copied into the runtime image.
+
+Checkout authority and inventory remain process-local. A restart, deployment,
+or another replica invalidates unfinished checkout/proposal state; Replan and
+review again. Do not deploy this version to multi-instance serverless. Drain an
+active demo before deploying again. No new sandbox payment is part of frontend
+or deployment verification; the historical receipts below remain evidence.
+
+Railway provisioning currently needs an account with available resources. The
+connected account rejected a new Till project with **“Free plan resource provision
+limit exceeded.”** No public deployment is claimed until the host is provisioned
+and the live checks are recorded in project state.
+
+For AWS, use a single EC2 instance with one Till container and an HTTPS reverse
+proxy, such as [Caddy](https://caddyserver.com/docs/automatic-https). Keep the
+Node listener private to that host and configure `PUBLIC_ORIGIN` to the HTTPS
+hostname. Store the three application keys in the host's private runtime
+environment, outside the repository and image. Do not overlap old and new Till
+containers during deployment. AWS Free Tier coverage depends on the account's
+active credits and expiry; EC2 is not an indefinitely free service.
 
 ## Judge setup
 
@@ -47,9 +89,9 @@ If the checkout URL contains `/checkoutweb/signup`, you are creating an account 
 
 Add `GEMINI_API_KEY` privately to the gitignored root `.env`, without changing the existing PayPal values, and restart `npm run dev`. The loader reads it through the server environment only. The cafe server uses Google’s REST `generateContent` endpoint with `gemini-3.5-flash-lite`, a current stable Flash model with a documented free tier ([model](https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite), [pricing](https://ai.google.dev/gemini-api/docs/pricing)). The key goes in the request header, never the URL. Each **Write the cart/Replan** click makes one capped Gemini Flash-Lite request; there is no background replanning or model fallback.
 
-1. Click **Cafe restock**. The mandate is **“Restock a cafe: oat milk, beans, and cups, under $180, Counter Supply only.”** Start with every catalog item in stock: leave **Mark 500-count cups out of stock** unchecked. Click **Write the cart**. The model sees only product IDs, integer-cent prices, merchant and stock, plus these mandate constraints.
+1. The root opens **Cafe restock**. The mandate is **“Restock a cafe: oat milk, beans, and cups, under $180, Counter Supply only.”** Start with every catalog item in stock: leave the **Mark 500-count cups out of stock** switch off. Click **Write the cart**. The model sees only product IDs, integer-cent prices, merchant and stock, plus these mandate constraints.
 2. The first payable cart must contain one oat milk ($24), one beans ($72) and one 500-count cup pack ($64): **$160**, inside **$180**. The smaller pack is visibly refused: **“The 500-count cups are in stock and fit the cap.”** Premium cups cost $128, making a $224 restock, and are refused for breaking $180. Review is available for this complete cart, but the stock-out demo proceeds without paying it.
-3. Under **Demo supplier**, check **Mark 500-count cups out of stock**. Only that stock flag changes; the previous proposal clears. Click **Replan**. The fresh payable cart must contain one oat milk ($24), one beans ($72) and one smaller cup pack ($18): **$114**. The 500-count cups are now refused as **out of stock**; premium cups remain refused for the **$224/$180 cap**. Keep the checkbox checked.
+3. Under **Demo supplier**, turn on **Mark 500-count cups out of stock**. Only that stock flag changes; the previous proposal clears. Click **Replan**. The fresh payable cart must contain one oat milk ($24), one beans ($72) and one smaller cup pack ($18): **$114**. The 500-count cups are now refused as **out of stock**; premium cups remain refused for the **$224/$180 cap**. Keep the supplier switch on.
 4. Removing a line recalculates the display, but an incomplete restock cannot be paid. Click **Replan** to restore the complete cart; adding or replacing items also requires Replan.
 5. Click **Review PayPal checkout** for the recovered $114 cart. The checkout shows the **$180** mandate and **$114** total. Acknowledge the cart, then **Continue to PayPal · $114.00**. Stop at PayPal for the personal sandbox buyer to approve. PayPal returns through the server callback, which matches the order token and cart version and records that return in signed checkout state before redirecting to Till. A capture POST without that recorded return is refused. Keep stock unchanged and the server running during approval. The receipt must show a new order ID, one capture, both statuses, $114.00 and the three recovered items. Refresh checks that same order without another capture.
 
@@ -65,14 +107,14 @@ The revised **$180** story has real buyer-approved sandbox evidence: order `2TB5
 
 ## Run the sandbox purchase
 
-1. Click **Sunday dinner**. The existing sample cart costs **$61**, below its **$90** cap. Its fictional catalog vendors do not create multiple PayPal payees. Cafe restock now uses its genuine replanned cart for this same checkout after the demo stock change; the completed $160 cafe payment remains historical verification evidence below.
+1. Open **Other mandates**, then click **Sunday dinner**. The existing sample cart costs **$61**, below its **$90** cap. Its fictional catalog vendors do not create multiple PayPal payees. Cafe restock now uses its genuine replanned cart for this same checkout after the demo stock change; the completed $160 cafe payment remains historical verification evidence below.
 2. Optionally remove items, then click **Review PayPal checkout**.
 3. Review the amount and acknowledge the cart. Click **Continue to PayPal**.
 4. Till's server uses OAuth client credentials, creates one `CAPTURE` order with USD item amounts from the catalog, and sends you to PayPal's returned `payer-action` link (otherwise `approve`). Log in as the **personal sandbox buyer** and approve.
 5. PayPal returns through `/api/paypal/checkout?paypal=return` with its order `token` and the frozen cart version. The server matches both, records the order return in signed state, and redirects to Till. Capture then requires that recorded return and the current server-held checkout generation. The server GETs the order and captures only if it is `APPROVED`, belongs to this checkout, and its amount, currency, items and cart version match the frozen cart. It uses the same stable `PayPal-Request-Id` for create and capture. No payee override is accepted.
 6. The receipt displays the **PayPal order ID, capture ID, order status and capture status**, read back from PayPal. There is no local “Paid” label. `PENDING` is not presented as `COMPLETED`.
 
-The delivery-note field is a demo note. This slice does not arrange shipping, calculate tax, or change the payment amount through shipping preferences.
+The delivery-note field on non-cafe mandates is a demo note. This slice does not arrange shipping, calculate tax, or change the payment amount through shipping preferences.
 
 ## Verify the outcomes
 

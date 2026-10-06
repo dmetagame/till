@@ -2,7 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowRight, RefreshCw } from "lucide-react";
 import { money, parseBudget } from "@/lib/till/catalog";
-import { CAFE_REPLAN_ERROR, type CafeCatalog, type CafePlan } from "@/lib/till/cafe";
+import {
+  CAFE_MAX_BUDGET,
+  CAFE_REPLAN_ERROR,
+  type CafeCatalog,
+  type CafePlan,
+} from "@/lib/till/cafe";
 import { getCafeCatalog, replanCafe, setDemoCupsStock } from "@/lib/till/cafe.functions";
 
 export function CafeRestock({
@@ -26,6 +31,7 @@ export function CafeRestock({
   const [attempted, setAttempted] = useState(false);
   const operation = useRef(false);
   const errorRef = useRef<HTMLParagraphElement>(null);
+  const ticketRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -47,6 +53,13 @@ export function CafeRestock({
   useEffect(() => {
     if (error) errorRef.current?.focus({ preventScroll: true });
   }, [error]);
+
+  useEffect(() => {
+    if (plan) {
+      ticketRef.current?.focus({ preventScroll: true });
+      ticketRef.current?.scrollIntoView({ block: "start" });
+    }
+  }, [plan]);
 
   async function updateStock(cupsInStock: boolean) {
     if (operation.current) return;
@@ -100,213 +113,256 @@ export function CafeRestock({
   const budget = plan?.budgetCents ?? parseBudget(brief);
   const cupsInStock = catalog?.products.find((product) => product.id === "cups")?.inStock ?? true;
   const complete = lines.length === 3;
-  const ratio = budget ? Math.min(100, Math.round((total / budget) * 100)) : 0;
 
   return (
-    <div className="rise mt-10">
-      <p className="text-sm font-medium text-teal">Demo supplier · Counter Supply</p>
-      <h1 className="font-display mt-2 text-4xl font-semibold tracking-tight">Cafe restock</h1>
-      <p className="mt-3 text-muted">{brief}</p>
-      <p className="mt-2 text-sm text-muted">
-        The agent proposes a cart. You review checkout and approve on PayPal sandbox.
-      </p>
+    <main className="counter-workspace rise" id="counter">
+      <div className="counter-order">
+        <section className="order-ticket mandate-ticket" aria-labelledby="cafe-mandate">
+          <div className="ticket-heading">
+            <p className="ticket-label">Cafe restock / your mandate</p>
+            <span className="ticket-mark" aria-hidden="true">
+              T.
+            </span>
+          </div>
+          <h1 id="cafe-mandate" className="mandate-title">
+            Oat milk,
+            <br />
+            beans &amp; cups.
+          </h1>
+          <p className="mandate-brief">{brief}</p>
+          <div className="mandate-boundary">
+            <div>
+              <span className="ticket-label">Spend no more than</span>
+              <p className="mandate-cap amount">{money(budget ?? CAFE_MAX_BUDGET)}</p>
+            </div>
+            <div className="mandate-supplier">
+              <span className="ticket-label">One supplier</span>
+              <p>Counter Supply only</p>
+            </div>
+          </div>
+          <div className="ticket-tear mandate-action">
+            <button
+              type="button"
+              disabled={busy || !catalog}
+              onClick={() => void replan()}
+              className="counter-button plan-button"
+            >
+              {attempted || changed ? (
+                <RefreshCw size={18} aria-hidden="true" />
+              ) : (
+                <ArrowRight size={18} aria-hidden="true" />
+              )}
+              {busy ? "Writing the cart…" : attempted || changed ? "Replan" : "Write the cart"}
+            </button>
+            <p className="ticket-note">
+              A proposal first.
+              <br />
+              You approve the payment.
+            </p>
+          </div>
+        </section>
 
-      <div className="mt-6 rounded-2xl border border-ink/10 bg-card p-4 sm:p-5">
-        <p className="text-sm font-medium">Demo supplier</p>
-        <p id="cafe-stock-instructions" className="mt-1 text-sm text-muted">
-          Start with this box unchecked for the $160 cart. Check it to mark the 500-count cups
-          unavailable, then Replan for the $114 replacement.
-        </p>
-        <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-3">
-          <input
-            type="checkbox"
-            aria-describedby="cafe-stock-instructions"
-            checked={!cupsInStock}
-            disabled={busy || !catalog}
-            onChange={(event) => void updateStock(!event.target.checked)}
-            className="size-5 accent-teal"
-          />
-          <span>Mark 500-count cups out of stock</span>
-        </label>
-        <p className="mt-1 text-sm text-muted" aria-live="polite">
-          {!catalog
-            ? "Loading the supplier catalog…"
-            : `500-count cups: ${cupsInStock ? "in stock" : "out of stock"}.`}
-        </p>
+        {error ? (
+          <p ref={errorRef} role="alert" tabIndex={-1} className="counter-alert">
+            {error}
+          </p>
+        ) : null}
+        {busy ? (
+          <p role="status" className="counter-status">
+            Reading current stock. Checking your cap.
+          </p>
+        ) : null}
         {changed ? (
-          <p className="mt-2 text-sm">Stock changed. Replan to get a fresh cart.</p>
+          <p role="status" className="counter-status">
+            Stock changed. Replan to write a fresh ticket.
+          </p>
+        ) : null}
+
+        {plan ? (
+          <section className="cart-section" aria-label="Validated cafe proposal" aria-live="polite">
+            <div className="section-heading">
+              <h2>Your order ticket</h2>
+              <span className="ticket-label text-teal">Counter Supply</span>
+            </div>
+            <p className="cart-summary">{plan.summary}</p>
+            <div className="order-ticket cart-ticket">
+              <div className="cart-column-labels ticket-label">
+                <span>Item / one of each</span>
+                <span>USD</span>
+              </div>
+              {lines.length ? (
+                <ul className="cart-lines" aria-label="Proposed cart">
+                  {lines.map((line) => {
+                    const product = catalog?.products.find((item) => item.id === line.productId);
+                    if (!product) return null;
+                    return (
+                      <li key={line.productId} className="cart-line">
+                        <div className="cart-line-copy">
+                          <p className="cart-item-name">
+                            {product.name}
+                            {line.qty > 1 ? ` × ${line.qty}` : ""}
+                          </p>
+                          <p className="cart-item-reason">{line.why}</p>
+                          <button
+                            type="button"
+                            aria-label={`Remove ${product.name}`}
+                            onClick={() => setRemoved((current) => [...current, product.id])}
+                            className="ticket-text-button"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        <p className="amount cart-line-price">
+                          {money(product.priceCents * line.qty)}
+                        </p>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className="empty-ticket">The ticket is empty. Nothing will be spent.</p>
+              )}
+              <div className="ticket-tear cart-total">
+                <div>
+                  <p className="ticket-label">Proposed total</p>
+                  <p className="amount total-amount" data-testid="cafe-total">
+                    {money(total)}
+                  </p>
+                </div>
+                <p className="unspent">
+                  <span className="amount">{money(plan.budgetCents - total)}</span>
+                  <br />
+                  under your cap
+                </p>
+              </div>
+            </div>
+
+            {plan.refused.length ? (
+              <div className="refusal-section">
+                <h3 className="ticket-label">Left off the ticket</h3>
+                <ul aria-label="Catalog refusals" className="refusal-lines">
+                  {plan.refused.map((item) => (
+                    <li key={item.productId} className="refusal-line">
+                      <span className="refusal-stamp">
+                        {item.productId === "cups"
+                          ? "Out of stock"
+                          : item.productId === "cups-premium"
+                            ? "Over cap"
+                            : "Not needed"}
+                      </span>
+                      <div>
+                        <p className="refusal-name">{item.name}</p>
+                        <p>{item.reason}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+            <p className="cart-provenance">
+              Proposed with Gemini Flash-Lite. Catalog, stock and cap checked by the server.
+            </p>
+            <p className="ticket-note">
+              Removing a line recalculates. Restock needs all three items; Replan to add or restore
+              a line.
+            </p>
+            {plan.checkoutProof && !complete ? (
+              <p id="cafe-checkout-blocked" className="counter-alert">
+                Checkout needs one oat milk, one beans and exactly one cup pack. Click Replan.
+              </p>
+            ) : null}
+            {lines.length && plan.checkoutProof ? (
+              <div className="payment-handoff">
+                <p className="ticket-label">PayPal sandbox · no real money</p>
+                <button
+                  type="button"
+                  disabled={busy || !complete}
+                  aria-describedby={!complete ? "cafe-checkout-blocked" : undefined}
+                  onClick={() => onCheckout({ ...plan, lines, totalCents: total })}
+                  className="counter-button payment-button"
+                >
+                  Review PayPal checkout · <span className="amount">{money(total)}</span>
+                  <ArrowRight size={18} aria-hidden="true" />
+                </button>
+                <p className="ticket-note">Review opens a separate payment slip. No payment yet.</p>
+              </div>
+            ) : null}
+          </section>
         ) : null}
       </div>
 
-      <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => void replan()}
-          className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full bg-teal px-5 font-medium text-paper transition-transform duration-150 ease-out active:scale-95 disabled:opacity-40"
-        >
-          {attempted || changed ? (
-            <RefreshCw className="size-4" aria-hidden="true" />
-          ) : (
-            <ArrowRight className="size-4" aria-hidden="true" />
-          )}
-          {busy ? "Checking the catalog…" : attempted || changed ? "Replan" : "Write the cart"}
-        </button>
-        <button
-          type="button"
-          disabled={busy}
-          onClick={onBack}
-          className="min-h-11 rounded-full border border-ink/15 bg-card px-5 font-medium disabled:opacity-40"
-        >
-          Back to mandates
-        </button>
-      </div>
-
-      {error ? (
-        <p
-          ref={errorRef}
-          role="alert"
-          tabIndex={-1}
-          className="mt-4 rounded-2xl border border-ink/15 bg-card px-4 py-4 text-sm"
-        >
-          {error}
-        </p>
-      ) : null}
-      {busy ? (
-        <p role="status" className="mt-4 text-sm text-muted">
-          Reading current stock and checking the dollar cap.
-        </p>
-      ) : null}
-
-      {plan ? (
-        <section className="mt-6" aria-label="Validated cafe proposal" aria-live="polite">
-          <p className="text-sm font-medium text-teal">
-            Planned with Gemini Flash-Lite · checked by the server
+      <aside className="supplier-slip" aria-labelledby="supplier-title">
+        <div className="supplier-title-row">
+          <p className="ticket-label">Demo supplier</p>
+          <span className="supplier-dot" aria-hidden="true" />
+        </div>
+        <h2 id="supplier-title">Counter Supply</h2>
+        <p className="supplier-intro">A small catalog for the cafe counter.</p>
+        <div className="supplier-stock">
+          <p className="ticket-label">Try a stock-out</p>
+          <label className="supplier-switch" htmlFor="cafe-stock">
+            <span>
+              500-count cups
+              <br />
+              <span className="ticket-note">Mark out of stock</span>
+            </span>
+            <input
+              id="cafe-stock"
+              type="checkbox"
+              role="switch"
+              aria-label="Mark 500-count cups out of stock"
+              aria-describedby="cafe-stock-instructions"
+              checked={!cupsInStock}
+              disabled={busy || !catalog}
+              onChange={(event) => void updateStock(!event.target.checked)}
+            />
+          </label>
+          <p className="stock-fact" aria-live="polite">
+            {!catalog
+              ? "Loading supplier catalog…"
+              : cupsInStock
+                ? "500-count cups are in stock."
+                : "500-count cups are out of stock."}
           </p>
-          <p className="mt-2 text-muted">{plan.summary}</p>
-          <ul className="mt-4 flex flex-wrap gap-2">
-            {[
-              `Spend at most ${money(plan.budgetCents)}`,
-              "Counter Supply only",
-              "In-stock catalog items only",
-            ].map((rule) => (
-              <li
-                key={rule}
-                className="rounded-full border border-ink/10 bg-card px-3 py-1 text-sm"
-              >
-                {rule}
-              </li>
-            ))}
-          </ul>
-          <div className="mt-4 rounded-2xl border border-ink/10 bg-card p-4 sm:p-5">
-            <div className="flex items-end justify-between gap-3">
-              <p className="text-sm text-muted">Against the cap</p>
-              <p className="font-display text-2xl tabular-nums" data-testid="cafe-total">
-                {money(total)}
-              </p>
-            </div>
-            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-ink/10">
-              <div className="h-full rounded-full bg-teal" style={{ width: `${ratio}%` }} />
-            </div>
-            <p className="mt-2 text-sm text-muted tabular-nums">
-              {money(plan.budgetCents - total)} left unspent
-            </p>
-          </div>
-          {lines.length ? (
-            <ul
-              className="mt-4 divide-y divide-ink/10 rounded-2xl border border-ink/10 bg-card"
-              aria-label="Proposed cart"
-            >
-              {lines.map((line) => {
-                const product = catalog?.products.find((item) => item.id === line.productId);
-                if (!product) return null;
-                return (
-                  <li key={line.productId} className="flex gap-3 px-4 py-4">
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium">
-                        {product.name}
-                        {line.qty > 1 ? ` × ${line.qty}` : ""}
-                      </p>
-                      <p className="text-sm text-muted">{product.merchant} · In stock</p>
-                      <p className="mt-1 text-sm">{line.why}</p>
-                    </div>
-                    <div className="flex shrink-0 flex-col items-end gap-2">
-                      <p className="tabular-nums">{money(product.priceCents * line.qty)}</p>
-                      <button
-                        type="button"
-                        aria-label={`Remove ${product.name}`}
-                        onClick={() => setRemoved((current) => [...current, product.id])}
-                        className="min-h-11 text-sm font-medium text-muted underline-offset-2 hover:text-ink hover:underline"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </li>
-                );
-              })}
+          <p id="cafe-stock-instructions" className="ticket-note">
+            Changing demo stock clears the cart. Click Replan for a fresh proposal. Demo stock is
+            shared.
+          </p>
+        </div>
+        {catalog ? (
+          <details className="supplier-catalog">
+            <summary>
+              Supplier catalog <span className="amount">{catalog.products.length} items</span>
+            </summary>
+            <ul aria-label="Demo supplier catalog">
+              {catalog.products.map((product) => (
+                <li key={product.id} className="supplier-product">
+                  <div>
+                    <p>{product.name}</p>
+                    <span className="ticket-note">
+                      {product.inStock ? "In stock" : "Out of stock"}
+                    </span>
+                  </div>
+                  <span className="amount">{money(product.priceCents)}</span>
+                </li>
+              ))}
             </ul>
-          ) : (
-            <p className="mt-4 rounded-2xl border border-ink/10 bg-card p-4 text-muted">
-              No cart proposed. Nothing will be spent.
-            </p>
-          )}
-          {plan.refused.length ? (
-            <div className="mt-6">
-              <p className="text-sm font-medium">Left off on purpose</p>
-              <ul className="mt-2 space-y-2" aria-label="Catalog refusals">
-                {plan.refused.map((item) => (
-                  <li key={item.productId} className="text-sm text-muted">
-                    <span className="text-ink">{item.name}.</span> {item.reason}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-          <p className="mt-4 text-sm text-muted">
-            Removing a line recalculates the total. Checkout needs the complete three-item restock;
-            click Replan to restore or replace items.
-          </p>
-          {plan.checkoutProof && !complete ? (
-            <p
-              id="cafe-checkout-blocked"
-              className="mt-4 rounded-2xl border border-ink/10 bg-card p-4 text-sm"
-            >
-              Checkout needs one oat milk, one beans and exactly one cup pack. Click Replan.
-            </p>
-          ) : null}
-          {lines.length && plan.checkoutProof ? (
-            <button
-              type="button"
-              disabled={busy || !complete}
-              aria-describedby={!complete ? "cafe-checkout-blocked" : undefined}
-              onClick={() => onCheckout({ ...plan, lines, totalCents: total })}
-              className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-teal px-5 font-medium text-paper disabled:opacity-40"
-            >
-              Review PayPal checkout · {money(total)}
-              <ArrowRight className="size-4" aria-hidden="true" />
-            </button>
-          ) : null}
-        </section>
-      ) : null}
-
-      {catalog ? (
-        <section className="mt-8" aria-label="Demo supplier catalog">
-          <p className="text-sm font-medium">Counter Supply catalog · demo inventory</p>
-          <ul className="mt-3 divide-y divide-ink/10 rounded-2xl border border-ink/10 bg-card">
-            {catalog.products.map((product) => (
-              <li key={product.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium">{product.name}</p>
-                  <p className="text-sm text-muted">
-                    {product.inStock ? "In stock" : "Out of stock"}
-                  </p>
-                </div>
-                <p className="shrink-0 text-sm tabular-nums">{money(product.priceCents)}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-    </div>
+          </details>
+        ) : null}
+        <p className="supplier-footnote">
+          The agent writes the ticket.
+          <br />
+          It cannot raise your cap or pay.
+          <br />
+          You approve on PayPal.
+        </p>
+      </aside>
+      <footer className="counter-footer">
+        <button type="button" onClick={onBack} disabled={busy} className="ticket-text-button">
+          Other mandates
+        </button>
+        <p>Counter Supply is a demo catalog.</p>
+      </footer>
+    </main>
   );
 }

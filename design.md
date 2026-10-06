@@ -81,7 +81,8 @@ the rule. Name the unavailable 500-count cups and the premium case's $180 cap.
    No cart appears before Gemini succeeds.
 2. With 500-count cups in stock, show oat milk $24, beans $72 and cups $64;
    total $160. Server refusals show the smaller pack's preference reason and
-   premium $224 cart breaking $180. Gemini cannot change the server's cup choice.
+   premium $224 cart breaking $180. Bring the new ticket into view and focus its
+   region after a successful proposal. Gemini cannot change the server's cup choice.
 3. A native switch labeled **Demo supplier** marks only the 500-count cups
    unavailable. It immediately clears the proposal and payment continuation.
    Explain shared demo inventory without presenting a settings page.
@@ -112,8 +113,10 @@ cart and stamped refusals; separate PayPal and receipt slips; desktop and 390px
 review; production build and deployed public review. A frontend edit may never
 change catalog prices, the $180 cup policy, Gemini prompt or payment guards.
 
-Deployment is one long-running Node process in one Railway replica, sleeping
+Deployment is one long-running Node process in one host instance, sleeping
 disabled, no cluster, serverless or overlapping replicas. Runtime credentials
-belong in the host environment, never source or browser. Restart invalidates
+belong in the host environment, never source or browser. The Node transport
+pins PUBLIC_ORIGIN to the host HTTPS origin before routing; forwarded hosts
+cannot choose a different PayPal return destination. Restart invalidates
 unfinished checkout authority. Verify live $160 → $114 replanning and a refused
 capture request without creating an order or approving a charge.

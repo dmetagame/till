@@ -14,7 +14,7 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "A buyer agent that shops inside a mandate you write, then checks out with a one-time PayPal authorization.",
+          "A cafe restock ticket within your $180 cap. Review the cart, then approve on PayPal sandbox.",
       },
       { name: "theme-color", content: "#f3eee4" },
     ],
@@ -24,7 +24,7 @@ export const Route = createRootRoute({
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,560;0,9..144,640;1,9..144,560&family=Outfit:wght@400;500;600&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600&display=swap",
       },
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/__grok/manifest.webmanifest" },

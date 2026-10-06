@@ -20,7 +20,9 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test:paypal": "node --test scripts/paypal-env.test.mjs && node --experimental-strip-types --test src/lib/till/checkout.test.ts",
-    "test:cafe": "node --test scripts/cafe-env.test.mjs && node --experimental-strip-types --test src/lib/till/cafe.test.ts src/lib/till/cafe-checkout.test.ts src/lib/till/checkout-audit.test.ts"
+    "test:cafe": "node --test scripts/cafe-env.test.mjs && node --experimental-strip-types --test src/lib/till/cafe.test.ts src/lib/till/cafe-checkout.test.ts src/lib/till/checkout-audit.test.ts",
+    "start": "node .output/server/index.mjs",
+    "test:transport": "node --test scripts/public-origin.test.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.4",

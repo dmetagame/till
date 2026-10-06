@@ -170,7 +170,9 @@ export default defineConfig(({ command, isPreview }) => ({
     ...(command === "build" || isPreview
       ? [
           nitro({
-            preset: "vercel",
+            // Checkout authority lives in one Node process, never a serverless pool.
+            preset: "node-server",
+            entry: "./scripts/node-entry.mjs",
             // Auto-registers server/middleware/* (the PWA install page +
             // manifest + head-tag middleware). Nitro v3 defaults serverDir to
             // false, so removing this silently unwires /?install=1 on deploys.
