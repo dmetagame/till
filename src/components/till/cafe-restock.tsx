@@ -9,6 +9,7 @@ import {
   type CafePlan,
 } from "@/lib/till/cafe";
 import { getCafeCatalog, replanCafe, setDemoCupsStock } from "@/lib/till/cafe.functions";
+import { CounterIllustration, SupplierSeal, SupplyGlyph } from "./cafe-graphics";
 
 export function CafeRestock({
   brief,
@@ -115,189 +116,83 @@ export function CafeRestock({
   const complete = lines.length === 3;
 
   return (
-    <main className="counter-workspace rise" id="counter">
-      <div className="counter-order">
-        <section className="order-ticket mandate-ticket" aria-labelledby="cafe-mandate">
-          <div className="ticket-heading">
-            <p className="ticket-label">Cafe restock / your mandate</p>
-            <span className="ticket-mark" aria-hidden="true">
-              T.
-            </span>
-          </div>
+    <main className="counter-workspace" id="counter">
+      <section className="order-ticket mandate-ticket" aria-labelledby="cafe-mandate">
+        <div className="ticket-heading">
+          <p className="ticket-label">Cafe restock / your mandate</p>
+          <span className="ticket-mark" aria-hidden="true">
+            T.
+          </span>
+        </div>
+        <div className="mandate-composition">
           <h1 id="cafe-mandate" className="mandate-title">
             Oat milk,
             <br />
-            beans &amp; cups.
+            beans
+            <br />
+            <span>&amp; cups.</span>
           </h1>
-          <p className="mandate-brief">{brief}</p>
-          <div className="mandate-boundary">
-            <div>
-              <span className="ticket-label">Spend no more than</span>
-              <p className="mandate-cap amount">{money(budget ?? CAFE_MAX_BUDGET)}</p>
-            </div>
-            <div className="mandate-supplier">
-              <span className="ticket-label">One supplier</span>
-              <p>Counter Supply only</p>
-            </div>
+          <div className="mandate-art">
+            <CounterIllustration />
           </div>
-          <div className="ticket-tear mandate-action">
-            <button
-              type="button"
-              disabled={busy || !catalog}
-              onClick={() => void replan()}
-              className="counter-button plan-button"
-            >
-              {attempted || changed ? (
-                <RefreshCw size={18} aria-hidden="true" />
-              ) : (
-                <ArrowRight size={18} aria-hidden="true" />
-              )}
-              {busy ? "Writing the cart…" : attempted || changed ? "Replan" : "Write the cart"}
-            </button>
-            <p className="ticket-note">
-              A proposal first.
-              <br />
-              You approve the payment.
-            </p>
+        </div>
+        <p className="mandate-brief">{brief}</p>
+        <div className="mandate-boundary">
+          <div>
+            <span className="ticket-label">Spend no more than</span>
+            <p className="mandate-cap amount">{money(budget ?? CAFE_MAX_BUDGET)}</p>
           </div>
-        </section>
-
-        {error ? (
-          <p ref={errorRef} role="alert" tabIndex={-1} className="counter-alert">
-            {error}
+          <div className="mandate-supplier">
+            <span className="ticket-label">One supplier</span>
+            <p>Counter Supply only</p>
+          </div>
+        </div>
+        <div className="ticket-tear mandate-action">
+          <button
+            type="button"
+            disabled={busy || !catalog}
+            onClick={() => void replan()}
+            className="counter-button plan-button"
+          >
+            {attempted || changed ? (
+              <RefreshCw size={18} aria-hidden="true" />
+            ) : (
+              <ArrowRight size={18} aria-hidden="true" />
+            )}
+            {busy ? "Writing the cart…" : attempted || changed ? "Replan" : "Write the cart"}
+          </button>
+          <p className="ticket-note">
+            A proposal first.
+            <br />
+            You approve the payment.
           </p>
-        ) : null}
-        {busy ? (
-          <p role="status" className="counter-status">
-            Reading current stock. Checking your cap.
-          </p>
-        ) : null}
-        {changed ? (
-          <p role="status" className="counter-status">
-            Stock changed. Replan to write a fresh ticket.
-          </p>
-        ) : null}
-
-        {plan ? (
-          <section className="cart-section" aria-label="Validated cafe proposal" aria-live="polite">
-            <div className="section-heading">
-              <h2>Your order ticket</h2>
-              <span className="ticket-label text-teal">Counter Supply</span>
-            </div>
-            <p className="cart-summary">{plan.summary}</p>
-            <div className="order-ticket cart-ticket">
-              <div className="cart-column-labels ticket-label">
-                <span>Item / one of each</span>
-                <span>USD</span>
-              </div>
-              {lines.length ? (
-                <ul className="cart-lines" aria-label="Proposed cart">
-                  {lines.map((line) => {
-                    const product = catalog?.products.find((item) => item.id === line.productId);
-                    if (!product) return null;
-                    return (
-                      <li key={line.productId} className="cart-line">
-                        <div className="cart-line-copy">
-                          <p className="cart-item-name">
-                            {product.name}
-                            {line.qty > 1 ? ` × ${line.qty}` : ""}
-                          </p>
-                          <p className="cart-item-reason">{line.why}</p>
-                          <button
-                            type="button"
-                            aria-label={`Remove ${product.name}`}
-                            onClick={() => setRemoved((current) => [...current, product.id])}
-                            className="ticket-text-button"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                        <p className="amount cart-line-price">
-                          {money(product.priceCents * line.qty)}
-                        </p>
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : (
-                <p className="empty-ticket">The ticket is empty. Nothing will be spent.</p>
-              )}
-              <div className="ticket-tear cart-total">
-                <div>
-                  <p className="ticket-label">Proposed total</p>
-                  <p className="amount total-amount" data-testid="cafe-total">
-                    {money(total)}
-                  </p>
-                </div>
-                <p className="unspent">
-                  <span className="amount">{money(plan.budgetCents - total)}</span>
-                  <br />
-                  under your cap
-                </p>
-              </div>
-            </div>
-
-            {plan.refused.length ? (
-              <div className="refusal-section">
-                <h3 className="ticket-label">Left off the ticket</h3>
-                <ul aria-label="Catalog refusals" className="refusal-lines">
-                  {plan.refused.map((item) => (
-                    <li key={item.productId} className="refusal-line">
-                      <span className="refusal-stamp">
-                        {item.productId === "cups"
-                          ? "Out of stock"
-                          : item.productId === "cups-premium"
-                            ? "Over cap"
-                            : "Not needed"}
-                      </span>
-                      <div>
-                        <p className="refusal-name">{item.name}</p>
-                        <p>{item.reason}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-            <p className="cart-provenance">
-              Proposed with Gemini Flash-Lite. Catalog, stock and cap checked by the server.
-            </p>
-            <p className="ticket-note">
-              Removing a line recalculates. Restock needs all three items; Replan to add or restore
-              a line.
-            </p>
-            {plan.checkoutProof && !complete ? (
-              <p id="cafe-checkout-blocked" className="counter-alert">
-                Checkout needs one oat milk, one beans and exactly one cup pack. Click Replan.
-              </p>
-            ) : null}
-            {lines.length && plan.checkoutProof ? (
-              <div className="payment-handoff">
-                <p className="ticket-label">PayPal sandbox · no real money</p>
-                <button
-                  type="button"
-                  disabled={busy || !complete}
-                  aria-describedby={!complete ? "cafe-checkout-blocked" : undefined}
-                  onClick={() => onCheckout({ ...plan, lines, totalCents: total })}
-                  className="counter-button payment-button"
-                >
-                  Review PayPal checkout · <span className="amount">{money(total)}</span>
-                  <ArrowRight size={18} aria-hidden="true" />
-                </button>
-                <p className="ticket-note">Review opens a separate payment slip. No payment yet.</p>
-              </div>
-            ) : null}
-          </section>
-        ) : null}
-      </div>
+        </div>
+      </section>
 
       <aside className="supplier-slip" aria-labelledby="supplier-title">
         <div className="supplier-title-row">
           <p className="ticket-label">Demo supplier</p>
           <span className="supplier-dot" aria-hidden="true" />
         </div>
-        <h2 id="supplier-title">Counter Supply</h2>
+        <div className="supplier-identity">
+          <h2 id="supplier-title">
+            Counter
+            <br />
+            Supply
+          </h2>
+          <SupplierSeal />
+        </div>
         <p className="supplier-intro">A small catalog for the cafe counter.</p>
+        <div
+          className={`supplier-stock-drawing${catalog && !cupsInStock ? " is-unavailable" : ""}`}
+          aria-hidden="true"
+        >
+          <SupplyGlyph productId="cups" />
+          <div>
+            <span className="ticket-label">500-count cups</span>
+            <p>{!catalog ? "Checking stock" : cupsInStock ? "On the shelf." : "Off the shelf."}</p>
+          </div>
+        </div>
         <div className="supplier-stock">
           <p className="ticket-label">Try a stock-out</p>
           <label className="supplier-switch" htmlFor="cafe-stock">
@@ -325,8 +220,7 @@ export function CafeRestock({
                 : "500-count cups are out of stock."}
           </p>
           <p id="cafe-stock-instructions" className="ticket-note">
-            Changing demo stock clears the cart. Click Replan for a fresh proposal. Demo stock is
-            shared.
+            Stock changes clear the cart. Replan for a fresh proposal. Shared demo stock.
           </p>
         </div>
         {catalog ? (
@@ -357,6 +251,166 @@ export function CafeRestock({
           You approve on PayPal.
         </p>
       </aside>
+
+      {error ? (
+        <p ref={errorRef} role="alert" tabIndex={-1} className="counter-alert">
+          {error}
+        </p>
+      ) : null}
+      {busy ? (
+        <div role="status" className="writing-status">
+          <span className="writing-motif" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+          <div>
+            <p>Reading current stock.</p>
+            <p className="ticket-note">Checking your cap. Writing a fresh ticket.</p>
+          </div>
+        </div>
+      ) : null}
+      {changed ? (
+        <p role="status" className="counter-status">
+          Stock changed. Replan to write a fresh ticket.
+        </p>
+      ) : null}
+
+      {plan ? (
+        <section
+          ref={ticketRef}
+          tabIndex={-1}
+          className="cart-section"
+          aria-label="Validated cafe proposal"
+          aria-live="polite"
+        >
+          <div className="section-heading">
+            <h2>Your order ticket</h2>
+            <span className="proposal-label">Proposal · not a payment</span>
+          </div>
+          <p className="cart-summary">{plan.summary}</p>
+          <div className="cart-layout">
+            <div className="order-ticket cart-ticket">
+              <div className="cart-column-labels ticket-label">
+                <span>Item / one of each</span>
+                <span>USD</span>
+              </div>
+              {lines.length ? (
+                <ul className="cart-lines" aria-label="Proposed cart">
+                  {lines.map((line) => {
+                    const product = catalog?.products.find((item) => item.id === line.productId);
+                    if (!product) return null;
+                    return (
+                      <li key={line.productId} className="cart-line">
+                        <span className="cart-product-art">
+                          <SupplyGlyph productId={product.id} />
+                        </span>
+                        <div className="cart-line-copy">
+                          <p className="cart-item-name">
+                            {product.name}
+                            {line.qty > 1 ? ` × ${line.qty}` : ""}
+                          </p>
+                        </div>
+                        <p className="amount cart-line-price">
+                          {money(product.priceCents * line.qty)}
+                        </p>
+                        <div className="cart-line-detail">
+                          <p className="cart-item-reason">{line.why}</p>
+                          <button
+                            type="button"
+                            aria-label={`Remove ${product.name}`}
+                            onClick={() => setRemoved((current) => [...current, product.id])}
+                            className="ticket-text-button"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className="empty-ticket">The ticket is empty. Nothing will be spent.</p>
+              )}
+              <div className="ticket-tear cart-total">
+                <div>
+                  <p className="ticket-label">Proposed total</p>
+                  <p className="amount total-amount" data-testid="cafe-total">
+                    {money(total)}
+                  </p>
+                </div>
+                <p className="unspent">
+                  <span className="amount">{money(plan.budgetCents - total)}</span>
+                  <br />
+                  under your cap
+                </p>
+              </div>
+              <div className="budget-strip">
+                <div className="budget-rule" aria-hidden="true">
+                  <span style={{ transform: `scaleX(${Math.min(total / plan.budgetCents, 1)})` }} />
+                </div>
+                <p className="ticket-label">
+                  {money(total)} of your {money(plan.budgetCents)} cap
+                </p>
+              </div>
+            </div>
+
+            <div className="cart-annotations">
+              {plan.refused.length ? (
+                <div className="refusal-section">
+                  <h3 className="ticket-label">Left off the ticket</h3>
+                  <ul aria-label="Catalog refusals" className="refusal-lines">
+                    {plan.refused.map((item) => (
+                      <li key={item.productId} className="refusal-line">
+                        <span className="refusal-stamp">
+                          {item.productId === "cups"
+                            ? "Out of stock"
+                            : item.productId === "cups-premium"
+                              ? "Over cap"
+                              : "Not needed"}
+                        </span>
+                        <div>
+                          <p className="refusal-name">{item.name}</p>
+                          <p>{item.reason}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              <p className="cart-provenance">
+                Proposed with Gemini Flash-Lite. Catalog, stock and cap checked by the server.
+              </p>
+              <p className="ticket-note">
+                Removing a line recalculates. Restock needs all three items; Replan to add or
+                restore a line.
+              </p>
+            </div>
+          </div>
+          {plan.checkoutProof && !complete ? (
+            <p id="cafe-checkout-blocked" className="counter-alert">
+              Checkout needs one oat milk, one beans and exactly one cup pack. Click Replan.
+            </p>
+          ) : null}
+          {lines.length && plan.checkoutProof ? (
+            <div className="payment-handoff">
+              <p className="ticket-label">PayPal sandbox · no real money</p>
+              <button
+                type="button"
+                disabled={busy || !complete}
+                aria-describedby={!complete ? "cafe-checkout-blocked" : undefined}
+                onClick={() => onCheckout({ ...plan, lines, totalCents: total })}
+                className="counter-button payment-button"
+              >
+                Review PayPal checkout · <span className="amount">{money(total)}</span>
+                <ArrowRight size={18} aria-hidden="true" />
+              </button>
+              <p className="ticket-note">Review opens a separate payment slip. No payment yet.</p>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
       <footer className="counter-footer">
         <button type="button" onClick={onBack} disabled={busy} className="ticket-text-button">
           Other mandates

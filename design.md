@@ -68,7 +68,11 @@ rows, 24px between groups, 32px ticket padding, 48px between main sections.
 Desktop content max-width 1120px, 32px outer padding. The main ticket takes
 the larger column; the supplier slip is 304px, separated by 32px. Their top
 edges share the same grid line, with no margin or decorative transform on the
-panels. Within the mandate, words and the illustration form an asymmetric
+panels. Their first-row paper surfaces also stretch to the same bottom edge.
+The supplier precedes the cart in the document so the phone's stock control
+does not disappear below a long proposal. A successful ticket uses the larger
+column for its illustrated lines and the smaller column for the refusal stamps;
+on phones these stack in that order. Within the mandate, words and the illustration form an asymmetric
 two-column composition, followed by the full-width brief and a cap tear-off.
 At 1040px and below the workspace becomes one column; at 390px the words and
 smaller illustration remain side by side without cropping. A small

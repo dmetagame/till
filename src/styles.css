@@ -9,6 +9,7 @@
   --color-card: #fffdf8;
   --color-teal: #0e6b56;
   --color-stamp: #854132;
+  --color-kraft: #ded3be;
 }
 
 @layer base {
@@ -52,7 +53,7 @@
 }
 
 .rise {
-  animation: rise 420ms ease-out both;
+  animation: ticket-fade 120ms ease-out both;
 }
 
 .step-live {
@@ -76,7 +77,8 @@
 :root {
   --ticket-rule: rgb(28 25 21 / 15%);
   --ticket-rule-strong: rgb(28 25 21 / 30%);
-  --ticket-shadow: 2px 3px 0 rgb(28 25 21 / 4%);
+  --ticket-shadow: 0 1px 2px rgb(28 25 21 / 5%), 0 8px 24px -16px rgb(28 25 21 / 22%);
+  --counter-ease: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 :focus-visible {
@@ -95,6 +97,16 @@
   padding: 24px 32px 64px;
   margin: 0 auto;
 }
+.till-app::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%231c1915' filter='url(%23grain)' opacity='.6' d='M0 0h180v180H0z'/%3E%3C/svg%3E")
+    repeat;
+  z-index: -1;
+}
 .counter-masthead {
   display: flex;
   justify-content: space-between;
@@ -107,6 +119,10 @@
   display: flex;
   align-items: baseline;
   gap: 24px;
+}
+.counter-brand > .ticket-label {
+  padding-left: 24px;
+  border-left: 1px solid var(--ticket-rule-strong);
 }
 .counter-wordmark {
   font-family: var(--font-display);
@@ -149,11 +165,8 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) 304px;
   gap: 32px;
-  align-items: start;
+  align-items: stretch;
   padding-top: 40px;
-}
-.counter-order {
-  min-width: 0;
 }
 .order-ticket {
   border: 1px solid var(--ticket-rule);
@@ -163,6 +176,10 @@
 }
 .mandate-ticket {
   padding: 32px 32px 0;
+  border-top: 3px solid var(--color-teal);
+  display: flex;
+  flex-direction: column;
+  grid-column: 1;
 }
 .ticket-heading {
   display: flex;
@@ -177,13 +194,31 @@
   font-size: 28px;
   line-height: 1;
 }
+.mandate-composition {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 0;
+  flex: 1;
+}
 .mandate-title {
   font-family: var(--font-display);
-  font-size: 72px;
+  font-size: 66px;
   font-weight: 400;
   line-height: 1.02;
   letter-spacing: -0.025em;
-  padding: 32px 0 24px;
+}
+.mandate-title > span {
+  color: var(--color-teal);
+}
+.mandate-art {
+  min-width: 0;
+}
+.counter-illustration {
+  display: block;
+  width: 100%;
+  color: var(--color-ink);
 }
 .mandate-brief {
   max-width: 480px;
@@ -202,7 +237,7 @@
   color: var(--color-muted);
 }
 .mandate-cap {
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 500;
   line-height: 1.25;
   margin-top: 4px;
@@ -264,6 +299,10 @@
 .plan-button {
   color: var(--color-card);
   background: var(--color-teal);
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--color-teal) 80%, var(--color-ink));
+}
+.counter-button > svg {
+  flex-shrink: 0;
 }
 .plan-button:hover:not(:disabled) {
   background: color-mix(in srgb, var(--color-teal) 80%, var(--color-ink));
@@ -287,11 +326,13 @@
   line-height: 1.5;
 }
 .supplier-slip {
-  margin-top: 24px;
+  margin-top: 0;
   border-top: 3px solid var(--color-teal);
   padding: 24px;
   background: var(--color-card);
   box-shadow: var(--ticket-shadow);
+  grid-column: 2;
+  grid-row: 1;
 }
 .supplier-title-row {
   display: flex;
@@ -307,10 +348,51 @@
 }
 .supplier-slip h2 {
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 36px;
   font-weight: 400;
   line-height: 1.2;
-  margin-top: 16px;
+  letter-spacing: -0.025em;
+}
+.supplier-identity {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+.supplier-seal {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  color: var(--color-teal);
+}
+.supplier-stock-drawing {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 24px;
+  padding: 16px;
+  background: var(--color-paper);
+}
+.supplier-stock-drawing .supply-glyph {
+  width: 54px;
+  height: 68px;
+  flex-shrink: 0;
+}
+.supplier-stock-drawing .ticket-label {
+  color: var(--color-muted);
+  font-size: 10px;
+}
+.supplier-stock-drawing p {
+  font-family: var(--font-display);
+  font-size: 22px;
+  margin-top: 4px;
+}
+.supplier-stock-drawing.is-unavailable {
+  color: var(--color-stamp);
+}
+.supplier-stock-drawing.is-unavailable .supply-glyph {
+  opacity: 0.45;
 }
 .supplier-intro {
   color: var(--color-muted);
@@ -443,8 +525,70 @@
   color: var(--color-muted);
   padding: 20px 4px 0;
 }
+.counter-workspace > .counter-alert,
+.counter-workspace > .counter-status,
+.counter-workspace > .writing-status {
+  grid-column: 1 / -1;
+  margin-top: 0;
+}
+.writing-status {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 20px 24px;
+  margin-top: 20px;
+  background: var(--color-card);
+  border-left: 3px solid var(--color-teal);
+}
+.writing-motif {
+  display: grid;
+  gap: 5px;
+  width: 24px;
+  flex-shrink: 0;
+}
+.writing-motif i {
+  height: 2px;
+  background: var(--color-teal);
+  transform-origin: left;
+}
+.writing-motif i:last-child {
+  width: 65%;
+}
 .cart-section {
-  margin-top: 40px;
+  margin-top: 8px;
+  scroll-margin-top: 24px;
+  min-width: 0;
+  grid-column: 1 / -1;
+}
+.cart-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 304px;
+  gap: 32px;
+  align-items: start;
+  margin-top: 24px;
+}
+.cart-annotations {
+  padding-top: 8px;
+}
+.cart-annotations .refusal-section {
+  margin-top: 0;
+}
+.cart-annotations .refusal-line {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+.cart-annotations .refusal-stamp {
+  justify-self: start;
+  padding: 6px 12px;
+}
+.cart-section:focus:not(:focus-visible) {
+  outline: none;
+}
+.proposal-label {
+  color: var(--color-teal);
+  font-size: 11px;
+  font-weight: 500;
+  text-align: right;
 }
 .section-heading {
   display: flex;
@@ -464,7 +608,7 @@
 }
 .cart-ticket {
   padding: 24px 32px 0;
-  margin-top: 24px;
+  margin-top: 0;
 }
 .cart-column-labels {
   display: flex;
@@ -474,11 +618,38 @@
   border-bottom: 1px solid var(--ticket-rule);
 }
 .cart-line {
-  display: flex;
-  justify-content: space-between;
-  gap: 24px;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: 20px;
+  row-gap: 4px;
   padding: 20px 0 12px;
   border-bottom: 1px solid var(--ticket-rule);
+}
+.cart-product-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  background: var(--color-paper);
+  border-radius: 2px;
+  grid-row: 1 / span 2;
+  align-self: start;
+}
+.cart-line-detail {
+  grid-column: 2 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.cart-line-detail .ticket-text-button {
+  flex-shrink: 0;
+}
+.cart-product-art .supply-glyph {
+  width: 52px;
+  height: 65px;
+  color: var(--color-ink);
 }
 .cart-line:last-child {
   border-bottom: 0;
@@ -505,6 +676,25 @@
   justify-content: space-between;
   align-items: center;
   padding: 24px 0;
+}
+.budget-strip {
+  padding-bottom: 24px;
+}
+.budget-rule {
+  height: 3px;
+  background: var(--color-kraft);
+  overflow: hidden;
+}
+.budget-rule span {
+  display: block;
+  height: 100%;
+  background: var(--color-teal);
+  transform-origin: left;
+}
+.budget-strip .ticket-label {
+  color: var(--color-muted);
+  font-size: 10px;
+  margin-top: 12px;
 }
 .cart-total .ticket-label {
   color: var(--color-muted);
@@ -550,6 +740,9 @@
   align-self: start;
   min-height: 28px;
   border: 1px solid var(--color-stamp);
+  box-shadow:
+    inset 0 0 0 2px var(--color-paper),
+    inset 0 0 0 3px color-mix(in srgb, var(--color-stamp) 60%, transparent);
   color: var(--color-stamp);
   font-size: 10px;
   font-weight: 600;
@@ -572,10 +765,18 @@
   border-top: 1px solid var(--ticket-rule-strong);
   margin-top: 24px;
   padding-top: 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 24px;
+  row-gap: 4px;
 }
 .payment-handoff .counter-button {
-  width: 100%;
-  margin: 12px 0;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+.payment-handoff .ticket-note {
+  grid-column: 1;
 }
 .empty-ticket {
   padding: 24px 0;
@@ -587,6 +788,27 @@
   margin-right: auto;
 }
 
+@media (min-width: 1041px) and (max-width: 1160px) {
+  .mandate-composition {
+    grid-template-columns: minmax(0, 1fr) 224px;
+  }
+  .mandate-title {
+    font-size: 58px;
+  }
+}
+@media (max-width: 1040px) {
+  .counter-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .supplier-slip {
+    max-width: none;
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .cart-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 @media (max-width: 760px) {
   .till-app {
     padding: 20px 16px 40px;
@@ -605,6 +827,8 @@
     display: block;
     margin-top: 8px;
     font-size: 10px;
+    border: 0;
+    padding-left: 0;
   }
   .counter-masthead-note > .ticket-label {
     max-width: 140px;
@@ -620,9 +844,14 @@
     padding: 20px 20px 0;
   }
   .mandate-title {
-    font-size: 44px;
+    font-size: 40px;
     line-height: 1.05;
-    padding: 24px 0 20px;
+  }
+  .mandate-composition {
+    grid-template-columns: minmax(0, 1fr) 136px;
+    gap: 4px;
+    padding: 24px 0;
+    flex: none;
   }
   .mandate-brief {
     font-size: 15px;
@@ -662,8 +891,17 @@
     margin-top: 0;
     padding: 20px;
   }
+  .supplier-identity {
+    margin-top: 16px;
+  }
+  .supplier-slip h2 {
+    font-size: 32px;
+  }
+  .supplier-stock-drawing {
+    margin-top: 20px;
+  }
   .cart-section {
-    margin-top: 32px;
+    margin-top: 8px;
   }
   .section-heading h2 {
     font-size: 28px;
@@ -675,7 +913,26 @@
     padding: 20px 20px 0;
   }
   .cart-line {
-    gap: 12px;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    column-gap: 12px;
+    row-gap: 4px;
+  }
+  .cart-line-detail {
+    display: block;
+  }
+  .cart-product-art {
+    min-height: 56px;
+  }
+  .cart-product-art .supply-glyph {
+    width: 36px;
+    height: 45px;
+  }
+  .cart-item-reason {
+    font-size: 13px;
+  }
+  .proposal-label {
+    font-size: 10px;
+    max-width: 116px;
   }
   .cart-item-name {
     font-size: 16px;
@@ -694,10 +951,108 @@
   .payment-handoff .counter-button {
     flex-wrap: wrap;
     gap: 8px;
+    grid-column: 1;
+    grid-row: auto;
+    width: 100%;
+    margin: 12px 0;
+  }
+  .payment-handoff {
+    grid-template-columns: minmax(0, 1fr);
   }
   .counter-footer {
     align-items: baseline;
     font-size: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .mandate-title {
+    font-size: 32px;
+  }
+  .mandate-composition {
+    grid-template-columns: minmax(0, 1fr) 96px;
+  }
+}
+
+@keyframes ticket-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes supply-settle {
+  from {
+    opacity: 0;
+    transform: translateY(8px) rotate(-2deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes refusal-stamp {
+  from {
+    opacity: 0;
+    transform: scale(1.07) rotate(-3deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes writing-line {
+  50% {
+    opacity: 0.3;
+    transform: scaleX(0.6);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .rise,
+  .mandate-ticket,
+  .supplier-slip {
+    animation: rise 240ms var(--counter-ease) both;
+  }
+  .mandate-art {
+    animation: supply-settle 280ms var(--counter-ease) 40ms both;
+  }
+  .cart-section {
+    animation: rise 240ms var(--counter-ease) both;
+  }
+  .cart-line {
+    animation: rise 200ms var(--counter-ease) both;
+  }
+  .cart-line:nth-child(2) {
+    animation-delay: 40ms;
+  }
+  .cart-line:nth-child(3) {
+    animation-delay: 80ms;
+  }
+  .refusal-stamp {
+    animation: refusal-stamp 180ms var(--counter-ease) 100ms both;
+  }
+  .writing-motif i {
+    animation: writing-line 900ms ease-in-out 4;
+  }
+  .writing-motif i:nth-child(2) {
+    animation-delay: 80ms;
+  }
+  .writing-motif i:nth-child(3) {
+    animation-delay: 160ms;
+  }
+  .counter-button > svg {
+    transition: transform 140ms var(--counter-ease);
+  }
+  .counter-button:hover:not(:disabled) > svg:last-child {
+    transform: translateX(3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mandate-ticket,
+  .supplier-slip,
+  .cart-section {
+    animation: ticket-fade 120ms ease-out both;
   }
 }
 
