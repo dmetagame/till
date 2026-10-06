@@ -145,6 +145,11 @@
 .counter-masthead-note > .ticket-label {
   color: var(--color-muted);
 }
+.counter-nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
 .ticket-text-button {
   min-height: 44px;
   font-size: 14px;
@@ -1219,6 +1224,179 @@
 }
 .receipt-slip .payment-items {
   margin-top: 24px;
+}
+
+/* All-mandate selection; scenario contract lives in design.md. */
+.till-app > .rise.mandate-selection {
+  max-width: none;
+}
+.mandate-selection {
+  margin-top: 40px;
+}
+.selection-heading > .ticket-label {
+  color: var(--color-teal);
+}
+.selection-heading h1 {
+  font-family: var(--font-display);
+  font-size: 56px;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  margin: 12px 0;
+  font-weight: 400;
+}
+.selection-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 32px;
+  align-items: stretch;
+  margin-top: 32px;
+}
+.selection-feature {
+  border-top: 3px solid var(--color-teal);
+  padding: 28px 32px 0;
+  display: flex;
+  flex-direction: column;
+}
+.selection-feature-art {
+  width: 240px;
+  margin: 16px auto 4px;
+}
+.selection-feature h2 {
+  font-family: var(--font-display);
+  font-size: 44px;
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  margin-bottom: 16px;
+}
+.selection-feature h2 span {
+  color: var(--color-teal);
+}
+.selection-feature > .ticket-note {
+  max-width: 400px;
+  margin-bottom: 24px;
+}
+.selection-feature-action {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+  margin-top: auto;
+  padding: 24px 0;
+}
+.selection-feature-action .ticket-label {
+  color: var(--color-muted);
+}
+.selection-feature-action .amount {
+  font-size: 24px;
+  font-weight: 500;
+}
+.selection-list {
+  padding: 24px;
+}
+.selection-list > .ticket-label {
+  color: var(--color-muted);
+  padding: 0 8px 16px;
+}
+.selection-list li + li {
+  border-top: 1px solid var(--ticket-rule);
+}
+.mandate-choice {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 18px;
+  width: 100%;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+  padding: 20px 8px;
+  min-height: 108px;
+  border-radius: 2px;
+  transition: background-color 140ms;
+}
+.mandate-choice:hover {
+  background: var(--color-paper);
+}
+.mandate-choice-mark {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 48px;
+  color: var(--color-teal);
+  background: var(--color-paper);
+}
+.mandate-choice-copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+.mandate-choice-name {
+  font-size: 18px;
+  font-weight: 500;
+}
+.choice-cap {
+  font-size: 13px;
+  color: var(--color-teal);
+}
+.mandate-choice > svg {
+  color: var(--color-muted);
+}
+.selection-footer {
+  padding-top: 24px;
+  border-top: 1px solid var(--ticket-rule);
+  margin-top: 32px;
+}
+@media (max-width: 760px) {
+  .counter-nav {
+    gap: 12px;
+  }
+  .counter-nav .ticket-text-button {
+    font-size: 12px;
+  }
+  .selection-heading h1 {
+    font-size: 40px;
+  }
+  .mandate-selection {
+    margin-top: 24px;
+  }
+  .selection-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .selection-feature {
+    padding: 20px 20px 0;
+  }
+  .selection-feature h2 {
+    font-size: 36px;
+  }
+  .selection-feature-action {
+    gap: 12px;
+    padding: 20px 0;
+  }
+  .selection-feature-action .counter-button {
+    font-size: 14px;
+    padding: 12px;
+  }
+  .selection-list {
+    padding: 20px 12px;
+  }
+  .mandate-choice {
+    gap: 12px;
+    padding: 20px 8px;
+  }
+  .mandate-choice-name {
+    font-size: 17px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mandate-choice {
+    transition:
+      background-color 140ms,
+      transform 140ms var(--counter-ease);
+  }
+  .mandate-choice:active {
+    transform: scale(0.98);
+  }
 }
 @media (max-width: 760px) {
   .payment-slip {

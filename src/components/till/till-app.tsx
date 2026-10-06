@@ -16,6 +16,8 @@ import { loadReceipts, saveReceipts, type Receipt } from "@/lib/till/ledger";
 import type { CheckoutCart, PayPalReceipt } from "@/lib/till/checkout";
 import { CAFE_BRIEF, isCafeMandate, type CafePlan } from "@/lib/till/cafe";
 import { CafeRestock } from "./cafe-restock";
+import { MandateSelection } from "./mandate-selection";
+import { kindForBrief, scenarioFor, type MandateKind } from "./mandate-config";
 
 const PENDING_CHECKOUT = "till.paypal.pending.v1";
 type PendingCheckout = { cart: CheckoutCart; notes: Receipt };
@@ -69,7 +71,8 @@ function receiptNotes(payment: PayPalReceipt, notes?: Receipt): Receipt {
   };
 }
 
-type Phase = "brief" | "planning" | "review" | "pay" | "payment" | "done" | "ledger" | "cafe";
+type Phase =
+  "mandates" | "brief" | "planning" | "review" | "pay" | "payment" | "done" | "ledger" | "cafe";
 
 const STEPS = [
   "Reading the brief",
@@ -89,6 +92,8 @@ export function TillApp() {
   const planFn = useServerFn(planMandate);
   const [phase, setPhase] = useState<Phase>("cafe");
   const [brief, setBrief] = useState(CAFE_BRIEF);
+  const [draftKind, setDraftKind] = useState<MandateKind>("cafe");
+  const [draftPreset, setDraftPreset] = useState<string | null>(null);
   const [step, setStep] = useState(0);
   const [plan, setPlan] = useState<Plan | null>(null);
   const [removed, setRemoved] = useState<string[]>([]);
@@ -239,6 +244,20 @@ export function TillApp() {
   function clearTimers() {
     timers.current.forEach((id) => window.clearTimeout(id));
     timers.current = [];
+  }
+
+  function openMandates() {
+    token.current += 1;
+    clearTimers();
+    void beforeEdit(() => setPhase("mandates"));
+  }
+
+  function chooseMandate(kind: MandateKind) {
+    const scenario = scenarioFor(kind);
+    setDraftKind(kind);
+    setDraftPreset(scenario.presetId);
+    setBrief(scenario.brief);
+    setPhase(kind === "cafe" ? "cafe" : "brief");
   }
 
   async function begin(nextBrief: string, presetId: string | null) {
@@ -414,18 +433,38 @@ export function TillApp() {
           <span className="counter-wordmark">
             Till<span className="text-teal">.</span>
           </span>
-          <span className="ticket-label">The cafe counter</span>
+          <span className="ticket-label">
+            {phase === "mandates" || phase === "ledger"
+              ? "Your mandate"
+              : scenarioFor(
+                  phase === "cafe"
+                    ? "cafe"
+                    : phase === "brief"
+                      ? draftKind
+                      : kindForBrief(plan?.brief ?? active?.brief ?? brief),
+                ).context}
+          </span>
         </div>
         <div className="counter-masthead-note">
-          <span className="ticket-label">Restock within your rules</span>
-          <button
-            type="button"
-            disabled={paymentBusy}
-            onClick={() => setPhase("ledger")}
-            className="ticket-text-button"
-          >
-            Local notes <span className="amount">{receipts.length}</span>
-          </button>
+          <span className="ticket-label">One cart. Your approval.</span>
+          <div className="counter-nav">
+            <button
+              type="button"
+              disabled={paymentBusy}
+              onClick={openMandates}
+              className="ticket-text-button"
+            >
+              Mandates
+            </button>
+            <button
+              type="button"
+              disabled={paymentBusy}
+              onClick={() => setPhase("ledger")}
+              className="ticket-text-button"
+            >
+              Local notes <span className="amount">{receipts.length}</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -472,6 +511,8 @@ export function TillApp() {
         </div>
       ) : null}
 
+      {phase === "mandates" ? <MandateSelection onChoose={chooseMandate} /> : null}
+
       {phase === "brief" ? (
         <Brief
           brief={brief}
@@ -479,7 +520,16 @@ export function TillApp() {
           onChange={setBrief}
           onStart={() => {
             if (isCafeMandate(brief)) setPhase("cafe");
-            else void beforeEdit(() => void begin(brief, null));
+            else
+              void beforeEdit(
+                () =>
+                  void begin(
+                    brief,
+                    draftPreset && brief.trim() === scenarioFor(draftKind).brief
+                      ? draftPreset
+                      : null,
+                  ),
+              );
           }}
           onPreset={(id, text) => {
             if (id === "cafe") {
@@ -493,7 +543,7 @@ export function TillApp() {
       {phase === "cafe" ? (
         <CafeRestock
           brief={brief}
-          onBack={() => setPhase("brief")}
+          onBack={openMandates}
           onCheckout={(proposal) => void reviewCafe(proposal)}
         />
       ) : null}
