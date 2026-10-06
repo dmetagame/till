@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowRight, LockKeyhole } from "lucide-react";
+import { LockKeyhole } from "lucide-react";
 import {
   getProduct,
-  listPresets,
   localPlan,
   money,
   parseBudget,
@@ -17,6 +16,7 @@ import type { CheckoutCart, PayPalReceipt } from "@/lib/till/checkout";
 import { CAFE_BRIEF, isCafeMandate, type CafePlan } from "@/lib/till/cafe";
 import { CafeRestock } from "./cafe-restock";
 import { MandateSelection } from "./mandate-selection";
+import { MandateComposer } from "./mandate-composer";
 import { kindForBrief, scenarioFor, type MandateKind } from "./mandate-config";
 
 const PENDING_CHECKOUT = "till.paypal.pending.v1";
@@ -106,11 +106,18 @@ export function TillApp() {
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [paymentBusy, setPaymentBusy] = useState(false);
   const paymentErrorRef = useRef<HTMLParagraphElement>(null);
+  const appRef = useRef<HTMLDivElement>(null);
   const checkoutKey = useRef("");
   const cafeProof = useRef<string | undefined>(undefined);
   const checkoutBusy = useRef(false);
   const token = useRef(0);
   const timers = useRef<number[]>([]);
+
+  useEffect(() => {
+    if (!["mandates", "brief", "review", "planning", "ledger"].includes(phase)) return;
+    appRef.current?.querySelector<HTMLElement>("[data-till-view]")?.focus({ preventScroll: true });
+    window.scrollTo({ top: 0 });
+  }, [phase]);
 
   useEffect(() => {
     if (!paymentError) return;
@@ -427,7 +434,7 @@ export function TillApp() {
   }
 
   return (
-    <div className="till-app">
+    <div ref={appRef} className="till-app">
       <header className="counter-masthead">
         <div className="counter-brand">
           <span className="counter-wordmark">
@@ -514,10 +521,12 @@ export function TillApp() {
       {phase === "mandates" ? <MandateSelection onChoose={chooseMandate} /> : null}
 
       {phase === "brief" ? (
-        <Brief
+        <MandateComposer
+          kind={draftKind}
           brief={brief}
           budget={budgetPreview}
           onChange={setBrief}
+          onBack={openMandates}
           onStart={() => {
             if (isCafeMandate(brief)) setPhase("cafe");
             else
@@ -530,12 +539,6 @@ export function TillApp() {
                       : null,
                   ),
               );
-          }}
-          onPreset={(id, text) => {
-            if (id === "cafe") {
-              setBrief(text);
-              setPhase("cafe");
-            } else void beforeEdit(() => void begin(text, id));
           }}
         />
       ) : null}
@@ -605,92 +608,6 @@ export function TillApp() {
           onBack={() => setPhase(active ? "done" : "brief")}
         />
       ) : null}
-    </div>
-  );
-}
-
-function Brief({
-  brief,
-  budget,
-  onChange,
-  onStart,
-  onPreset,
-}: {
-  brief: string;
-  budget: number | null;
-  onChange: (value: string) => void;
-  onStart: () => void;
-  onPreset: (id: string, brief: string) => void;
-}) {
-  const presets = listPresets();
-  return (
-    <div className="rise">
-      <h1 className="font-display mt-10 text-4xl leading-tight font-semibold tracking-tight sm:text-5xl">
-        Write your mandate.
-      </h1>
-      <p className="mt-4 max-w-xl text-lg text-muted">
-        Till shops a catalog inside a mandate you write. You approve one checkout on PayPal; the
-        server checks the frozen cart before capturing. The agent cannot approve or capture.
-      </p>
-
-      <form
-        className="mt-8 rounded-2xl border border-ink/10 bg-card p-4 sm:p-5"
-        onSubmit={(event) => {
-          event.preventDefault();
-          onStart();
-        }}
-      >
-        <label htmlFor="brief" className="text-sm font-medium">
-          Mandate
-        </label>
-        <textarea
-          id="brief"
-          value={brief}
-          maxLength={500}
-          rows={4}
-          onChange={(event) => onChange(event.target.value)}
-          placeholder="Weekend in Lisbon for two, under $400, prefer local makers."
-          suppressHydrationWarning
-          className="mt-2 w-full resize-none rounded-xl border border-ink/15 bg-paper px-3 py-3 text-base outline-none focus:border-teal"
-        />
-        <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-muted tabular-nums">
-            {budget
-              ? `Cap detected · ${money(budget)}`
-              : "Name a dollar cap so the agent can stop itself."}
-          </p>
-          <button
-            type="submit"
-            disabled={brief.trim().length < 8}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-teal px-5 font-medium text-paper transition-transform duration-150 ease-out active:scale-95 disabled:opacity-40"
-          >
-            Write the cart
-            <ArrowRight className="size-4" aria-hidden="true" />
-          </button>
-        </div>
-      </form>
-
-      <div className="mt-6">
-        <p className="text-sm font-medium text-muted">Or start from a sample</p>
-        <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-          {presets.map((preset) => (
-            <li key={preset.id}>
-              <button
-                type="button"
-                onClick={() => onPreset(preset.id, preset.brief)}
-                className="flex min-h-11 w-full flex-col items-start rounded-2xl border border-ink/10 bg-card px-4 py-3 text-left transition-transform duration-150 ease-out active:scale-95"
-              >
-                <span className="font-medium">{preset.label}</span>
-                <span className="text-sm text-muted">{preset.hint}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <p className="mt-8 text-sm text-muted">
-        PayPal sandbox · no real money. Catalog vendors are fictional; checkout pays one controlled
-        sandbox merchant.
-      </p>
     </div>
   );
 }

@@ -14,7 +14,12 @@ const MARKS = {
 export function MandateSelection({ onChoose }: { onChoose: (kind: MandateKind) => void }) {
   const cafe = scenarioFor("cafe");
   return (
-    <main className="mandate-selection rise" aria-labelledby="selection-title">
+    <main
+      className="mandate-selection rise"
+      data-till-view
+      tabIndex={-1}
+      aria-labelledby="selection-title"
+    >
       <div className="selection-heading">
         <p className="ticket-label">A job. A cap. Your approval.</p>
         <h1 id="selection-title">Choose a mandate.</h1>

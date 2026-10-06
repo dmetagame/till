@@ -1414,3 +1414,144 @@
     gap: 8px;
   }
 }
+
+/* Alternate mandates share the counter's paper, with their own catalog art. */
+.till-app > .rise.mandate-composer {
+  max-width: none;
+}
+.mandate-composer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 304px;
+  gap: 32px;
+  margin-top: 40px;
+  align-items: stretch;
+}
+.scenario-illustration {
+  display: block;
+  width: 100%;
+  color: var(--color-ink);
+}
+.composer-title {
+  font-size: clamp(44px, 4.5vw, 58px);
+}
+.composer-title > span {
+  color: var(--color-ink);
+}
+.composer-title > span.text-teal {
+  color: var(--color-teal);
+}
+.mandate-form {
+  margin-top: 28px;
+}
+.mandate-form label {
+  display: block;
+  margin-bottom: 10px;
+}
+.mandate-form textarea {
+  width: 100%;
+  min-height: 110px;
+  resize: vertical;
+  border: 1px solid var(--ticket-rule);
+  border-radius: 4px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  padding: 16px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+.mandate-form textarea:focus-visible {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 3px;
+}
+.composer-boundary {
+  display: flex;
+  gap: 20px;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 24px 0;
+}
+.composer-boundary .mandate-cap {
+  font-size: 36px;
+}
+.composer-boundary > .ticket-note {
+  max-width: 180px;
+  text-align: right;
+}
+.mandate-guide .guide-source {
+  margin-top: 16px;
+}
+.mandate-path {
+  list-style: none;
+  margin: 28px 0 0;
+  padding: 0;
+}
+.mandate-path li {
+  display: flex;
+  gap: 12px;
+  padding: 18px 0;
+  border-top: 1px solid var(--ticket-rule);
+}
+.mandate-path li > span {
+  display: grid;
+  place-items: center;
+  flex: 0 0 24px;
+  height: 24px;
+  color: var(--color-teal);
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 12px;
+}
+.mandate-path li p:first-child {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.guide-demo {
+  margin: 24px 0 12px;
+}
+[data-till-view]:focus:not(:focus-visible) {
+  outline: none;
+}
+@media (max-width: 1040px) {
+  .mandate-composer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mandate-guide {
+    grid-column: 1;
+    grid-row: auto;
+    margin-top: 0;
+  }
+  .mandate-path {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+@media (max-width: 760px) {
+  .mandate-composer {
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .composer-title {
+    font-size: 40px;
+  }
+  .composer-boundary .mandate-cap {
+    font-size: 28px;
+  }
+  .mandate-path {
+    display: block;
+  }
+}
+@media (max-width: 360px) {
+  .composer-title {
+    font-size: 34px;
+  }
+  .composer-boundary {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .composer-boundary > .ticket-note {
+    max-width: none;
+    text-align: left;
+  }
+}

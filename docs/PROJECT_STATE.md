@@ -2,7 +2,7 @@
 
 Current status: The illustrated cafe counter is deployed at **https://till.rouma.online**. The user has authorized the proposed all-mandate UI upgrade and truthful planning feedback, now in progress. Preserve prices, the $180 cafe cup rule, Gemini prompt, general server planner, payment guards and historical evidence. No new PayPal order or charge is authorized. Older checkpoints are history.
 
-Last updated: `2026-10-06T13:26:46Z`
+Last updated: `2026-10-06T14:30:02Z`
 Status: `ALL-MANDATE PRESENTATION AND TRUTHFUL FEEDBACK IN PROGRESS`
 Objective: Mandate selection → individual scenario designs → unified carts/errors → truthful loading, then desktop/390px verification and the existing single-process deployment. No PayPal create/capture.
 
@@ -15,6 +15,10 @@ Objective: Mandate selection → individual scenario designs → unified carts/e
 - Next: implement and verify each stage in order, commit/push scoped checkpoints, then deploy and verify final flows without PayPal continuation. No video is included in this scoped UI task.
 - Selection stage: new UI-only `mandate-config.ts` reads existing dinner/repair/gift briefs from listPresets; travel prefills the existing Lisbon custom brief. `mandate-selection.tsx` adds the illustrated cafe entry and distinct job list. `till-app.tsx` adds chooser/draft selection and contextual masthead, through existing cancel-before-edit authority. Untouched samples retain their original preset ID; editing routes through existing custom planning. No server changes.
 - Selection verification: typecheck and scoped ESLint pass; real dev-browser chooser shows five alternate jobs, phone has no horizontal overflow, and choosing dinner opens its editable original $90 brief with the dinner masthead. Desktop/390px screenshots inspected; refined the inherited 720px width constraint to use the full counter workspace. Existing planning theater is still present at this intermediate checkpoint and will be removed in the authorized fourth stage. No PayPal create/capture or model call.
+
+- Selection checkpoint `e855146cc5478ae02e88147da50e5b1a7426177a` was pushed and independently matched remote main.
+- Scenario stage: authored paper-and-ink grocery, cracked-phone, wooden-dinosaur, folded-map and custom-brief SVGs in `mandate-graphics.tsx`; `mandate-composer.tsx` replaces the old generic brief form. All briefs remain editable, actual cap parsing is unchanged, untouched samples explicitly say prewritten, and travel explains that no booking is arranged. UI navigation focuses the new view and resets scroll; payment return/capture logic is untouched.
+- Scenario verification: typecheck and scoped ESLint pass after removing an unused import; desktop dinner ticket/guide tops and bottoms match. Real 390px dinner, repair, gift and travel screens show original briefs/caps, no horizontal overflow, and screenshots were visually inspected. Only preset/composer navigation was exercised, without model or PayPal create/capture calls. Next: share the illustrated cart/refusal/error layout, then replace the timed planning theater.
 
 ## Previous Visual Refinement Checkpoint
 
