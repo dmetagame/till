@@ -2,8 +2,8 @@
 
 Current status: The public repository's cafe frontend is being rebuilt from root `design.md`, followed by a single-process Node deployment. The live cafe path stays the **$180 story** ($160 in stock, $114 recovered). Older checkpoints are history. Prices, the cup rule, Gemini prompt and all three payment guard files are protected; no sandbox charge is authorized.
 
-Last updated: `2026-10-06T12:20:00Z`
-Status: `FRONTEND AND NODE BUILD VERIFIED LOCALLY — HOST ACCESS PENDING`
+Last updated: `2026-10-06T12:22:33Z`
+Status: `FRONTEND PUSHED AND VERIFIED — AWS LOGIN / HTTPS HOSTNAME PENDING`
 Active objective: Rebuild the cafe counter frontend from design.md, deploy one long-running Node service, and verify public $160 → $114 replanning plus refused capture before return. Stop before buyer approval or any create/capture transaction.
 
 ## Current Rebuild and Deployment Checkpoint
@@ -20,7 +20,9 @@ Active objective: Rebuild the cafe counter frontend from design.md, deploy one l
 - Secret-presence scan checked 122 tracked/new source files and 13 public assets: no actual configured PayPal/Gemini values present. `.env` and `.env.*` remain ignored and untouched. Only variable names/presence were output.
 - Enabled PayPal-slip buttons have text contrast ratios 4.90–17.23 and 44–48px heights; desktop/390px review shows $114.00 with oat $24, beans $72 and small cups $18. Buyer acknowledgement was checked only to inspect the enabled button; Continue to PayPal was never clicked. Screenshot evidence remains local under `screenshots/counter-*`.
 - Railway provisioning failed with “Free plan resource provision limit exceeded”; no Till service/project or variables were created, and the existing unrelated project was untouched. User requested another free option, then asked about AWS and confirmed active credits (user-reported, not independently inspected). Official Northflank pricing lists two free always-on Sandbox services; AWS EC2 can run one process, but its new-account Free plan is time/credit limited. AWS CLI 2.36.25 is installed but STS authentication is unavailable. Requested secure `aws login --profile till-deploy --region us-east-1` and an HTTPS hostname/free-hostname preference. AWS access and hostname are pending; no public deployment is claimed.
-- Next: finish the scoped frontend/Node checkpoint and verify its push; once AWS access is ready, inspect eligible EC2 capacity/credits, provision one instance with private runtime variables and an HTTPS origin, then verify public replanning and pre-return capture refusal without creating an order. Do not ask for buyer approval.
+- Frontend/Node implementation checkpoint `df725251e0b53061d8584fcc6a89a7d7f6f3adab` is pushed to origin/main. HEAD, tracking main and independent remote main match; worktree was clean. Protected-source diff against `7ec5885` is empty. This documentation-only handoff may follow that verified implementation commit.
+- Cleaned up the disposable resolver workspace, network-disabled test container, QA browsers and Node listeners on 8082/8083. Retained local screenshot/build evidence and deployment image `till-counter:df72525`. Local dev remains on 8080 and responds 200. No secret file or unrelated user artifact was removed.
+- Next: once secure AWS login and hostname preference are ready, inspect eligible EC2 capacity/credits, provision one instance with private runtime variables and an HTTPS origin, then verify public replanning and pre-return capture refusal without creating an order. Do not ask for buyer approval. No public app URL or hosted acceptance is claimed.
 
 ## Historical Visibility Checkpoint
 
@@ -259,3 +261,5 @@ Active objective: Rebuild the cafe counter frontend from design.md, deploy one l
 - 2026-10-05T21:44:33Z: Visibility documentation checkpoint 77ede6eac4f851af3c5796f29efceb2acd408cce pushed and independently verified: HEAD, upstream and remote main match, clean tree. Diff check passed; only docs/PROJECT_STATE.md changed. Public access verified through both authenticated and anonymous GitHub responses. No application or credential changes, PayPal/Gemini calls or transactions; objective complete. This final documentation-only handoff records the verified checkpoint.
 
 - 2026-10-06T11:49:14Z: Reconciled new frontend/deployment scope against clean public main 7ec5885d7c8f444ff495ed7cf98f3b09ed87ba2d and matching remote main. Read skills and wrote root design.md before UI code. Railway CLI authenticated; existing Vercel build target must gain a single-process Node path. Prices, $180 cup policy, Gemini prompt, protected guard files, credentials and historical payment records unchanged. No model/payment request yet. Design checkpoint precedes frontend work.
+
+- 2026-10-06T12:22:33Z: Cafe counter frontend and single-process Node/Docker runtime verified and pushed as df725251e0b53061d8584fcc6a89a7d7f6f3adab. Real local Gemini $160 → $114 and separate desktop/390px payment slip verified; all protected payment/cafe sources unchanged. Railway resource-limit blocker prompted AWS selection; user reports active credits. Await named AWS CLI login and HTTPS hostname. No PayPal order/capture or hosted deployment.
