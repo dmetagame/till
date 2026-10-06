@@ -1,12 +1,20 @@
 # Project State
 
-Current status: The illustrated cafe counter is deployed and verified at **https://till.rouma.online** on the existing single-process AWS EC2 service behind Caddy HTTPS. Panel alignment, custom supply graphics and accessible motion are complete. The live cafe path stays the **$180 story** ($160 in stock, $114 recovered). Older checkpoints are history. Prices, the cup rule, Gemini prompt and all three payment guard files are unchanged; no sandbox order or charge was created.
+Current status: The illustrated cafe counter is deployed at **https://till.rouma.online**. The user has authorized the proposed all-mandate UI upgrade and truthful planning feedback, now in progress. Preserve prices, the $180 cafe cup rule, Gemini prompt, general server planner, payment guards and historical evidence. No new PayPal order or charge is authorized. Older checkpoints are history.
 
 Last updated: `2026-10-06T13:26:46Z`
-Status: `VISUAL REFINEMENT DEPLOYED AND VERIFIED — NO PAYPAL ORDER OR CHARGE`
-Objective completed: Aligned panels, custom cafe graphics and accessible motion verified on desktop/390px and deployed without changing payment or cafe policy. Stop before any new buyer approval.
+Status: `ALL-MANDATE PRESENTATION AND TRUTHFUL FEEDBACK IN PROGRESS`
+Objective: Mandate selection → individual scenario designs → unified carts/errors → truthful loading, then desktop/390px verification and the existing single-process deployment. No PayPal create/capture.
 
-## Current Visual Refinement Checkpoint
+## Current All-Mandate Checkpoint
+
+- 2026-10-06: Read handoff, design.md and repository guidance; clean `/home/rouma/till`, `main` → `origin/main`, HEAD `bf783e772e01df8df3d95f3f9cebd2245713d246` independently matches remote main; GitHub auth verified. User approved the proposed order; this supersedes the previous frontend stop for the listed presentation/client-planning changes only.
+- Reused installed frontend-design/interface-design/animation/accessibility/browser skills. Mystique Mide remains absent from installed catalogs. Updated root design.md before UI changes with scenario illustrations, chooser, shared ticket states and truthful request/provenance semantics.
+- Read actual source: dinner/repair/gift samples are prewritten; travel is custom-brief planning; custom briefs attempt Grok then local rules. Four planning milestones currently advance by timers and include an artificial 1.6s delay. Remove that theater; preserve server providers/prompts. Cafe Gemini can only repeat the server-selected cup.
+- Protect eight policy/payment/planner sources byte-for-byte against bf783e7 and retain all historical order evidence. No dependency, model-provider, price, catalog-product, cookie, order/capture rule or credentials change. Deployment must preserve one Node process and current runtime environment.
+- Next: implement and verify each stage in order, commit/push scoped checkpoints, then deploy and verify final flows without PayPal continuation. No video is included in this scoped UI task.
+
+## Previous Visual Refinement Checkpoint
 
 - 2026-10-06: Read this handoff, repo instructions and root design.md; clean `/home/rouma/till`, `main` → `origin/main`, HEAD `3a1b9b28e3ec3d6a041d020b0323af08e6b04910` independently matches remote main; GitHub authentication verified. This user-authorized visual refinement supersedes the preceding stop for presentation/deployment only.
 - Installed frontend-design, interface-design, 12-principles-of-animation and accessible-animation skills loaded before UI changes. Mystique Mide remains absent from installed skills; follow the explicit design-first method. No new dependency planned.

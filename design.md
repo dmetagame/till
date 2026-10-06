@@ -6,6 +6,59 @@ The user's specified Mystique Mide method governs the sequence; no installed
 Mystique Mide skill was found in the local skill catalogs. The installed
 frontend-design and interface-design skills supply the craft and review checks.
 
+## October 6: all mandates, one ticket system
+
+This authorized extension follows this order: mandate selection; individual
+scenario composition; shared cart/error presentation; truthful planning feedback.
+The cafe remains the default and flagship. Prices, catalog, the $180 cafe cup
+rule, existing Gemini prompt, general server planner and payment guards remain
+byte-identical. No PayPal order, approval or capture belongs to this task.
+
+Selection is an illustrated cafe ticket beside a compact list of the other
+jobs, not a grid of identical cards. A person can choose dinner, screen repair,
+a dinosaur gift, a travel brief or their own brief. Selecting a job opens its
+editable mandate before writing a cart. Existing dinner/repair/gift sample
+briefs and caps come from listPresets; an untouched sample uses its original
+prewritten cart. Travel prefills the existing Lisbon example and uses the
+existing custom-brief planner; do not invent a travel preset or booking.
+
+Each scenario keeps the paper/ink/teal/kraft palette and display/plain faces:
+dinner gets groceries and a bakery-bag drawing; repair gets a cracked-screen
+work order; gift gets a wooden-dinosaur gift tag; travel gets a folded map and
+transit ticket. These are decorative catalog illustrations, not real stock,
+reservations or fulfillment evidence. The header changes to the selected job;
+the chooser and local notes use neutral Till labels. The shared cart has
+illustrated catalog lines, cents-based prices, the actual cap/remaining amount,
+and stamped refusals with the existing reason text. Supplier names stay demo
+catalog labels; every PayPal slip still pays the same controlled merchant.
+
+Desktop chooser and composers use the existing asymmetric counter grid and
+aligned paper edges; phone uses one column with 44px controls, readable prices,
+no cropped text, and visible focus. Composers use at most 58px display text on
+desktop/40px on phone so editable briefs and the write action fit naturally.
+Each cart uses the same ticket and refusal components as the cafe. Empty carts
+and errors use the same paper vocabulary. Cafe still requires all three lines;
+other mandates retain their existing remove-only behavior. PayPal and receipt
+business wiring, verified statuses and IDs remain unchanged.
+
+Replace the four timer-driven planning steps and artificial 1.6s delay. Samples
+load immediately and say **Sample cart · prewritten**. While a genuine custom
+request is outstanding, say **Waiting for a model proposal**; do not display
+invented scoring/tool milestones. A successful request says **Grok proposal**.
+The existing fallback says **Local catalog rules · model unavailable**; it is
+a rules engine, not an on-device model. Do not change either provider or prompt.
+Cafe source copy stays separate and admits that the server fixes the accepted
+cup. Leaving a pending request invalidates its UI run so late results cannot
+replace a newly selected mandate. Loading decoration is bounded and has the
+existing reduced-motion behavior. Keep actual PayPal errors verbatim.
+
+Verify selector → each mandate → cart → payment review without continuing to
+PayPal. Verify sample provenance, missing-provider fallback, a delayed/failing
+request fixture (explicitly test-only), late-result navigation, removal/empty
+cart, actual cafe $160 → $114, desktop/390px and reduced motion. Re-run existing
+payment/cafe/transport guards. Deploy only the final verified build by replacing
+the one existing Node process, preserving private runtime variables and HTTPS.
+
 ## Feel and audience
 
 October 6 refinement: the first rebuild was too plain and the supplier slip's
