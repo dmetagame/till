@@ -1,10 +1,17 @@
 # Project State
 
-Current status: Till is deployed at **https://till.rouma.online** on one AWS EC2 instance running one Node service behind Caddy HTTPS. The rebuilt cafe counter and live Gemini sequence are verified on desktop and 390px. The live cafe path stays the **$180 story** ($160 in stock, $114 recovered). Older checkpoints are history. Prices, the cup rule, Gemini prompt and all three payment guard files are protected; no sandbox charge was created or authorized.
+Current status: Till is deployed at **https://till.rouma.online** on one AWS EC2 instance running one Node service behind Caddy HTTPS. Visual refinement is in progress following the user's feedback about misaligned and overly simple panels. The live cafe path stays the **$180 story** ($160 in stock, $114 recovered). Older checkpoints are history. Prices, the cup rule, Gemini prompt and all three payment guard files are protected; this task must create no sandbox charge.
 
 Last updated: `2026-10-06T12:49:45Z`
-Status: `DEPLOYED AND VERIFIED — STOPPED BEFORE PAYPAL ORDER CREATION / APPROVAL`
-Objective completed: Cafe counter frontend rebuilt from design.md, one long-running Node service deployed, live $160 → $114 replanning and refused unauthorized pre-return capture verified. No buyer approval, PayPal create or PayPal capture was requested.
+Status: `VISUAL REFINEMENT — PAYMENT AND CAFE POLICY PROTECTED`
+Objective: Correct panel alignment, add product-specific supply graphics and accessible motion, verify desktop/390px, and replace the existing single Node service without changing checkout or creating an order.
+
+## Current Visual Refinement Checkpoint
+
+- 2026-10-06: Read this handoff, repo instructions and root design.md; clean `/home/rouma/till`, `main` → `origin/main`, HEAD `3a1b9b28e3ec3d6a041d020b0323af08e6b04910` independently matches remote main; GitHub authentication verified. This user-authorized visual refinement supersedes the preceding stop for presentation/deployment only.
+- Installed frontend-design, interface-design, 12-principles-of-animation and accessible-animation skills loaded before UI changes. Mystique Mide remains absent from installed skills; follow the explicit design-first method. No new dependency planned.
+- Browser measured mandate top 145.80px and supplier top 169.80px at 1280px: `.supplier-slip` has a 24px margin. Root design.md now specifies aligned panel tops, custom two-tone cafe supply art, repeated product glyphs, budget strip and bounded/reduced-motion animation before implementation. Preserve eight protected policy/payment/planner files and historical payment evidence.
+- Next: implement this contract, inspect real browser states, run unchanged payment/cafe audit fixtures, build and deploy to the existing one-process EC2 service. Do not click PayPal continuation or create/capture an order.
 
 ## Current Rebuild and Deployment Checkpoint
 

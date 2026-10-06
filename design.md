@@ -1,4 +1,4 @@
-# Till — counter ticket
+# Till — the illustrated counter ticket
 
 This is the source of truth for the frontend rebuild. Build one section at a time,
 inspect it in a browser, and refine it against this document before moving on.
@@ -7,6 +7,14 @@ Mystique Mide skill was found in the local skill catalogs. The installed
 frontend-design and interface-design skills supply the craft and review checks.
 
 ## Feel and audience
+
+October 6 refinement: the first rebuild was too plain and the supplier slip's
+24px top offset broke panel alignment. The current direction is a cafe supply
+label brought to life: oversized editorial words beside a custom two-tone
+illustration of an oat carton, coffee bag and stacked cups. This illustration
+is the signature, not a generic icon or marketing image. The counter has a
+quiet printed-paper texture; ticket edges, a small supplier seal and catalog
+line drawings repeat the physical vocabulary. Keep the real job prominent.
 
 An independent cafe owner is standing at the counter, checking tomorrow's supplies.
 Till should feel like a paper order ticket next to a payment receipt: direct,
@@ -22,7 +30,9 @@ dashboard, marketing hero, metric cards and feature-card grid.
 ## Type
 
 - Display: **DM Serif Display**, regular; sharp contrast for the cafe mandate and
-  Till wordmark. Mandate 72px / 1.02 on desktop, 44px / 1.05 at 390px. Use display
+  Till wordmark. Mandate 66px / 1.02 on desktop, 40px / 1.05 at 390px. The
+  three-line headline sits beside the supply illustration; emphasize "& cups."
+  in teal. Use display
   type for words, never money or payment identifiers.
 - Plain text: **IBM Plex Sans**, 400/500/600. Body 16px / 1.5, controls 16px / 1.25,
   support 14px / 1.5, ticket labels 12px / 1.4 with 0.08em tracking.
@@ -43,7 +53,9 @@ dashboard, marketing hero, metric cards and feature-card grid.
 | stamp | #854132 | Refusals and errors on paper |
 
 Use ink at 15% for rules, 30% for stronger separators. Paper surfaces use a quiet
-1px outline and a tiny offset shadow, not floating rounded dashboard cards.
+1px outline and a restrained layered paper shadow. Illustration fills use the
+same paper/ink/teal palette plus #ded3be (kraft); no extra saturated accent.
+Fine grain and a ruled motif remain decorative and do not sit behind body text.
 Tickets have 2px corners; controls have 4px corners. The distinctive edge is a
 small repeated perforation on the ticket's tear-off, not a decorative gradient.
 Teal/paper and ink/paper buttons must exceed 4.5:1 contrast. Never reduce enabled
@@ -53,8 +65,13 @@ button opacity. Disabled controls have a distinct background and explicit text.
 
 Use a 4px base: 8px within labels, 12px between related controls, 16px between
 rows, 24px between groups, 32px ticket padding, 48px between main sections.
-Desktop workspace max-width 1120px, 32px outer padding. The main ticket takes
-the larger column; the supplier slip is 304px, separated by 32px. A small
+Desktop content max-width 1120px, 32px outer padding. The main ticket takes
+the larger column; the supplier slip is 304px, separated by 32px. Their top
+edges share the same grid line, with no margin or decorative transform on the
+panels. Within the mandate, words and the illustration form an asymmetric
+two-column composition, followed by the full-width brief and a cap tear-off.
+At 1040px and below the workspace becomes one column; at 390px the words and
+smaller illustration remain side by side without cropping. A small
 masthead has Till on the left and cafe context on the right, separated from the
 workspace by an ink rule. No dashboard navigation or three equal cards.
 
@@ -104,8 +121,18 @@ the rule. Name the unavailable 500-count cups and the premium case's $180 cap.
 
 Use native controls, visible 3px teal keyboard focus with 3px offset, hover,
 press and disabled states. Errors focus the alert; loading uses role=status;
-cart updates use aria-live. Use only a brief opacity/translate reveal, respect
-reduced motion, and do not animate amounts. Preserve existing server functions,
+cart updates use aria-live. New tickets reveal in 240ms with up to 40ms row
+stagger; refusals stamp in 180ms. The supply illustration settles once on entry,
+with no continuous motion. Buttons press at scale 0.98 over 140ms; arrows move
+3px on hover. Only transform and opacity animate. A localized writing indicator
+can animate for at most four seconds, then stays still while its real request
+continues; it never simulates progress or completion. Respect live
+prefers-reduced-motion: replace reveals with a 120ms fade, remove translation,
+stamping and button movement, and retain focus, loading text and stock feedback.
+Never animate amounts. Product line drawings accompany the actual cart lines;
+a labeled budget strip reflects catalog cents and the current cap. Refusal
+reasons remain the server's words, not copy invented by the graphics.
+Preserve existing server functions,
 stock handling, proposal proof and checkout wiring.
 
 Build and inspect in this order: masthead/mandate and supplier slip; proposed
