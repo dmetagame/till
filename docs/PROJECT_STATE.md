@@ -1,12 +1,20 @@
 # Project State
 
-Current status: The repository is **public**, as explicitly requested by the user. The live cafe path is the **$180 story** ($160 in stock, $114 recovered). Every older checkpoint below is history, not current instructions. Audit guard fixes remain verified with network-free fixtures; earlier live payments remain historical. This visibility task made no payment or application-code changes.
+Current status: The public repository's cafe frontend is being rebuilt from root `design.md`, followed by a single-process Node deployment. The live cafe path stays the **$180 story** ($160 in stock, $114 recovered). Older checkpoints are history. Prices, the cup rule, Gemini prompt and all three payment guard files are protected; no sandbox charge is authorized.
 
-Last updated: `2026-10-05T21:44:33Z`
-Status: `PUBLIC VISIBILITY VERIFIED — CHECKPOINT PUSHED`
-Active objective: Completed — make https://github.com/dmetagame/till public and verify anonymous access. User's latest visibility request supersedes the earlier audit-task publication restriction. Preserve application code, credentials and historical payment evidence; only this handoff changes locally.
+Last updated: `2026-10-06T11:49:14Z`
+Status: `DESIGN CONTRACT WRITTEN — FRONTEND AND NODE DEPLOYMENT IN PROGRESS`
+Active objective: Rebuild the cafe counter frontend from design.md, deploy one long-running Node service, and verify public $160 → $114 replanning plus refused capture before return. Stop before buyer approval or any create/capture transaction.
 
-## Current Visibility Checkpoint
+## Current Rebuild and Deployment Checkpoint
+
+- Workspace `/home/rouma/till`, clean `main` → `origin/main`, starting HEAD and independently verified remote main `7ec5885d7c8f444ff495ed7cf98f3b09ed87ba2d`; origin and GitHub authentication checked. Public visibility was verified in the preceding task.
+- Read living handoff and repo guidance before edits. Latest user scope supersedes the preceding no-application-change restriction for frontend and single-process deployment only. Preserve `catalog.ts`, `cafe.ts`, `cafe.server.ts`, `checkout.server.ts`, `paypal.server.ts`, `cafe-checkout.server.ts` and historical payment evidence.
+- Loaded installed frontend-design and interface-design skill instructions before UI edits. No installed Mystique Mide skill found in installed skill roots; follow the user's explicit design-first, section-by-section, browser-review method. Root `design.md` fixes audience, feel, type, spacing, colors, voice and product path before code.
+- Existing build uses Nitro's Vercel preset, unsuitable for process-local checkout authority. Railway CLI is already authenticated; no Till project exists yet. Prepare node-server output and a dedicated one-replica, never-sleeping service; inspect deployment configuration before going live. Secrets are to be uploaded privately from the ignored local file to server runtime variables, never logged or included in deployment source.
+- Next: commit this design/scope checkpoint, build and browser-review the frontend, run protected-file comparisons and network-free audit fixtures, then deploy and verify the public flow without creating a PayPal order.
+
+## Historical Visibility Checkpoint
 
 - Workspace `/home/rouma/till`, branch `main` tracking `origin/main`, clean starting commit `6cff0697c7fcc209d7fe9ead7161b1acb0ecb65c`; local HEAD and independent remote main matched before the change. Origin, GitHub authentication and ADMIN permission verified.
 - `gh repo edit dmetagame/till --visibility public` succeeded. Authenticated `gh repo view` reports `isPrivate: false`; anonymous GET of `https://api.github.com/repos/dmetagame/till` reports `private: false` and `visibility: public`.
@@ -54,9 +62,9 @@ Active objective: Completed — make https://github.com/dmetagame/till public an
 - One sandbox merchant owned by the configured PayPal REST app; fictional catalog merchants are never payees.
 - Server-only PAYPAL_CLIENT_ID/PAYPAL_CLIENT_SECRET; no credential values in documentation, browser, or Git.
 - Buyer alone approves on PayPal; agent cannot capture. Server checks frozen cart before capture.
-- Current user explicitly authorizes public repository visibility and the required handoff update. The prior audit task authorized only return gating, process-local revocation, final transport guards and documentation; its no-publication restriction is historical and superseded by the latest request. Do not create/capture a real PayPal order, edit credentials or application code, change prices/the $180 cup policy, or change the Gemini prompt. No database, new dependencies, sponsors or redesign.
+- Current user authorizes the cafe frontend rebuild and one long-running Node deployment, including host runtime variables and the required handoff updates. The prior audit task authorized only return gating, process-local revocation, final transport guards and documentation; its no-publication restriction is historical and superseded by the latest request. Do not create/capture a real PayPal order, print/commit secrets, change prices/the $180 cup policy or Gemini prompt, or edit the capture rules in checkout.server.ts, paypal.server.ts and cafe-checkout.server.ts. No database, new dependencies, sponsors or redesign.
 - User narrowed delivery to this payment slice and setup documentation; no video/license deliverable.
-- User authorized local testing with a gitignored root `.env`, overriding the template's generic prohibition. The new cafe server reads GEMINI_API_KEY through process.env; root-file loading adds only that model key while retaining the existing PayPal loader unchanged. No secret output or browser prefixes. That earlier buyer-approved capture authorization is historical; the completed audit-fix session permitted injected fixtures only, and this visibility task authorizes no real order/capture.
+- User authorized local testing with a gitignored root `.env`, overriding the template's generic prohibition. The new cafe server reads GEMINI_API_KEY through process.env; root-file loading adds only that model key while retaining the existing PayPal loader unchanged. No secret output or browser prefixes. That earlier buyer-approved capture authorization is historical; the completed audit-fix session permitted injected fixtures only, and this frontend/deployment task authorizes no real order/capture.
 - Repository Grok instructions describe a different `/workspace` environment; use the explicitly authorized clone here. `.grok` skills/references are absent from the clone. Preserve existing startup/platform files.
 
 ## Current Context
@@ -152,7 +160,7 @@ Active objective: Completed — make https://github.com/dmetagame/till public an
 ## Next Actions
 
 - Preserve completed historical live acceptance: revised-story order `2TB52773F8180315G` / capture `3H158002EX0446249` (USD114), plus earlier `8J567318K9210721P` and `7GH61487DG719402X` written evidence unchanged.
-- Public visibility, anonymous access and the pushed documentation checkpoint are verified; stop after this handoff. No real order, capture, stock mutation, credential change or application change is authorized.
+- Build from design.md, verify desktop/390px rendering and protected source equality, deploy one Node replica, verify live replanning and refused direct capture. No PayPal order creation, actual capture or buyer approval is authorized.
 - Audit fixtures and documentation were verified in the preceding task; earlier private checkpoints and live results remain historical. Future submission/demo or live payment work requires a separate task.
 
 ## Historical Revised $180 Live Acceptance Checkpoint
@@ -241,3 +249,5 @@ Active objective: Completed — make https://github.com/dmetagame/till public an
 - 2026-10-05T21:43:35Z: User explicitly requested public visibility, superseding the prior audit-task publication restriction. Clean main at 6cff0697c7fcc209d7fe9ead7161b1acb0ecb65c matched remote main; origin/authentication/ADMIN permission verified. Visibility edit succeeded and authenticated plus anonymous GitHub responses confirm public access. Only docs/PROJECT_STATE.md changes locally; application, credentials and all historical records preserved. No PayPal/Gemini call or transaction. Documentation checkpoint and push verification follow.
 
 - 2026-10-05T21:44:33Z: Visibility documentation checkpoint 77ede6eac4f851af3c5796f29efceb2acd408cce pushed and independently verified: HEAD, upstream and remote main match, clean tree. Diff check passed; only docs/PROJECT_STATE.md changed. Public access verified through both authenticated and anonymous GitHub responses. No application or credential changes, PayPal/Gemini calls or transactions; objective complete. This final documentation-only handoff records the verified checkpoint.
+
+- 2026-10-06T11:49:14Z: Reconciled new frontend/deployment scope against clean public main 7ec5885d7c8f444ff495ed7cf98f3b09ed87ba2d and matching remote main. Read skills and wrote root design.md before UI code. Railway CLI authenticated; existing Vercel build target must gain a single-process Node path. Prices, $180 cup policy, Gemini prompt, protected guard files, credentials and historical payment records unchanged. No model/payment request yet. Design checkpoint precedes frontend work.
