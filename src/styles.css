@@ -1508,7 +1508,7 @@
 .guide-demo {
   margin: 24px 0 12px;
 }
-[data-till-view]:focus:not(:focus-visible) {
+[data-till-view]:focus {
   outline: none;
 }
 @media (max-width: 1040px) {
@@ -1553,5 +1553,103 @@
   .composer-boundary > .ticket-note {
     max-width: none;
     text-align: left;
+  }
+}
+
+.till-app > .rise.mandate-review {
+  max-width: none;
+}
+.mandate-review {
+  margin-top: 32px;
+}
+.review-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  gap: 32px;
+  align-items: center;
+  padding-bottom: 24px;
+}
+.review-heading h1,
+.local-notes h1 {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  margin-top: 12px;
+}
+.cart-item-detail {
+  color: var(--color-muted);
+  font-size: 13px;
+  margin-top: 4px;
+}
+.cart-ticket:focus:not(:focus-visible) {
+  outline: none;
+}
+.unspent.over-cap .amount {
+  color: var(--color-stamp);
+}
+.ticket-rules {
+  padding-bottom: 24px;
+}
+.ticket-rules h3 {
+  color: var(--color-muted);
+}
+.ticket-rules ul {
+  margin-top: 12px;
+}
+.ticket-rules li {
+  padding: 10px 0;
+  font-size: 14px;
+  border-bottom: 1px solid var(--ticket-rule);
+}
+.local-notes {
+  margin-top: 40px;
+}
+.notes-ticket {
+  padding: 8px 24px;
+  margin-top: 24px;
+}
+.notes-ticket li + li {
+  border-top: 1px solid var(--ticket-rule);
+}
+.notes-ticket button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 24px;
+  padding: 20px 0;
+  min-height: 64px;
+  text-align: left;
+}
+.notes-name,
+.notes-id {
+  display: block;
+}
+.notes-id {
+  overflow-wrap: anywhere;
+  margin-top: 4px;
+}
+.notes-back {
+  margin-top: 16px;
+}
+@media (max-width: 760px) {
+  .review-heading {
+    grid-template-columns: minmax(0, 1fr) 96px;
+    gap: 16px;
+  }
+  .review-heading h1,
+  .local-notes h1 {
+    font-size: 36px;
+  }
+  .review-heading .cart-summary {
+    font-size: 14px;
+  }
+  .mandate-review .section-heading h2 {
+    font-size: 26px;
+  }
+  .notes-ticket {
+    padding: 8px 20px;
   }
 }

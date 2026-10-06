@@ -10,6 +10,7 @@ import {
 } from "@/lib/till/cafe";
 import { getCafeCatalog, replanCafe, setDemoCupsStock } from "@/lib/till/cafe.functions";
 import { CounterIllustration, SupplierSeal, SupplyGlyph } from "./cafe-graphics";
+import { OrderTicket, RefusalLines } from "./order-ticket";
 
 export function CafeRestock({
   brief,
@@ -290,94 +291,22 @@ export function CafeRestock({
           </div>
           <p className="cart-summary">{plan.summary}</p>
           <div className="cart-layout">
-            <div className="order-ticket cart-ticket">
-              <div className="cart-column-labels ticket-label">
-                <span>Item / one of each</span>
-                <span>USD</span>
-              </div>
-              {lines.length ? (
-                <ul className="cart-lines" aria-label="Proposed cart">
-                  {lines.map((line) => {
-                    const product = catalog?.products.find((item) => item.id === line.productId);
-                    if (!product) return null;
-                    return (
-                      <li key={line.productId} className="cart-line">
-                        <span className="cart-product-art">
-                          <SupplyGlyph productId={product.id} />
-                        </span>
-                        <div className="cart-line-copy">
-                          <p className="cart-item-name">
-                            {product.name}
-                            {line.qty > 1 ? ` × ${line.qty}` : ""}
-                          </p>
-                        </div>
-                        <p className="amount cart-line-price">
-                          {money(product.priceCents * line.qty)}
-                        </p>
-                        <div className="cart-line-detail">
-                          <p className="cart-item-reason">{line.why}</p>
-                          <button
-                            type="button"
-                            aria-label={`Remove ${product.name}`}
-                            onClick={() => setRemoved((current) => [...current, product.id])}
-                            className="ticket-text-button"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : (
-                <p className="empty-ticket">The ticket is empty. Nothing will be spent.</p>
-              )}
-              <div className="ticket-tear cart-total">
-                <div>
-                  <p className="ticket-label">Proposed total</p>
-                  <p className="amount total-amount" data-testid="cafe-total">
-                    {money(total)}
-                  </p>
-                </div>
-                <p className="unspent">
-                  <span className="amount">{money(plan.budgetCents - total)}</span>
-                  <br />
-                  under your cap
-                </p>
-              </div>
-              <div className="budget-strip">
-                <div className="budget-rule" aria-hidden="true">
-                  <span style={{ transform: `scaleX(${Math.min(total / plan.budgetCents, 1)})` }} />
-                </div>
-                <p className="ticket-label">
-                  {money(total)} of your {money(plan.budgetCents)} cap
-                </p>
-              </div>
-            </div>
+            <OrderTicket
+              lines={lines.flatMap((line) => {
+                const product = catalog?.products.find((item) => item.id === line.productId);
+                return product
+                  ? [{ ...line, name: product.name, unitCents: product.priceCents }]
+                  : [];
+              })}
+              totalCents={total}
+              budgetCents={plan.budgetCents}
+              totalTestId="cafe-total"
+              emptyMessage="Replan to restore the three required items."
+              onRemove={(id) => setRemoved((current) => [...current, id])}
+            />
 
             <div className="cart-annotations">
-              {plan.refused.length ? (
-                <div className="refusal-section">
-                  <h3 className="ticket-label">Left off the ticket</h3>
-                  <ul aria-label="Catalog refusals" className="refusal-lines">
-                    {plan.refused.map((item) => (
-                      <li key={item.productId} className="refusal-line">
-                        <span className="refusal-stamp">
-                          {item.productId === "cups"
-                            ? "Out of stock"
-                            : item.productId === "cups-premium"
-                              ? "Over cap"
-                              : "Not needed"}
-                        </span>
-                        <div>
-                          <p className="refusal-name">{item.name}</p>
-                          <p>{item.reason}</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
+              <RefusalLines items={plan.refused} />
               <p className="cart-provenance">
                 Proposed with Gemini Flash-Lite. Catalog, stock and cap checked by the server.
               </p>

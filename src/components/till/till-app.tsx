@@ -17,6 +17,8 @@ import { CAFE_BRIEF, isCafeMandate, type CafePlan } from "@/lib/till/cafe";
 import { CafeRestock } from "./cafe-restock";
 import { MandateSelection } from "./mandate-selection";
 import { MandateComposer } from "./mandate-composer";
+import { MandateIllustration } from "./mandate-graphics";
+import { OrderTicket, RefusalLines } from "./order-ticket";
 import { kindForBrief, scenarioFor, type MandateKind } from "./mandate-config";
 
 const PENDING_CHECKOUT = "till.paypal.pending.v1";
@@ -476,12 +478,7 @@ export function TillApp() {
       </header>
 
       {paymentError ? (
-        <p
-          ref={paymentErrorRef}
-          role="alert"
-          tabIndex={-1}
-          className="mt-6 rounded-2xl border border-ink/15 bg-card px-4 py-4 text-sm"
-        >
+        <p ref={paymentErrorRef} role="alert" tabIndex={-1} className="counter-alert">
           {paymentError}
         </p>
       ) : null}
@@ -502,14 +499,14 @@ export function TillApp() {
               <button
                 type="button"
                 onClick={() => window.location.reload()}
-                className="min-h-11 rounded-full bg-teal px-5 font-medium text-paper"
+                className="counter-button payment-button"
               >
                 Retry check
               </button>
               <button
                 type="button"
                 onClick={() => void beforeEdit(() => setPhase("brief"))}
-                className="min-h-11 rounded-full border border-ink/15 bg-card px-5 font-medium"
+                className="ticket-text-button"
               >
                 New mandate
               </button>
@@ -653,114 +650,96 @@ function Review({
   onPay: () => void;
   onBack: () => void;
 }) {
-  const ratio =
-    plan.budgetCents > 0 ? Math.min(100, Math.round((total / plan.budgetCents) * 100)) : 0;
-  const left = plan.budgetCents - total;
+  const kind = kindForBrief(plan.brief);
   return (
-    <div className="rise mt-10">
-      <p className="text-sm font-medium text-teal">{SOURCE_LABEL[plan.source]}</p>
-      <h1 className="font-display mt-2 text-4xl font-semibold tracking-tight">{plan.title}</h1>
-      <p className="mt-3 text-muted">{plan.summary}</p>
-
-      <ul className="mt-6 flex flex-wrap gap-2">
-        {plan.rules.map((rule) => (
-          <li key={rule} className="rounded-full border border-ink/10 bg-card px-3 py-1 text-sm">
-            {rule}
-          </li>
-        ))}
-      </ul>
-
-      <div className="mt-6 rounded-2xl border border-ink/10 bg-card p-4 sm:p-5">
-        <div className="flex items-end justify-between gap-3">
-          <p className="text-sm text-muted">Against the cap</p>
-          <p className="font-display text-2xl tabular-nums">{money(total)}</p>
+    <main
+      className="mandate-review rise"
+      data-till-view
+      tabIndex={-1}
+      aria-labelledby="review-title"
+    >
+      <header className="review-heading">
+        <div>
+          <p className="ticket-label text-teal">{SOURCE_LABEL[plan.source]}</p>
+          <h1 id="review-title">{plan.title}</h1>
+          <p className="cart-summary">{plan.summary}</p>
         </div>
-        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-ink/10">
-          <div className="h-full rounded-full bg-teal" style={{ width: `${ratio}%` }} />
+        <div className="review-art">
+          <MandateIllustration kind={kind} />
         </div>
-        <p className="mt-2 text-sm text-muted tabular-nums">
-          {left >= 0 ? `${money(left)} left unspent` : `${money(Math.abs(left))} over the cap`}
-        </p>
+      </header>
+      <div className="section-heading">
+        <h2>Your order ticket</h2>
+        <span className="proposal-label">Proposal · not a payment</span>
       </div>
-
-      {lines.length === 0 ? (
-        <p className="mt-6 rounded-2xl border border-ink/10 bg-card px-4 py-6 text-muted">
-          The cart is empty, so nothing will be charged. You can only remove items — adding one
-          would rewrite the mandate.
-        </p>
-      ) : (
-        <ul className="mt-4 divide-y divide-ink/10 rounded-2xl border border-ink/10 bg-card">
-          {lines.map((line) => {
+      <div className="cart-layout">
+        <OrderTicket
+          lines={lines.flatMap((line) => {
             const product = getProduct(line.productId);
-            if (!product) return null;
-            return (
-              <li key={line.productId} className="flex gap-3 px-4 py-4">
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium">
-                    {product.name}
-                    {line.qty > 1 ? <span className="text-muted"> × {line.qty}</span> : null}
-                  </p>
-                  <p className="text-sm text-muted">
-                    {product.merchant} · {product.lead}
-                  </p>
-                  <p className="mt-1 text-sm">{line.why}</p>
-                </div>
-                <div className="flex shrink-0 flex-col items-end gap-2">
-                  <p className="tabular-nums">{money(product.price * line.qty)}</p>
-                  <button
-                    type="button"
-                    onClick={() => onRemove(line.productId)}
-                    className="min-h-11 text-sm font-medium text-muted underline-offset-2 hover:text-ink hover:underline"
-                  >
-                    Remove
-                  </button>
-                </div>
-              </li>
-            );
+            return product
+              ? [
+                  {
+                    ...line,
+                    name: product.name,
+                    unitCents: product.price,
+                    detail: `${product.merchant} · ${product.lead}`,
+                  },
+                ]
+              : [];
           })}
-        </ul>
-      )}
-
-      {plan.rejected.length > 0 ? (
-        <div className="mt-6">
-          <p className="text-sm font-medium">Left off on purpose</p>
-          <ul className="mt-2 space-y-2">
-            {plan.rejected.map((item) => {
+          totalCents={total}
+          budgetCents={plan.budgetCents}
+          onRemove={onRemove}
+        />
+        <aside className="cart-annotations">
+          <div className="ticket-rules">
+            <h3 className="ticket-label">Your boundaries</h3>
+            <ul>
+              {plan.rules.map((rule) => (
+                <li key={rule}>{rule}</li>
+              ))}
+            </ul>
+          </div>
+          <RefusalLines
+            items={plan.rejected.flatMap((item) => {
               const product = getProduct(item.productId);
-              if (!product) return null;
-              return (
-                <li key={item.productId} className="text-sm text-muted">
-                  <span className="text-ink">{product.name}.</span> {item.reason}
-                </li>
-              );
+              return product ? [{ ...item, name: product.name }] : [];
             })}
-          </ul>
-        </div>
-      ) : null}
-
-      <p className="mt-4 text-sm text-muted">
-        You can take items off. You cannot add — that would rewrite the mandate.
-      </p>
-
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          />
+          <p className="cart-provenance">
+            {plan.source === "preset"
+              ? "Original sample cart. No model request."
+              : plan.source === "device"
+                ? "Local catalog rules. The model was unavailable; this is a rules-based result."
+                : plan.source === "gemini"
+                  ? "Gemini proposal checked against the server catalog."
+                  : "Grok proposal checked against catalog rules."}
+          </p>
+          <p className="ticket-note">
+            Remove a line to spend less. Rewrite the brief to add or restore one.
+          </p>
+        </aside>
+      </div>
+      <div className="payment-handoff">
+        <p className="ticket-label">PayPal sandbox · no real money</p>
         <button
           type="button"
           disabled={lines.length === 0 || total > plan.budgetCents}
           onClick={onPay}
-          className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full bg-teal px-5 font-medium text-paper transition-transform duration-150 ease-out active:scale-95 disabled:opacity-40"
+          className="counter-button payment-button"
         >
-          <LockKeyhole className="size-4" aria-hidden="true" />
-          Review PayPal checkout
+          <LockKeyhole size={16} aria-hidden="true" /> Review PayPal checkout ·{" "}
+          <span className="amount">{money(total)}</span>
         </button>
-        <button
-          type="button"
-          onClick={onBack}
-          className="inline-flex min-h-11 items-center justify-center rounded-full border border-ink/15 bg-card px-5 font-medium transition-transform duration-150 ease-out active:scale-95"
-        >
+        <p className="ticket-note">Review opens a separate payment slip. No payment yet.</p>
+      </div>
+      <footer className="counter-footer">
+        <button type="button" onClick={onBack} className="ticket-text-button">
           Rewrite the brief
         </button>
-      </div>
-    </div>
+        <p>Demo catalog labels. No delivery is arranged.</p>
+      </footer>
+    </main>
   );
 }
 
@@ -999,42 +978,38 @@ function Ledger({
   onBack: () => void;
 }) {
   return (
-    <div className="rise mt-10">
-      <h1 className="font-display text-4xl font-semibold tracking-tight">Ledger</h1>
-      <p className="mt-3 text-muted">
-        Local mandate notes and order references, not payment records. Open a reference to check the
+    <main className="local-notes rise" data-till-view tabIndex={-1} aria-labelledby="notes-title">
+      <p className="ticket-label">Saved on this device</p>
+      <h1 id="notes-title">Local notes.</h1>
+      <p className="cart-summary">
+        Mandate notes and order references, not payment records. Open a reference to check the
         current checkout against PayPal.
       </p>
-      {receipts.length === 0 ? (
-        <p className="mt-6 rounded-2xl border border-ink/10 bg-card px-4 py-6 text-muted">
-          No local mandate references yet.
-        </p>
-      ) : (
-        <ul className="mt-6 divide-y divide-ink/10 rounded-2xl border border-ink/10 bg-card">
-          {receipts.map((receipt) => (
-            <li key={receipt.id}>
-              <button
-                type="button"
-                onClick={() => onOpen(receipt)}
-                className="flex min-h-11 w-full items-center justify-between gap-3 px-4 py-3 text-left"
-              >
-                <span>
-                  <span className="block font-medium">{receipt.title}</span>
-                  <span className="text-sm text-muted">{receipt.id}</span>
-                </span>
-                <span className="tabular-nums">{money(receipt.total)}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-      <button
-        type="button"
-        onClick={onBack}
-        className="mt-6 inline-flex min-h-11 items-center justify-center rounded-full border border-ink/15 bg-card px-5 font-medium transition-transform duration-150 ease-out active:scale-95"
-      >
+      <div className="order-ticket notes-ticket">
+        {receipts.length ? (
+          <ul>
+            {receipts.map((receipt) => (
+              <li key={receipt.id}>
+                <button type="button" onClick={() => onOpen(receipt)}>
+                  <span>
+                    <span className="notes-name">{receipt.title}</span>
+                    <span className="ticket-note notes-id">{receipt.id}</span>
+                  </span>
+                  <span className="amount">{money(receipt.total)}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="empty-ticket">
+            No local mandate references yet. A PayPal receipt appears only after server
+            verification.
+          </p>
+        )}
+      </div>
+      <button type="button" onClick={onBack} className="ticket-text-button notes-back">
         Back
       </button>
-    </div>
+    </main>
   );
 }
