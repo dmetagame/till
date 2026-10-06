@@ -4,6 +4,13 @@ Till proposes a cart inside a spending mandate. The completed **PayPal sandbox**
 
 **PayPal sandbox · no real money.** All purchases go to the one sandbox business merchant that owns the configured REST app. Catalog vendor names are fictional labels, never PayPal payees. The cafe frontend follows [design.md](design.md): a paper order ticket beside a separate PayPal slip. Other mandates and Grok planning remain available under **Other mandates**; local notes are not payment evidence.
 
+**Live cafe demo: [till.rouma.online](https://till.rouma.online).** One AWS EC2
+instance runs one Till Node process behind Caddy HTTPS. The October 6 deployment
+verified a real Gemini $160 → $114 stock-out sequence and an unauthorized capture
+POST returning 409. It stopped at the $114 review slip; no sandbox order or
+capture was created. Demo stock is shared; switch stock-out off to start the
+judge sequence below from $160.
+
 ## Single-process Node deployment
 
 The build uses Nitro **node-server**, with one Node listener and no cluster. Build
@@ -33,10 +40,9 @@ review again. Do not deploy this version to multi-instance serverless. Drain an
 active demo before deploying again. No new sandbox payment is part of frontend
 or deployment verification; the historical receipts below remain evidence.
 
-Railway provisioning currently needs an account with available resources. The
-connected account rejected a new Till project with **“Free plan resource provision
-limit exceeded.”** No public deployment is claimed until the host is provisioned
-and the live checks are recorded in project state.
+Railway initially refused provisioning with **“Free plan resource provision
+limit exceeded.”** The deployed demo uses AWS instead; the resource IDs, pinned
+application image and verification evidence are recorded in project state.
 
 For AWS, use a single EC2 instance with one Till container and an HTTPS reverse
 proxy, such as [Caddy](https://caddyserver.com/docs/automatic-https). Keep the
@@ -45,6 +51,11 @@ hostname. Store the three application keys in the host's private runtime
 environment, outside the repository and image. Do not overlap old and new Till
 containers during deployment. AWS Free Tier coverage depends on the account's
 active credits and expiry; EC2 is not an indefinitely free service.
+
+The deployed origin is `https://till.rouma.online`. Namecheap uses one A record
+with Host `till`, Value `3.209.232.97`, TTL Automatic. Caddy forwards to Till's
+loopback-only port 8080. Deployments are manual: stop the existing Till container
+before replacing it, and expect unfinished checkout/proposal state to expire.
 
 ## Judge setup
 
